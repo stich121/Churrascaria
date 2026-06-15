@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Churrascaria Pampulha | Reservas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="setupNotice" class="setup-notice hidden">
+        <div>
+          <h1>Configuração do banco online</h1>
+          <p>
+            Cole os dados públicos do Supabase uma vez. Eles ficam salvos neste
+            computador ou tablet para ativar a sincronização das reservas.
+          </p>
+        </div>
+        <form id="setupForm" class="setup-form">
+          <label>
+            URL do projeto Supabase
+            <input id="supabaseUrl" placeholder="https://seu-projeto.supabase.co" required />
+          </label>
+          <label>
+            Chave anon pública
+            <input id="supabaseKey" placeholder="eyJhbGciOi..." required />
+          </label>
+          <button type="submit">Salvar configuração</button>
+          <p id="setupMessage" class="form-message"></p>
+        </form>
+      </section>
+
+      <section id="loginView" class="auth-view">
+        <div class="brand-panel">
+          <p class="eyebrow">Sistema de reservas</p>
+          <h1>Churrascaria Pampulha</h1>
+          <p>
+            Controle reservas do dia, semana e mês com níveis de acesso para
+            operadores e supervisores.
+          </p>
+        </div>
+
+        <form id="loginForm" class="auth-card">
+          <h2>Entrar</h2>
+          <label>
+            E-mail
+            <input id="email" type="email" autocomplete="email" required />
+          </label>
+          <label>
+            Senha
+            <input id="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">Acessar sistema</button>
+          <p id="loginMessage" class="form-message"></p>
+        </form>
+      </section>
+
+      <section id="dashboardView" class="dashboard hidden">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Reservas</p>
+            <h1>Churrascaria Pampulha</h1>
+          </div>
+          <div class="user-box">
+            <span id="userRole">Operador</span>
+            <button id="configureButton" class="secondary-button" type="button">Banco online</button>
+            <button id="logoutButton" class="secondary-button" type="button">Sair</button>
+          </div>
+        </header>
+
+        <section class="toolbar" aria-label="Filtros de reservas">
+          <div class="period-tabs">
+            <button class="period-button active" type="button" data-period="day">Dia</button>
+            <button class="period-button" type="button" data-period="week">Semana</button>
+            <button class="period-button" type="button" data-period="month">Mês</button>
+          </div>
+          <label>
+            Data base
+            <input id="baseDate" type="date" />
+          </label>
+          <label>
+            Status
+            <select id="statusFilter">
+              <option value="all">Todos</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="pendente">Pendente</option>
+              <option value="cancelada">Cancelada</option>
+              <option value="concluida">Concluída</option>
+            </select>
+          </label>
+          <button id="usersButton" class="secondary-button hidden" type="button">Usuários</button>
+          <button id="newReservationButton" type="button">Nova reserva</button>
+        </section>
+
+        <section class="summary-grid" aria-label="Resumo">
+          <article>
+            <span>Total</span>
+            <strong id="totalCount">0</strong>
+          </article>
+          <article>
+            <span>Pessoas</span>
+            <strong id="guestCount">0</strong>
+          </article>
+          <article>
+            <span>Confirmadas</span>
+            <strong id="confirmedCount">0</strong>
+          </article>
+          <article>
+            <span>Pendentes</span>
+            <strong id="pendingCount">0</strong>
+          </article>
+        </section>
+
+        <section class="reservation-panel">
+          <div class="panel-title">
+            <h2 id="rangeTitle">Reservas de hoje</h2>
+            <p id="permissionHint"></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Cliente</th>
+                  <th>Pessoas</th>
+                  <th>Status</th>
+                  <th>Contato</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="reservationRows"></tbody>
+            </table>
+          </div>
+          <p id="emptyState" class="empty-state hidden">Nenhuma reserva encontrada para o período.</p>
+        </section>
+
+        <section id="usersPanel" class="reservation-panel hidden">
+          <div class="panel-title">
+            <h2>Gerenciar usuários</h2>
+            <p>Apenas operadores nível 3 podem criar novos acessos.</p>
+          </div>
+          <form id="userForm" class="user-form">
+            <label>
+              Nome
+              <input id="newUserName" required />
+            </label>
+            <label>
+              E-mail
+              <input id="newUserEmail" type="email" required />
+            </label>
+            <label>
+              Senha temporária
+              <input id="newUserPassword" type="password" minlength="8" required />
+            </label>
+            <label>
+              Nível
+              <select id="newUserRole">
+                <option value="operador">Nível 1 - operador</option>
+                <option value="nivel_2">Nível 2 - reservas</option>
+                <option value="nivel_3">Nível 3 - administrador</option>
+              </select>
+            </label>
+            <button type="submit">Adicionar usuário</button>
+            <p id="userMessage" class="form-message"></p>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Nível</th>
+                  <th>Criado em</th>
+                </tr>
+              </thead>
+              <tbody id="userRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="reservationDialog">
+      <form id="reservationForm" method="dialog">
+        <div class="dialog-header">
+          <h2 id="dialogTitle">Nova reserva</h2>
+          <button id="closeDialogButton" class="icon-button" type="button" aria-label="Fechar">×</button>
+        </div>
+        <input id="reservationId" type="hidden" />
+        <div class="form-grid">
+          <label>
+            Nome do cliente
+            <input id="customerName" required />
+          </label>
+          <label>
+            Telefone
+            <input id="customerPhone" required />
+          </label>
+          <label>
+            Data
+            <input id="reservationDate" type="date" required />
+          </label>
+          <label>
+            Hora
+            <input id="reservationTime" type="time" required />
+          </label>
+          <label>
+            Pessoas
+            <input id="guestAmount" type="number" min="1" max="200" required />
+          </label>
+          <label>
+            Ambiente
+            <select id="reservationArea">
+              <option value="salao">Salão</option>
+              <option value="varanda">Varanda</option>
+              <option value="evento">Evento</option>
+              <option value="privativo">Privativo</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select id="reservationStatus">
+              <option value="confirmada">Confirmada</option>
+              <option value="pendente">Pendente</option>
+              <option value="cancelada">Cancelada</option>
+              <option value="concluida">Concluída</option>
+            </select>
+          </label>
+          <label class="span-2">
+            Observações
+            <textarea id="reservationNotes" rows="4"></textarea>
+          </label>
+        </div>
+        <div class="dialog-actions">
+          <button id="deleteReservationButton" class="danger-button hidden" type="button">Excluir</button>
+          <button class="secondary-button" type="button" id="cancelDialogButton">Cancelar</button>
+          <button type="submit">Salvar reserva</button>
+        </div>
+        <p id="reservationMessage" class="form-message"></p>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
