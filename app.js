@@ -1,5 +1,5 @@
-const DEFAULT_SUPABASE_URL = "COLE_AQUI_A_URL_DO_SUPABASE";
-const DEFAULT_SUPABASE_ANON_KEY = "COLE_AQUI_A_CHAVE_ANON_PUBLICA";
+const DEFAULT_SUPABASE_URL = "https://szjslvjimtkurgffztaz.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_Ak3R3v72fSGSUn71Yk1Snw_yu1urxvU";
 const CONFIG_STORAGE_KEY = "churrascaria-pampulha-supabase";
 
 function loadConfig() {

@@ -66,13 +66,16 @@ values
 
 ## Conectar o app ao Supabase
 
-Ao abrir o sistema pela primeira vez, cole na tela de configuração:
+O app já vem configurado com a URL do projeto Supabase e a publishable key. Os
+colaboradores só precisam abrir o sistema e fazer login.
+
+Se algum dia trocar de projeto Supabase, clique em **Banco online** no painel e
+cole novamente:
 
 - URL do projeto Supabase.
-- Chave `anon public`.
+- Publishable key.
 
-Esses dados ficam salvos no computador ou tablet usado. Você encontra ambos em
-Project Settings > API no Supabase.
+Esses dados ficam salvos no computador ou tablet usado.
 
 ## Arquivo EXE
 
