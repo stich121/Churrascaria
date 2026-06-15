@@ -1,6 +1,7 @@
 const DEFAULT_SUPABASE_URL = "https://szjslvjimtkurgffztaz.supabase.co";
 const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_Ak3R3v72fSGSUn71Yk1Snw_yu1urxvU";
 const CONFIG_STORAGE_KEY = "churrascaria-pampulha-supabase";
+const CREATE_USER_FUNCTIONS = ["create-user", "bright-processor"];
 
 function loadConfig() {
   const savedConfig = localStorage.getItem(CONFIG_STORAGE_KEY);
@@ -252,17 +253,27 @@ async function createUser() {
     throw new Error("Apenas operadores nível 3 podem adicionar usuários.");
   }
 
-  const { data, error } = await client.functions.invoke("create-user", {
-    body: {
-      fullName: elements.newUserName.value.trim(),
-      email: elements.newUserEmail.value.trim(),
-      password: elements.newUserPassword.value,
-      role: elements.newUserRole.value,
-    },
-  });
+  const payload = {
+    fullName: elements.newUserName.value.trim(),
+    email: elements.newUserEmail.value.trim(),
+    password: elements.newUserPassword.value,
+    role: elements.newUserRole.value,
+  };
 
-  if (error) throw new Error(formatCreateUserError(error));
-  if (data?.error) throw new Error(data.error);
+  let lastError = null;
+
+  for (const functionName of CREATE_USER_FUNCTIONS) {
+    const { data, error } = await client.functions.invoke(functionName, {
+      body: payload,
+    });
+
+    if (!error && !data?.error) return;
+    if (data?.error) throw new Error(data.error);
+
+    lastError = error;
+  }
+
+  throw new Error(formatCreateUserError(lastError));
 }
 
 function formatCreateUserError(error) {
@@ -271,7 +282,8 @@ function formatCreateUserError(error) {
   if (message.includes("Failed to send a request to the Edge Function")) {
     return [
       "A função create-user ainda não respondeu no Supabase.",
-      "Publique a Edge Function supabase/functions/create-user e tente novamente.",
+      "No seu painel ela também pode estar como bright-processor.",
+      "Confira se o código foi publicado e tente novamente.",
     ].join(" ");
   }
 

@@ -43,7 +43,9 @@ público.
 
 ## Permitir que nível 3 adicione usuários
 
-O app chama a Edge Function `supabase/functions/create-user`.
+O app chama a Edge Function `supabase/functions/create-user`. A versão atual
+também tenta chamar `bright-processor` como compatibilidade, porque esse é o
+nome criado automaticamente em alguns testes.
 
 Sem publicar essa função no Supabase, o cadastro de usuários pelo app mostra erro
 ao enviar a solicitação.
@@ -58,7 +60,8 @@ supabase functions deploy create-user
 
 1. Abra o projeto no Supabase.
 2. Vá em **Edge Functions**.
-3. Crie uma função chamada exatamente `create-user`.
+3. Crie uma função chamada exatamente `create-user`. Se você já criou como
+   `bright-processor`, também funciona com a versão atual do app.
 4. Copie o conteúdo de `supabase/functions/create-user/index.ts`.
 5. Cole no editor da função.
 6. Clique em **Deploy**.
