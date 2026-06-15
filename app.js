@@ -267,8 +267,14 @@ async function createUser() {
       body: payload,
     });
 
-    if (!error && !data?.error) return;
+    if (!error && data?.user?.id) return data.user;
     if (data?.error) throw new Error(data.error);
+    if (!error) {
+      throw new Error(
+        `A função ${functionName} respondeu, mas não criou o usuário. ` +
+          "Cole o código correto em Edge Functions > Code e clique em Deploy."
+      );
+    }
 
     lastError = error;
   }
