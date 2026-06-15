@@ -45,14 +45,27 @@ público.
 
 O app chama a Edge Function `supabase/functions/create-user`.
 
-Para publicar a função:
+Sem publicar essa função no Supabase, o cadastro de usuários pelo app mostra erro
+ao enviar a solicitação.
+
+### Opção 1: publicar pela CLI
 
 ```bash
 supabase functions deploy create-user
 ```
 
+### Opção 2: publicar pelo painel do Supabase
+
+1. Abra o projeto no Supabase.
+2. Vá em **Edge Functions**.
+3. Crie uma função chamada exatamente `create-user`.
+4. Copie o conteúdo de `supabase/functions/create-user/index.ts`.
+5. Cole no editor da função.
+6. Clique em **Deploy**.
+7. Abra os logs da função e confirme que não há erro de variáveis.
+
 No painel do Supabase, confirme que as variáveis `SUPABASE_URL` e
-`SUPABASE_SERVICE_ROLE_KEY` estão disponíveis para a função. A service role key
+`SUPABASE_SERVICE_ROLE_KEY` estão disponíveis para a função. A `service_role`
 deve ficar somente no ambiente do Supabase, nunca no frontend.
 
 Exemplo:

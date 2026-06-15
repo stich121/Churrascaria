@@ -261,8 +261,25 @@ async function createUser() {
     },
   });
 
-  if (error) throw error;
+  if (error) throw new Error(formatCreateUserError(error));
   if (data?.error) throw new Error(data.error);
+}
+
+function formatCreateUserError(error) {
+  const message = error?.message || "";
+
+  if (message.includes("Failed to send a request to the Edge Function")) {
+    return [
+      "A função create-user ainda não respondeu no Supabase.",
+      "Publique a Edge Function supabase/functions/create-user e tente novamente.",
+    ].join(" ");
+  }
+
+  if (message.includes("FunctionsHttpError")) {
+    return "A função create-user retornou erro. Confira os logs da Edge Function no Supabase.";
+  }
+
+  return message || "Não foi possível chamar a função create-user.";
 }
 
 function startRealtimeSync() {
