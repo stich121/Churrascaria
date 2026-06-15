@@ -45,6 +45,12 @@ serve(async (req) => {
     }
 
     const body = await req.json();
+    const action = String(body.action || "create");
+
+    if (action === "update") {
+      return await updateExistingUser(admin, body);
+    }
+
     const fullName = String(body.fullName || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
@@ -96,6 +102,54 @@ function json(body: unknown, status = 200) {
     headers: {
       ...corsHeaders,
       "Content-Type": "application/json",
+    },
+  });
+}
+
+async function updateExistingUser(admin: ReturnType<typeof createClient>, body: Record<string, unknown>) {
+  const userId = String(body.userId || "").trim();
+  const role = String(body.role || "");
+  const password = String(body.password || "");
+
+  if (!userId || !allowedRoles.has(role)) {
+    return json({ error: "Dados inválidos para alterar o usuário." }, 400);
+  }
+
+  if (password && password.length < 8) {
+    return json({ error: "A nova senha precisa ter pelo menos 8 caracteres." }, 400);
+  }
+
+  const updatePayload: { password?: string } = {};
+
+  if (password) {
+    updatePayload.password = password;
+  }
+
+  if (Object.keys(updatePayload).length > 0) {
+    const { error: authUpdateError } = await admin.auth.admin.updateUserById(userId, updatePayload);
+
+    if (authUpdateError) {
+      return json({ error: authUpdateError.message }, 400);
+    }
+  }
+
+  const { data: profile, error: profileError } = await admin
+    .from("profiles")
+    .update({ role })
+    .eq("id", userId)
+    .select("id, full_name, email, role")
+    .single();
+
+  if (profileError || !profile) {
+    return json({ error: profileError?.message || "Perfil não encontrado." }, 400);
+  }
+
+  return json({
+    user: {
+      id: profile.id,
+      email: profile.email,
+      fullName: profile.full_name,
+      role: profile.role,
     },
   });
 }

@@ -180,6 +180,17 @@ textarea {
   align-self: end;
 }
 
+.user-edit-controls {
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.user-edit-controls input,
+.user-edit-controls select {
+  min-height: 38px;
+}
+
 .auth-card {
   display: grid;
   gap: 16px;

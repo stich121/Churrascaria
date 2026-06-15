@@ -10,7 +10,8 @@ mesmo endereço do sistema.
 - Login por e-mail e senha.
 - Operador comum cria reservas.
 - Operador nível 2 visualiza, altera e exclui reservas.
-- Operador nível 3 faz tudo dos níveis 1 e 2 e também adiciona usuários.
+- Operador nível 3 faz tudo dos níveis 1 e 2, adiciona usuários, altera nível
+  de operadores e redefine senhas.
 - Filtros por dia, semana, mês e status.
 - Resumo de total de reservas, pessoas, confirmadas e pendentes.
 - Banco online via Supabase.
@@ -49,6 +50,9 @@ nome criado automaticamente em alguns testes.
 
 Sem publicar essa função no Supabase, o cadastro de usuários pelo app mostra erro
 ao enviar a solicitação.
+
+Sempre que alterar este arquivo no GitHub, publique novamente a função no
+Supabase. É ela que cria usuários, altera níveis e redefine senhas.
 
 ### Opção 1: publicar pela CLI
 
@@ -95,10 +99,13 @@ Esses dados ficam salvos no computador ou tablet usado.
 
 ## Arquivo EXE
 
-O arquivo `ChurrascariaPampulhaReservas.exe` abre o sistema no navegador padrão
-do computador. Ele copia os arquivos para
-`%LOCALAPPDATA%\ChurrascariaPampulhaReservas` e abre o app sempre dessa pasta,
-mantendo a configuração local estável.
+O arquivo `ChurrascariaPampulhaReservas.exe` abre o sistema como aplicativo de
+desktop usando o modo app do Microsoft Edge, sem barra de endereço. Ele copia os
+arquivos para `%LOCALAPPDATA%\ChurrascariaPampulhaReservas` e abre o app sempre
+dessa pasta, mantendo a configuração local estável.
+
+Se o Microsoft Edge não estiver instalado, o lançador usa o navegador padrão como
+alternativa.
 
 ## Usar em tablet e computador
 

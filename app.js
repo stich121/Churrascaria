@@ -242,7 +242,20 @@ function renderUsers(users) {
       <td>${escapeHtml(user.full_name)}</td>
       <td>${escapeHtml(user.email || "-")}</td>
       <td>${formatRole(user.role)}</td>
+      <td>
+        <select data-user-role="${user.id}">
+          <option value="operador" ${user.role === "operador" ? "selected" : ""}>Nível 1 - operador</option>
+          <option value="nivel_2" ${user.role === "nivel_2" ? "selected" : ""}>Nível 2 - reservas</option>
+          <option value="nivel_3" ${user.role === "nivel_3" ? "selected" : ""}>Nível 3 - administrador</option>
+        </select>
+      </td>
+      <td>
+        <input data-user-password="${user.id}" type="password" minlength="8" placeholder="Opcional" />
+      </td>
       <td>${user.created_at ? formatDate(user.created_at.slice(0, 10)) : "-"}</td>
+      <td>
+        <button type="button" data-action="update-user" data-id="${user.id}">Salvar</button>
+      </td>
     `;
     elements.userRows.appendChild(row);
   }
@@ -273,6 +286,40 @@ async function createUser() {
       throw new Error(
         `A função ${functionName} respondeu, mas não criou o usuário. ` +
           "Cole o código correto em Edge Functions > Code e clique em Deploy."
+      );
+    }
+
+    lastError = error;
+  }
+
+  throw new Error(formatCreateUserError(lastError));
+}
+
+async function updateUser(userId, role, password) {
+  if (!canManageUsers()) {
+    throw new Error("Apenas operadores nível 3 podem alterar usuários.");
+  }
+
+  const payload = {
+    action: "update",
+    userId,
+    role,
+    password: password || null,
+  };
+
+  let lastError = null;
+
+  for (const functionName of CREATE_USER_FUNCTIONS) {
+    const { data, error } = await client.functions.invoke(functionName, {
+      body: payload,
+    });
+
+    if (!error && data?.user?.id) return data.user;
+    if (data?.error) throw new Error(data.error);
+    if (!error) {
+      throw new Error(
+        `A função ${functionName} respondeu, mas não alterou o usuário. ` +
+          "Cole o código atualizado em Edge Functions > Code e clique em Deploy."
       );
     }
 
@@ -592,6 +639,35 @@ elements.userForm.addEventListener("submit", async (event) => {
     await loadUsers();
   } catch (error) {
     setMessage(elements.userMessage, error.message || "Não foi possível criar o usuário.");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+elements.userRows.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-action='update-user']");
+  if (!button) return;
+
+  const userId = button.dataset.id;
+  const roleField = elements.userRows.querySelector(`[data-user-role="${userId}"]`);
+  const passwordField = elements.userRows.querySelector(`[data-user-password="${userId}"]`);
+  const password = passwordField.value.trim();
+
+  if (password && password.length < 8) {
+    setMessage(elements.userMessage, "A nova senha precisa ter pelo menos 8 caracteres.");
+    return;
+  }
+
+  button.disabled = true;
+  setMessage(elements.userMessage, "");
+
+  try {
+    await updateUser(userId, roleField.value, password);
+    passwordField.value = "";
+    setMessage(elements.userMessage, "Usuário atualizado com sucesso.", false);
+    await loadUsers();
+  } catch (error) {
+    setMessage(elements.userMessage, error.message || "Não foi possível alterar o usuário.");
   } finally {
     button.disabled = false;
   }
