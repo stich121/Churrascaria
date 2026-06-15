@@ -1,8 +1,9 @@
 # Sistema de Reservas | Churrascaria Pampulha
 
-Aplicativo web para registrar reservas e consultar agenda por dia, semana ou mês.
-Ele usa Supabase como banco de dados online, permitindo que tablets e computadores
-vejam as mesmas reservas em tempo real ao acessar o mesmo endereço do sistema.
+Aplicativo e website da churrascaria para registrar reservas e consultar agenda
+por dia, semana ou mês. Ele usa Supabase como banco de dados online, permitindo
+que tablets e computadores vejam as mesmas reservas em tempo real ao acessar o
+mesmo endereço do sistema.
 
 ## Funções
 
