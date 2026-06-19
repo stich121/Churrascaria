@@ -1,116 +1,41 @@
-# Sistema de Reservas | Churrascaria Pampulha
+# 🔥 Churrascaria Pampulha - Novo Site
 
-Aplicativo e website da churrascaria para registrar reservas e consultar agenda
-por dia, semana ou mês. Ele usa Supabase como banco de dados online, permitindo
-que tablets e computadores vejam as mesmas reservas em tempo real ao acessar o
-mesmo endereço do sistema.
+Site moderno, responsivo e interativo da Churrascaria Pampulha.
 
-## Funções
+## ✨ Características
 
-- Login por e-mail e senha.
-- Operador comum cria reservas.
-- Operador nível 2 visualiza, altera e exclui reservas.
-- Operador nível 3 faz tudo dos níveis 1 e 2, adiciona usuários, altera nível
-  de operadores e redefine senhas.
-- Filtros por dia, semana, mês e status.
-- Resumo de total de reservas, pessoas, confirmadas e pendentes.
-- Banco online via Supabase.
-- Atualização em tempo real entre dispositivos logados.
+- **Design Responsivo**: Funciona perfeitamente em desktop, tablet e mobile
+- **Logo Grande**: Logo da churrascaria bem dimensionada na navbar
+- **Botão WhatsApp Flutuante**: Contacte direto pelo WhatsApp com um clique
+- **Seções Completas**: Início, Cardápio, Rodízios, Eventos, Quem Somos, Contato
+- **Animações Suaves**: Efeitos visuais modernos e agradáveis
+- **Formulário de Contato**: Para que clientes entrem em contato diretamente
 
-## Configurar o banco online
+## 📁 Arquivos
 
-1. Crie um projeto em https://supabase.com.
-2. Abra o SQL Editor do Supabase.
-3. Execute o conteúdo do arquivo `supabase.schema.sql`.
-4. Em Database > Replication, habilite Realtime para a tabela `reservations`.
-5. Em Authentication > Users, crie os usuários dos operadores.
-6. Copie o UUID de cada usuário criado.
-7. No SQL Editor, rode inserts na tabela `profiles`, usando `operador` ou `nivel_2`.
+- `index.html` - Estrutura HTML da página
+- `style.css` - Estilos CSS modernos e responsivos
+- `script.js` - Interatividade e animações
+- `Logo Branca carroça MC.png` - Logo da churrascaria
+- `whatsapp-icon.png` - Ícone do WhatsApp
 
-## Criar o primeiro nível 3
+## 📱 Contato
 
-Para o usuário administrador inicial:
+- **Telefone**: (31) 3582-5158
+- **WhatsApp**: +55 31 84449047
+- **Email**: contato@churrascariapampulha.com.br
+- **Endereço**: Av. Pedro I, 568 - Itapoã, Belo Horizonte - MG
 
-1. No Supabase, vá em Authentication > Users.
-2. Crie o usuário com o e-mail `Matheusdyas4@gmail.com`.
-3. Defina a senha diretamente no painel do Supabase.
-4. Copie o UUID do usuário criado.
-5. Abra `supabase/create-initial-level3-profile.sql`.
-6. Troque `COLE_AQUI_O_UUID_DO_USUARIO` pelo UUID.
-7. Execute o SQL no Supabase.
+## 🚀 Como Usar
 
-Não salve senhas em arquivos do repositório, principalmente se o repositório for
-público.
+1. Abra `index.html` no navegador
+2. Ou faça upload para um servidor web
+3. O site é totalmente responsivo e funciona em qualquer dispositivo
 
-## Permitir que nível 3 adicione usuários
+## 📅 Desde 1982
 
-O app chama a Edge Function `supabase/functions/create-user`. A versão atual
-também tenta chamar `bright-processor` como compatibilidade, porque esse é o
-nome criado automaticamente em alguns testes.
+A Churrascaria Pampulha oferece uma opção de churrasco nobre com ambiente familiar e atendimento especial há mais de 40 anos.
 
-Sem publicar essa função no Supabase, o cadastro de usuários pelo app mostra erro
-ao enviar a solicitação.
+---
 
-Sempre que alterar este arquivo no GitHub, publique novamente a função no
-Supabase. É ela que cria usuários, altera níveis e redefine senhas.
-
-### Opção 1: publicar pela CLI
-
-```bash
-supabase functions deploy create-user
-```
-
-### Opção 2: publicar pelo painel do Supabase
-
-1. Abra o projeto no Supabase.
-2. Vá em **Edge Functions**.
-3. Crie uma função chamada exatamente `create-user`. Se você já criou como
-   `bright-processor`, também funciona com a versão atual do app.
-4. Copie o conteúdo de `supabase/functions/create-user/index.ts`.
-5. Cole no editor da função.
-6. Clique em **Deploy**.
-7. Abra os logs da função e confirme que não há erro de variáveis.
-
-No painel do Supabase, confirme que as variáveis `SUPABASE_URL` e
-`SUPABASE_SERVICE_ROLE_KEY` estão disponíveis para a função. A `service_role`
-deve ficar somente no ambiente do Supabase, nunca no frontend.
-
-Exemplo:
-
-```sql
-insert into public.profiles (id, full_name, email, role)
-values
-  ('UUID_DO_OPERADOR', 'Operador Atendimento', 'operador@exemplo.com', 'operador'),
-  ('UUID_DO_SUPERVISOR', 'Supervisor Pampulha', 'supervisor@exemplo.com', 'nivel_2');
-```
-
-## Conectar o app ao Supabase
-
-O app já vem configurado com a URL do projeto Supabase e a publishable key. Os
-colaboradores só precisam abrir o sistema e fazer login.
-
-Se algum dia trocar de projeto Supabase, clique em **Banco online** no painel e
-cole novamente:
-
-- URL do projeto Supabase.
-- Publishable key.
-
-Esses dados ficam salvos no computador ou tablet usado.
-
-## Arquivo EXE
-
-O arquivo `ChurrascariaPampulhaReservas.exe` abre o sistema como aplicativo de
-desktop usando o modo app do Microsoft Edge, sem barra de endereço. Ele copia os
-arquivos para `%LOCALAPPDATA%\ChurrascariaPampulhaReservas` e abre o app sempre
-dessa pasta, mantendo a configuração local estável.
-
-Se o Microsoft Edge não estiver instalado, o lançador usa o navegador padrão como
-alternativa.
-
-## Usar em tablet e computador
-
-Depois de configurado, publique estes arquivos em uma hospedagem estática ou abra
-o mesmo endereço nos dispositivos. Como o banco é online, todos usam os mesmos
-dados.
-
-Para teste local, basta abrir `index.html` no navegador.
+Desenvolvido com ❤️ para a Churrascaria Pampulha
