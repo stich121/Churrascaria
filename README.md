@@ -47,13 +47,14 @@ nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php` (sessã
 ### Deploy no Hostinger
 
 1. No phpMyAdmin do banco (ex.: `u654041352_Reserva`), importe `schema.sql` na aba "Importar" ou "SQL".
+   Isso já cria o admin inicial (usuário `Matheus.dias`, nível 3) — troque a senha pela tela "Trocar senha"
+   depois do primeiro login.
 2. Edite `config.php` com o host/usuário/senha reais do banco (hPanel > Bancos de Dados > Gerenciar).
 3. Suba todos os arquivos `.php`, `.html`, `.css`, `.js` e as imagens para o servidor.
-4. Acesse `gerar-senha.php` pelo navegador, gere o hash de uma senha de administrador e cole-o no `INSERT`
-   comentado no final de `schema.sql` (rode esse `INSERT` na aba SQL do phpMyAdmin).
-5. **Apague `gerar-senha.php` do servidor** depois de criar o admin — ele não deve ficar publicado.
-6. Faça login em `area-reservas.php` com o usuário admin e cadastre os demais funcionários pela tela
+4. Faça login em `area-reservas.php` com o usuário admin e cadastre os demais funcionários pela tela
    "Funcionários".
+5. Para criar outro admin via hash manual no futuro, use `gerar-senha.php` pelo navegador e depois
+   **apague esse arquivo do servidor** — ele não deve ficar publicado.
 
 ## 📅 Desde 1982
 

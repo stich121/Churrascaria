@@ -26,9 +26,7 @@ CREATE TABLE IF NOT EXISTS reservas (
 
 CREATE INDEX idx_reservas_data ON reservas (data_reserva, hora_reserva);
 
--- Depois de importar este arquivo, use o gerar-senha.php (veja instruções) para criar
--- o hash da senha do primeiro administrador e rode o INSERT abaixo na aba SQL,
--- substituindo COLE_O_HASH_AQUI pelo hash gerado.
---
--- INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES
--- ('Administrador', 'admin', 'COLE_O_HASH_AQUI', 3);
+-- Primeiro administrador (nível 3). Hash gerado localmente com password_hash() do PHP
+-- para a senha informada — rode este INSERT uma vez, na aba SQL do phpMyAdmin.
+INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES
+('Matheus Dias', 'Matheus.dias', '$2y$10$MAK7weG1g1u4OEp8Ir46C.9Bzho2nX1p2YRGHN6fpl/6H7aLGHaFi', 3);
