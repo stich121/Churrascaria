@@ -269,43 +269,45 @@ if (window.location.hash) {
     }, 500);
 }
 
-// Initialize Google Map
+// Initialize Map with Leaflet
 function initMap() {
     // Coordenadas da Churrascaria Pampulha
-    const churrascaria = {
-        lat: -19.8765432,
-        lng: -43.9876543
-    };
+    const lat = -19.8765432;
+    const lng = -43.9876543;
 
     // Criar mapa
-    const map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 15,
-        center: churrascaria,
-        mapTypeControl: true,
-        fullscreenControl: true,
-        zoomControl: true,
-        streetViewControl: false
-    });
+    const map = L.map('map').setView([lat, lng], 15);
+
+    // Adicionar OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
 
     // Adicionar marcador
-    const marker = new google.maps.Marker({
-        position: churrascaria,
-        map: map,
-        title: 'Churrascaria Pampulha',
-        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
-    });
+    const marker = L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: '#c41e3a',
+        color: '#8b2e2e',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+    }).addTo(map);
 
-    // Info window
-    const infoWindow = new google.maps.InfoWindow({
-        content: '<div style="padding: 10px;"><strong>Churrascaria Pampulha</strong><br>Av. Pedro I, 568 - Itapoã<br>Belo Horizonte - MG<br><a href="tel:+553135825158">(31) 3582-5158</a></div>'
-    });
+    // Popup com informações
+    marker.bindPopup(
+        '<div style="text-align: center; padding: 10px;">' +
+        '<strong style="color: #c41e3a; font-size: 16px;">Churrascaria Pampulha</strong><br>' +
+        '<p style="margin: 8px 0; color: #666;">Av. Pedro I, 568 - Itapoã<br>Belo Horizonte - MG</p>' +
+        '<a href="tel:+553135825158" style="color: #c41e3a; text-decoration: none; font-weight: bold;">' +
+        '📞 (31) 3582-5158</a><br>' +
+        '<a href="https://wa.me/553184449047" target="_blank" style="color: #25d366; text-decoration: none; font-weight: bold; margin-top: 8px; display: inline-block;">' +
+        '💬 WhatsApp</a>' +
+        '</div>'
+    );
 
-    marker.addListener('click', () => {
-        infoWindow.open(map, marker);
-    });
-
-    // Abrir info window por padrão
-    infoWindow.open(map, marker);
+    // Abrir popup por padrão
+    marker.openPopup();
 }
 
 // Carregar mapa quando página carrega
