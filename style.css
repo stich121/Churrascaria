@@ -1371,7 +1371,15 @@ body {
     flex-wrap: wrap;
 }
 
+.dashboard-unit-tabs {
+    margin-bottom: 1rem;
+}
+
 .dashboard-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     background: white;
     border: 2px solid #e5e5e5;
     color: var(--text-light);
@@ -1382,6 +1390,7 @@ body {
     transition: var(--transition);
     font-family: inherit;
     font-size: 0.95rem;
+    text-decoration: none;
 }
 
 .dashboard-tab:hover {
@@ -1808,6 +1817,18 @@ body {
 
     .reserva-form-card {
         padding: 1.5rem;
+    }
+    .dashboard-date-form,
+    .dashboard-unit-tabs {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .dashboard-unit-tabs .dashboard-tab,
+    .dashboard-date-form input[type="date"],
+    .dashboard-date-form .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 

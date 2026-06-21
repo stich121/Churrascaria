@@ -20,6 +20,13 @@ function validarDataYmd(?string $valor): string
     return ($dt && $dt->format('Y-m-d') === $valor) ? $valor : $hoje;
 }
 
+function dashboardUrl(array $params = []): string
+{
+    $query = http_build_query($params);
+
+    return $query !== '' ? 'dashboard.php?' . $query : 'dashboard.php';
+}
+
 $dataSelecionada = validarDataYmd($_GET['data'] ?? null);
 $dataSelecionadaDt = new DateTime($dataSelecionada);
 $diaSemanaNum = (int) $dataSelecionadaDt->format('w');
@@ -28,14 +35,37 @@ $dataFormatada = $dataSelecionadaDt->format('d/m/Y');
 $abasValidas = ['dia', 'semana', 'mes'];
 $abaSelecionada = in_array($_GET['aba'] ?? '', $abasValidas, true) ? $_GET['aba'] : 'dia';
 
+$opcoesDashboardChurrascaria = [
+    'pampulha' => CHURRASCARIA_PADRAO,
+    'casarao-itau' => 'Casarão Itau',
+];
+
+if ($nivel >= NIVEL_SUPERIOR) {
+    $opcoesDashboardChurrascaria['todas'] = 'Todos';
+}
+
+$churrascariaDashboard = $_GET['churrascaria'] ?? 'pampulha';
+if (!array_key_exists($churrascariaDashboard, $opcoesDashboardChurrascaria)) {
+    $churrascariaDashboard = 'pampulha';
+}
+
+$rotuloDashboardChurrascaria = $opcoesDashboardChurrascaria[$churrascariaDashboard];
+$filtroChurrascariaSql = '';
+$filtroChurrascariaParams = [];
+
+if ($churrascariaDashboard !== 'todas') {
+    $filtroChurrascariaSql = ' AND churrascaria = ?';
+    $filtroChurrascariaParams[] = $rotuloDashboardChurrascaria;
+}
+
 // ===== Visão do dia =====
 $stmt = $pdo->prepare(
-    'SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
+    "SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
      FROM reservas
-     WHERE data_reserva = ?
-     ORDER BY hora_reserva'
+     WHERE data_reserva = ?{$filtroChurrascariaSql}
+     ORDER BY hora_reserva"
 );
-$stmt->execute([$dataSelecionada]);
+$stmt->execute(array_merge([$dataSelecionada], $filtroChurrascariaParams));
 $reservasDia = $stmt->fetchAll();
 
 $totalReservasDia = 0;
@@ -61,10 +91,10 @@ $fimSemana = (clone $inicioSemana)->modify('+6 days');
 $stmt = $pdo->prepare(
     "SELECT data_reserva, COUNT(*) AS total, COALESCE(SUM(pessoas), 0) AS pessoas
      FROM reservas
-     WHERE data_reserva BETWEEN ? AND ? AND status_reserva = 'Reservado'
+     WHERE data_reserva BETWEEN ? AND ? AND status_reserva = 'Reservado'{$filtroChurrascariaSql}
      GROUP BY data_reserva"
 );
-$stmt->execute([$inicioSemana->format('Y-m-d'), $fimSemana->format('Y-m-d')]);
+$stmt->execute(array_merge([$inicioSemana->format('Y-m-d'), $fimSemana->format('Y-m-d')], $filtroChurrascariaParams));
 
 $linhasSemana = [];
 foreach ($stmt->fetchAll() as $linha) {
@@ -95,9 +125,9 @@ $stmt = $pdo->prepare(
     "SELECT COUNT(*) AS total, COALESCE(SUM(pessoas), 0) AS pessoas,
             COALESCE(SUM(confirmacao = 'Confirmado'), 0) AS confirmadas
      FROM reservas
-     WHERE data_reserva BETWEEN ? AND ? AND status_reserva = 'Reservado'"
+     WHERE data_reserva BETWEEN ? AND ? AND status_reserva = 'Reservado'{$filtroChurrascariaSql}"
 );
-$stmt->execute([$inicioMes->format('Y-m-d'), $fimMes->format('Y-m-d')]);
+$stmt->execute(array_merge([$inicioMes->format('Y-m-d'), $fimMes->format('Y-m-d')], $filtroChurrascariaParams));
 $resumoMes = $stmt->fetch();
 
 $totalReservasMes = (int) $resumoMes['total'];
@@ -143,26 +173,39 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                 <div class="panel-header-icon"><i class="fa-solid fa-gauge-high"></i></div>
                 <div>
                     <h2>Dashboard</h2>
-                    <p>Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — visão geral de <?= e($dataFormatada) ?> (<?= e($diasSemana[$diaSemanaNum]) ?>)</p>
+                    <p>Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — visão de <?= e($rotuloDashboardChurrascaria) ?> em <?= e($dataFormatada) ?> (<?= e($diasSemana[$diaSemanaNum]) ?>)</p>
                 </div>
             </div>
 
             <div class="dashboard-date-bar">
                 <form method="get" action="dashboard.php" class="dashboard-date-form">
-                    <input type="hidden" name="aba" id="aba-input" value="<?= e($abaSelecionada) ?>">
+                    <input type="hidden" name="aba" id="aba-input" class="dashboard-aba-input" value="<?= e($abaSelecionada) ?>">
+                    <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
                     <label for="data-input"><i class="fa-solid fa-calendar-days"></i> Visualizar reservas do dia</label>
                     <input type="date" id="data-input" name="data" value="<?= e($dataSelecionada) ?>" onchange="this.form.submit()">
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i>Ver</button>
                     <?php if ($dataSelecionada !== date('Y-m-d')): ?>
-                        <a href="dashboard.php" class="dashboard-date-reset"><i class="fa-solid fa-rotate-left"></i>Voltar para hoje</a>
+                        <a href="<?= e(dashboardUrl(['aba' => $abaSelecionada, 'churrascaria' => $churrascariaDashboard])) ?>" class="dashboard-date-reset"><i class="fa-solid fa-rotate-left"></i>Voltar para hoje</a>
                     <?php endif; ?>
                 </form>
             </div>
 
+            <div class="dashboard-tabs dashboard-unit-tabs" aria-label="Selecionar churrascaria">
+                <?php foreach ($opcoesDashboardChurrascaria as $chaveOpcao => $rotuloOpcao): ?>
+                    <a
+                        href="<?= e(dashboardUrl(['data' => $dataSelecionada, 'aba' => $abaSelecionada, 'churrascaria' => $chaveOpcao])) ?>"
+                        class="dashboard-tab <?= $churrascariaDashboard === $chaveOpcao ? 'is-active' : '' ?>"
+                        <?= $churrascariaDashboard === $chaveOpcao ? 'aria-current="page"' : '' ?>>
+                        <i class="fa-solid <?= $chaveOpcao === 'todas' ? 'fa-layer-group' : 'fa-location-dot' ?>"></i>
+                        <?= e($rotuloOpcao) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
             <div class="dashboard-tabs">
-                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'dia' ? 'is-active' : '' ?>" data-tab="dia"><i class="fa-solid fa-calendar-day"></i> Dia</button>
-                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'semana' ? 'is-active' : '' ?>" data-tab="semana"><i class="fa-solid fa-calendar-week"></i> Semana</button>
-                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'mes' ? 'is-active' : '' ?>" data-tab="mes"><i class="fa-solid fa-calendar"></i> Mês</button>
+                <button type="button" class="dashboard-tab dashboard-period-tab <?= $abaSelecionada === 'dia' ? 'is-active' : '' ?>" data-tab="dia"><i class="fa-solid fa-calendar-day"></i> Dia</button>
+                <button type="button" class="dashboard-tab dashboard-period-tab <?= $abaSelecionada === 'semana' ? 'is-active' : '' ?>" data-tab="semana"><i class="fa-solid fa-calendar-week"></i> Semana</button>
+                <button type="button" class="dashboard-tab dashboard-period-tab <?= $abaSelecionada === 'mes' ? 'is-active' : '' ?>" data-tab="mes"><i class="fa-solid fa-calendar"></i> Mês</button>
             </div>
 
             <div class="dashboard-tab-panel <?= $abaSelecionada === 'dia' ? 'is-active' : '' ?>" data-panel="dia">
@@ -254,7 +297,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     <ul class="dashboard-week-list">
                         <?php foreach ($diasDaSemana as $dia): ?>
                             <li class="<?= $dia['selecionado'] ? 'is-selected' : '' ?>">
-                                <a href="dashboard.php?data=<?= e($dia['data']) ?>">
+                                <a href="<?= e(dashboardUrl(['data' => $dia['data'], 'aba' => 'dia', 'churrascaria' => $churrascariaDashboard])) ?>">
                                     <span class="dashboard-week-day"><?= e($dia['label']) ?> <small><?= e($dia['dataFormatada']) ?></small></span>
                                     <span class="dashboard-week-count"><?= e((string) $dia['total']) ?> res. · <?= e((string) $dia['pessoas']) ?> pessoas</span>
                                 </a>
@@ -304,9 +347,10 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var tabs = document.querySelectorAll('.dashboard-tab');
+            var tabs = document.querySelectorAll('.dashboard-period-tab');
             var paineis = document.querySelectorAll('.dashboard-tab-panel');
-            var abaInput = document.getElementById('aba-input');
+            var abaInputs = document.querySelectorAll('.dashboard-aba-input');
+            var unitLinks = document.querySelectorAll('.dashboard-unit-tabs a');
 
             tabs.forEach(function (tab) {
                 tab.addEventListener('click', function () {
@@ -320,9 +364,14 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     if (painelAlvo) {
                         painelAlvo.classList.add('is-active');
                     }
-                    if (abaInput) {
-                        abaInput.value = alvo;
-                    }
+                    abaInputs.forEach(function (input) {
+                        input.value = alvo;
+                    });
+                    unitLinks.forEach(function (link) {
+                        var url = new URL(link.href, window.location.href);
+                        url.searchParams.set('aba', alvo);
+                        link.href = url.toString();
+                    });
                 });
             });
         });
