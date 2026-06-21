@@ -39,6 +39,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: painel-reservas.php');
         exit;
     }
+
+    if ($acao === 'criar_mesa') {
+        $capacidade = (int) ($_POST['capacidade'] ?? 0);
+        $quantidadeMesas = (int) ($_POST['quantidade_mesas'] ?? 0);
+
+        if (!in_array($capacidade, [2, 4, 6], true) || $quantidadeMesas < 1) {
+            $mensagemErro = 'Escolha uma capacidade válida (2, 4 ou 6 lugares) e uma quantidade de mesas maior que zero.';
+        } else {
+            $stmt = $pdo->prepare('INSERT INTO mesas (capacidade, quantidade) VALUES (?, ?)');
+            $stmt->execute([$capacidade, $quantidadeMesas]);
+            header('Location: painel-reservas.php');
+            exit;
+        }
+    }
+
+    if ($acao === 'excluir_mesa' && $nivel >= NIVEL_GERENTE) {
+        $stmt = $pdo->prepare('DELETE FROM mesas WHERE id = ?');
+        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        header('Location: painel-reservas.php');
+        exit;
+    }
 }
 
 $reservas = $pdo->query(
@@ -47,6 +68,14 @@ $reservas = $pdo->query(
      JOIN funcionarios f ON f.id = r.funcionario_id
      ORDER BY r.data_reserva, r.hora_reserva'
 )->fetchAll();
+
+$mesas = $pdo->query('SELECT id, capacidade, quantidade FROM mesas ORDER BY capacidade, id')->fetchAll();
+$totalMesas = 0;
+$totalLugares = 0;
+foreach ($mesas as $mesa) {
+    $totalMesas += (int) $mesa['quantidade'];
+    $totalLugares += (int) $mesa['quantidade'] * (int) $mesa['capacidade'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -144,6 +173,72 @@ $reservas = $pdo->query(
                 </table>
                 <?php if (empty($reservas)): ?>
                     <p class="reservas-vazio" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
+                <?php endif; ?>
+            </div>
+
+            <h2 class="painel-secao-titulo">Mesas do Espaço</h2>
+            <p class="section-subtitle">Cadastre quantas mesas existem em cada capacidade</p>
+
+            <div class="reserva-form-card">
+                <form method="post" action="painel-reservas.php">
+                    <input type="hidden" name="acao" value="criar_mesa">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                    <div class="reserva-form-grid">
+                        <select name="capacidade" required>
+                            <option value="">Lugares por mesa</option>
+                            <option value="2">2 lugares</option>
+                            <option value="4">4 lugares</option>
+                            <option value="6">6 lugares</option>
+                        </select>
+                        <input type="number" name="quantidade_mesas" placeholder="Nº de mesas" min="1" required>
+                    </div>
+                    <?php if ($mensagemErro !== ''): ?>
+                        <p class="login-erro"><?= e($mensagemErro) ?></p>
+                    <?php endif; ?>
+                    <button type="submit" class="btn btn-primary">Adicionar Mesas</button>
+                </form>
+            </div>
+
+            <?php if (!empty($mesas)): ?>
+                <p class="mesas-resumo">Total: <strong><?= e((string) $totalMesas) ?></strong> mesas — <strong><?= e((string) $totalLugares) ?></strong> lugares no espaço</p>
+            <?php endif; ?>
+
+            <div class="reservas-lista-wrapper">
+                <table class="reservas-tabela">
+                    <thead>
+                        <tr>
+                            <th>Lugares por mesa</th>
+                            <th>Quantidade de mesas</th>
+                            <th>Lugares totais</th>
+                            <?php if ($nivel >= NIVEL_GERENTE): ?>
+                                <th></th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($mesas as $mesa): ?>
+                            <tr>
+                                <td><?= e((string) $mesa['capacidade']) ?></td>
+                                <td><?= e((string) $mesa['quantidade']) ?></td>
+                                <td><?= e((string) ($mesa['capacidade'] * $mesa['quantidade'])) ?></td>
+                                <?php if ($nivel >= NIVEL_GERENTE): ?>
+                                    <td>
+                                        <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover este lote de mesas?');">
+                                            <input type="hidden" name="acao" value="excluir_mesa">
+                                            <input type="hidden" name="id" value="<?= e((string) $mesa['id']) ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                                            <button type="submit" class="btn-remover-reserva" title="Remover lote de mesas">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php if (empty($mesas)): ?>
+                    <p class="reservas-vazio" style="display: block;">Nenhuma mesa cadastrada ainda.</p>
                 <?php endif; ?>
             </div>
         </div>

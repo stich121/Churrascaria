@@ -1188,6 +1188,19 @@ body {
     display: none;
 }
 
+.painel-secao-titulo {
+    text-align: center;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 3rem 0 0.5rem;
+}
+
+.mesas-resumo {
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
 .footer-funcionario-link a {
     color: #999;
     font-size: 0.85rem;

@@ -36,9 +36,12 @@ Site moderno, responsivo e interativo da Churrascaria Pampulha.
 
 Acesso restrito à equipe (link "Área Funcionário" no rodapé), com banco MySQL via PHP/PDO e 3 níveis de permissão:
 
-- **Nível 1 - Atendente**: cadastra e visualiza reservas.
-- **Nível 2 - Gerente**: tudo do atendente + exclui reservas + cadastra/gerencia atendentes.
+- **Nível 1 - Atendente**: cadastra e visualiza reservas, cadastra mesas do espaço.
+- **Nível 2 - Gerente**: tudo do atendente + exclui reservas/mesas + cadastra/gerencia atendentes.
 - **Nível 3 - Nível Superior**: acesso total, incluindo cadastro de gerentes e outros níveis superiores.
+
+No "Painel de Reservas" também é possível cadastrar a quantidade de mesas do espaço, escolhendo entre
+2, 4 ou 6 lugares por mesa — o painel mostra o total de mesas e de lugares disponíveis.
 
 Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `funcionarios.php` (gestão de equipe,
 nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php` (sessão e conexão com o banco),
@@ -55,6 +58,9 @@ nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php` (sessã
    "Funcionários".
 5. Para criar outro admin via hash manual no futuro, use `gerar-senha.php` pelo navegador e depois
    **apague esse arquivo do servidor** — ele não deve ficar publicado.
+6. Se o site já estava no ar antes da tabela `mesas` existir, não reimporte `schema.sql` inteiro (o INSERT
+   do admin vai falhar por duplicidade). Em vez disso, rode só o trecho `CREATE TABLE IF NOT EXISTS mesas (...)`
+   de `schema.sql` na aba "SQL" do phpMyAdmin.
 
 ## 📅 Desde 1982
 

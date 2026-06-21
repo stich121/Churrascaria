@@ -26,6 +26,14 @@ CREATE TABLE IF NOT EXISTS reservas (
 
 CREATE INDEX idx_reservas_data ON reservas (data_reserva, hora_reserva);
 
+CREATE TABLE IF NOT EXISTS mesas (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    capacidade TINYINT UNSIGNED NOT NULL,
+    quantidade SMALLINT UNSIGNED NOT NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_mesas_capacidade CHECK (capacidade IN (2, 4, 6))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Primeiro administrador (nível 3). Hash gerado localmente com password_hash() do PHP
 -- para a senha informada — rode este INSERT uma vez, na aba SQL do phpMyAdmin.
 INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES
