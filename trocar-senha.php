@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trocar Senha - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-4">
+    <link rel="stylesheet" href="style.css?v=20260621-5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                 </div>
                 <ul class="funcionario-nav-links">
+                    <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
                     <li><a href="mesas.php">Mesas</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>

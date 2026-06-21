@@ -3,7 +3,7 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 
 if (funcionarioLogado()) {
-    header('Location: painel-reservas.php');
+    header('Location: dashboard.php');
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['funcionario_id'] = $funcionario['id'];
         $_SESSION['funcionario_nome'] = $funcionario['nome'];
         $_SESSION['funcionario_nivel'] = (int) $funcionario['nivel'];
-        header('Location: painel-reservas.php');
+        header('Location: dashboard.php');
         exit;
     }
 
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Reservas - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-4">
+    <link rel="stylesheet" href="style.css?v=20260621-5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
