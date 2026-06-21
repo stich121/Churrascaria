@@ -348,6 +348,22 @@ body {
     opacity: 0.95;
 }
 
+.menu-item .menu-subtitle {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.menu-item .menu-highlight {
+    font-size: 0.9rem;
+    color: #fff;
+    margin-top: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
 .cardapio-cta {
     text-align: center;
 }
@@ -383,6 +399,21 @@ body {
 .promo-card:hover {
     transform: translateX(10px);
     box-shadow: 0 8px 25px rgba(196, 30, 58, 0.2);
+}
+
+.promo-highlight-card {
+    border-left: 8px solid var(--primary-color);
+    background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+}
+
+.promo-highlight-card h3 {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.promo-highlight-card .promo-highlight {
+    color: var(--primary-color);
+    font-weight: bold;
 }
 
 .promo-card h3 {
