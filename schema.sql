@@ -32,6 +32,18 @@ CREATE TABLE IF NOT EXISTS reservas (
 
 CREATE INDEX idx_reservas_data ON reservas (data_reserva, hora_reserva);
 
+-- Controle de força bruta no login: registra tentativas falhas por IP e bloqueia
+-- temporariamente após exceder o limite (ver constantes LOGIN_* em auth.php).
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    ip VARCHAR(45) NOT NULL,
+    tentativas INT UNSIGNED NOT NULL DEFAULT 1,
+    primeira_tentativa TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ultima_tentativa TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    bloqueado_until TIMESTAMP NULL,
+    UNIQUE KEY uq_login_attempts_ip (ip)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS mesas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     capacidade TINYINT UNSIGNED NOT NULL,

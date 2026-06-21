@@ -8,8 +8,12 @@ if (funcionarioLogado()) {
 }
 
 $erro = '';
+$ip = clienteIp();
+$bloqueioRestante = verificarBloqueioLogin($pdo, $ip);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($bloqueioRestante > 0) {
+    $erro = 'Muitas tentativas de login. Tente novamente em ' . ceil($bloqueioRestante / 60) . ' minuto(s).';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = trim($_POST['usuario'] ?? '');
     $senha = $_POST['senha'] ?? '';
 
@@ -18,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $funcionario = $stmt->fetch();
 
     if ($funcionario && (int) $funcionario['ativo'] === 1 && password_verify($senha, $funcionario['senha_hash'])) {
+        limparTentativasLogin($pdo, $ip);
         session_regenerate_id(true);
         $_SESSION['funcionario_id'] = $funcionario['id'];
         $_SESSION['funcionario_nome'] = $funcionario['nome'];
@@ -26,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    registrarTentativaFalhaLogin($pdo, $ip);
     $erro = 'Usuário ou senha incorretos.';
 }
 ?>
@@ -60,16 +66,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="post" action="area-reservas.php">
                 <label for="usuario">Usuário</label>
-                <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required autocomplete="username">
+                <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required autocomplete="username" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>>
 
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>>
 
                 <?php if ($erro !== ''): ?>
                     <p class="login-erro"><?= e($erro) ?></p>
                 <?php endif; ?>
 
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i>Entrar</button>
+                <button type="submit" class="btn btn-primary" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>><i class="fa-solid fa-right-to-bracket"></i>Entrar</button>
             </form>
         </div>
     </section>
