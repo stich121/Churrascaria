@@ -1250,6 +1250,173 @@ body {
     margin: 2rem 0 0;
 }
 
+/* ===== Seletor de data e visões do dashboard ===== */
+.dashboard-date-bar {
+    background: white;
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-date-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-date-form label {
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.dashboard-date-form label i {
+    color: var(--primary-color);
+}
+
+.dashboard-date-form input[type="date"] {
+    padding: 0.6rem 0.9rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background-color: #fafafa;
+    transition: var(--transition);
+}
+
+.dashboard-date-form input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.08);
+}
+
+.btn-sm {
+    padding: 0.55rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.dashboard-date-reset {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dashboard-date-reset i {
+    margin-right: 0;
+}
+
+.dashboard-date-reset:hover {
+    text-decoration: underline;
+}
+
+.dashboard-views-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    align-items: start;
+}
+
+.dashboard-view-card {
+    margin: 0;
+}
+
+.dashboard-view-date {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.dashboard-view-subtitle {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-week-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dashboard-week-list li a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text-dark);
+    background-color: var(--light-bg);
+    transition: var(--transition);
+}
+
+.dashboard-week-list li a:hover {
+    background-color: rgba(244, 164, 96, 0.18);
+}
+
+.dashboard-week-list li.is-selected a {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.dashboard-week-day {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.dashboard-week-day small {
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+.dashboard-week-count {
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.dashboard-month-summary {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.dashboard-month-summary li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    background-color: var(--light-bg);
+}
+
+.dashboard-month-summary li span {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.dashboard-month-summary li strong {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
 /* ===== Cartão de formulário ===== */
 .reserva-form-card {
     background: white;
