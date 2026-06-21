@@ -1118,6 +1118,36 @@ body {
     width: 100%;
 }
 
+.campo-senha {
+    position: relative;
+    margin-bottom: 1.2rem;
+}
+
+.campo-senha input {
+    margin-bottom: 0;
+    padding-right: 2.8rem;
+}
+
+.toggle-senha {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 2.8rem;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-senha:hover {
+    color: var(--primary-color);
+}
+
 .login-erro {
     color: var(--primary-color);
     font-size: 0.9rem;

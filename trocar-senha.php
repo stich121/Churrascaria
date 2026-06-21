@@ -72,13 +72,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
 
                 <label for="senha_atual">Senha atual</label>
-                <input type="password" id="senha_atual" name="senha_atual" required autocomplete="current-password">
+                <div class="campo-senha">
+                    <input type="password" id="senha_atual" name="senha_atual" required autocomplete="current-password">
+                    <button type="button" class="toggle-senha" data-target="senha_atual" aria-label="Mostrar senha">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
 
                 <label for="senha_nova">Nova senha</label>
-                <input type="password" id="senha_nova" name="senha_nova" minlength="6" required autocomplete="new-password">
+                <div class="campo-senha">
+                    <input type="password" id="senha_nova" name="senha_nova" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="toggle-senha" data-target="senha_nova" aria-label="Mostrar senha">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
 
                 <label for="confirmar_senha_nova">Confirmar nova senha</label>
-                <input type="password" id="confirmar_senha_nova" name="confirmar_senha_nova" minlength="6" required autocomplete="new-password">
+                <div class="campo-senha">
+                    <input type="password" id="confirmar_senha_nova" name="confirmar_senha_nova" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="toggle-senha" data-target="confirmar_senha_nova" aria-label="Mostrar senha">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
 
                 <?php if ($erro !== ''): ?>
                     <p class="login-erro"><?= e($erro) ?></p>
@@ -91,5 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </section>
+
+    <script>
+        document.querySelectorAll('.toggle-senha').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+                var input = document.getElementById(botao.dataset.target);
+                var icone = botao.querySelector('i');
+                var mostrando = input.type === 'text';
+
+                input.type = mostrando ? 'password' : 'text';
+                icone.classList.toggle('fa-eye', mostrando);
+                icone.classList.toggle('fa-eye-slash', !mostrando);
+                botao.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
+            });
+        });
+    </script>
 </body>
 </html>

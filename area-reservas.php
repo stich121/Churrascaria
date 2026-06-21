@@ -69,7 +69,12 @@ if ($bloqueioRestante > 0) {
                 <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required autocomplete="username" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>>
 
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>>
+                <div class="campo-senha">
+                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password" <?= $bloqueioRestante > 0 ? 'disabled' : '' ?>>
+                    <button type="button" class="toggle-senha" data-target="senha" aria-label="Mostrar senha">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
 
                 <?php if ($erro !== ''): ?>
                     <p class="login-erro"><?= e($erro) ?></p>
@@ -87,5 +92,20 @@ if ($bloqueioRestante > 0) {
             </div>
         </div>
     </footer>
+
+    <script>
+        document.querySelectorAll('.toggle-senha').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+                var input = document.getElementById(botao.dataset.target);
+                var icone = botao.querySelector('i');
+                var mostrando = input.type === 'text';
+
+                input.type = mostrando ? 'password' : 'text';
+                icone.classList.toggle('fa-eye', mostrando);
+                icone.classList.toggle('fa-eye-slash', !mostrando);
+                botao.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
+            });
+        });
+    </script>
 </body>
 </html>
