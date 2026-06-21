@@ -6,8 +6,6 @@
     <title>Churrascaria Pampulha - A Melhor Churrascaria de BH</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -163,7 +161,7 @@
 
             <!-- Google Maps -->
             <div class="mapa-container">
-                <div id="map"></div>
+                <iframe class="mapa-frame" title="Mapa da Churrascaria Pampulha" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Av.%20Pedro%20I,%20568,%20Itapo%C3%A3,%20Belo%20Horizonte,%20MG&output=embed"></iframe>
             </div>
 
             <div class="contato-grid">
@@ -182,6 +180,7 @@
                         <div class="icon">📍</div>
                         <h3>Endereço</h3>
                         <p>Av. Pedro I, 568 - Itapoã<br>Via Brasil, Belo Horizonte - MG</p>
+                        <a class="rota-link" href="https://www.google.com/maps/dir/?api=1&destination=Av.%20Pedro%20I,%20568,%20Itapo%C3%A3,%20Belo%20Horizonte,%20MG" target="_blank" rel="noopener">Abrir rota no Google Maps</a>
                     </div>
                 </div>
                 <div class="contato-form">
@@ -247,3 +246,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+

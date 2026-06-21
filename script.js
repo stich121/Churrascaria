@@ -269,48 +269,5 @@ if (window.location.hash) {
     }, 500);
 }
 
-// Initialize Map with Leaflet
-function initMap() {
-    // Coordenadas da Churrascaria Pampulha
-    const lat = -19.8765432;
-    const lng = -43.9876543;
-
-    // Criar mapa
-    const map = L.map('map').setView([lat, lng], 15);
-
-    // Adicionar OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
-
-    // Adicionar marcador
-    const marker = L.circleMarker([lat, lng], {
-        radius: 8,
-        fillColor: '#c41e3a',
-        color: '#8b2e2e',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
-    }).addTo(map);
-
-    // Popup com informações
-    marker.bindPopup(
-        '<div style="text-align: center; padding: 10px;">' +
-        '<strong style="color: #c41e3a; font-size: 16px;">Churrascaria Pampulha</strong><br>' +
-        '<p style="margin: 8px 0; color: #666;">Av. Pedro I, 568 - Itapoã<br>Belo Horizonte - MG</p>' +
-        '<a href="tel:+553135825158" style="color: #c41e3a; text-decoration: none; font-weight: bold;">' +
-        '📞 (31) 3582-5158</a><br>' +
-        '<a href="https://wa.me/553184449047" target="_blank" style="color: #25d366; text-decoration: none; font-weight: bold; margin-top: 8px; display: inline-block;">' +
-        '💬 WhatsApp</a>' +
-        '</div>'
-    );
-
-    // Abrir popup por padrão
-    marker.openPopup();
-}
-
-// Carregar mapa quando página carrega
-window.addEventListener('load', initMap);
-
 console.log('🔥 Churrascaria Pampulha - Site carregado com sucesso!');
+
