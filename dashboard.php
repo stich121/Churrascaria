@@ -2,6 +2,7 @@
 require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
+garantirColunaChurrascaria($pdo);
 
 $nivel = nivelFuncionario();
 $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -29,7 +30,7 @@ $abaSelecionada = in_array($_GET['aba'] ?? '', $abasValidas, true) ? $_GET['aba'
 
 // ===== Visão do dia =====
 $stmt = $pdo->prepare(
-    'SELECT id, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
+    'SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
      FROM reservas
      WHERE data_reserva = ?
      ORDER BY hora_reserva'
@@ -200,6 +201,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                 <tr>
                                     <th>Hora</th>
                                     <th>Cliente</th>
+                                    <th>Churrascaria</th>
                                     <th>Telefone</th>
                                     <th>Pessoas</th>
                                     <th>Status</th>
@@ -211,6 +213,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                     <tr>
                                         <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
                                         <td><?= e($reserva['nome_cliente']) ?></td>
+                                        <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
                                         <td><?= e($reserva['telefone']) ?></td>
                                         <td><?= e((string) $reserva['pessoas']) ?></td>
                                         <td>

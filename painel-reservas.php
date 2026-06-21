@@ -2,6 +2,7 @@
 require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
+garantirColunaChurrascaria($pdo);
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
@@ -18,12 +19,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
     if ($acao === 'criar') {
+        $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
         $pessoas = (int) ($_POST['pessoas'] ?? 0);
         $statusReserva = $_POST['status_reserva'] ?? 'Reservado';
         $confirmacao = $_POST['confirmacao'] ?? 'Pendente';
         $observacao = trim($_POST['observacao'] ?? '');
 
-        if ($pessoas < 1) {
+        if (!churrascariaReservaValida($churrascaria)) {
+            $mensagemErro = 'Escolha uma churrascaria válida.';
+        } elseif ($pessoas < 1) {
             $mensagemErro = 'Informe um número de pessoas válido.';
         } elseif (!in_array($statusReserva, ['Reservado', 'Cancelado'], true)) {
             $mensagemErro = 'Escolha um status de reserva válido.';
@@ -31,12 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagemErro = 'Escolha uma confirmação válida.';
         } else {
             $stmt = $pdo->prepare(
-                'INSERT INTO reservas (nome_cliente, telefone, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO reservas (nome_cliente, telefone, churrascaria, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $stmt->execute([
                 trim($_POST['nome'] ?? ''),
                 trim($_POST['telefone'] ?? ''),
+                $churrascaria,
                 $_POST['data_pedido'] ?? null,
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
@@ -54,24 +59,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'editar') {
         $idReserva = (int) ($_POST['id'] ?? 0);
+        $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
         $pessoas = (int) ($_POST['pessoas'] ?? 0);
         $statusReserva = $_POST['status_reserva'] ?? 'Reservado';
         $observacao = trim($_POST['observacao'] ?? '');
 
         if ($idReserva < 1) {
             $mensagemErro = 'Reserva inválida.';
+        } elseif (!churrascariaReservaValida($churrascaria)) {
+            $mensagemErro = 'Escolha uma churrascaria válida.';
         } elseif ($pessoas < 1) {
             $mensagemErro = 'Informe um número de pessoas válido.';
         } elseif (!in_array($statusReserva, ['Reservado', 'Cancelado'], true)) {
             $mensagemErro = 'Escolha um status de reserva válido.';
         } else {
             $stmt = $pdo->prepare(
-                'UPDATE reservas SET nome_cliente = ?, telefone = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
+                'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
                  WHERE id = ?'
             );
             $stmt->execute([
                 trim($_POST['nome'] ?? ''),
                 trim($_POST['telefone'] ?? ''),
+                $churrascaria,
                 $_POST['data_pedido'] ?? null,
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
@@ -111,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 $reservas = $pdo->query(
-    'SELECT r.id, r.nome_cliente, r.telefone, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
+    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
      JOIN funcionarios f ON f.id = r.funcionario_id
@@ -217,6 +226,14 @@ foreach ($reservas as $reserva) {
                             <input type="tel" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
                         </label>
                         <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                            <select name="churrascaria" required>
+                                <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                    <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
                             <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
                             <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
                         </label>
@@ -267,6 +284,7 @@ foreach ($reservas as $reserva) {
                     <thead>
                         <tr>
                             <th>Cliente</th>
+                            <th>Churrascaria</th>
                             <th>Telefone</th>
                             <th>Pedido</th>
                             <th>Data</th>
@@ -285,6 +303,7 @@ foreach ($reservas as $reserva) {
                         <?php foreach ($reservas as $reserva): ?>
                             <tr>
                                 <td><?= e($reserva['nome_cliente']) ?></td>
+                                <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
                                 <td><?= e($reserva['telefone']) ?></td>
                                 <td><?= $reserva['data_pedido'] ? e(date('d/m/Y', strtotime($reserva['data_pedido']))) : '-' ?></td>
                                 <td><?= e(date('d/m/Y', strtotime($reserva['data_reserva']))) ?></td>
@@ -319,6 +338,7 @@ foreach ($reservas as $reserva) {
                                         data-id="<?= e((string) $reserva['id']) ?>"
                                         data-nome="<?= e($reserva['nome_cliente']) ?>"
                                         data-telefone="<?= e($reserva['telefone']) ?>"
+                                        data-churrascaria="<?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?>"
                                         data-data-pedido="<?= e($reserva['data_pedido'] ?? '') ?>"
                                         data-data="<?= e($reserva['data_reserva']) ?>"
                                         data-hora="<?= e(substr((string) $reserva['hora_reserva'], 0, 5)) ?>"
@@ -370,6 +390,14 @@ foreach ($reservas as $reserva) {
                     <label class="reserva-form-label">
                         <span><i class="fa-solid fa-phone"></i>Telefone</span>
                         <input type="tel" name="telefone" id="editar_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                        <select name="churrascaria" id="editar_churrascaria" required>
+                            <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                <option value="<?= e($churrascariaOpcao) ?>"><?= e($churrascariaOpcao) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </label>
                     <label class="reserva-form-label">
                         <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
@@ -445,6 +473,7 @@ foreach ($reservas as $reserva) {
             document.getElementById('editar_id').value = botao.dataset.id;
             document.getElementById('editar_nome').value = botao.dataset.nome;
             document.getElementById('editar_telefone').value = botao.dataset.telefone;
+            document.getElementById('editar_churrascaria').value = botao.dataset.churrascaria || 'Churrascaria Pampulha';
             document.getElementById('editar_data_pedido').value = botao.dataset.dataPedido;
             document.getElementById('editar_data').value = botao.dataset.data;
             document.getElementById('editar_hora').value = botao.dataset.hora;

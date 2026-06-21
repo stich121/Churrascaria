@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS reservas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome_cliente VARCHAR(100) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
+    churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha',
     data_pedido DATE NULL,
     data_reserva DATE NOT NULL,
     hora_reserva TIME NOT NULL,

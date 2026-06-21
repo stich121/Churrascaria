@@ -13,6 +13,12 @@ const NIVEL_ATENDENTE = 1;
 const NIVEL_GERENTE = 2;
 const NIVEL_SUPERIOR = 3;
 
+const CHURRASCARIA_PADRAO = 'Churrascaria Pampulha';
+const CHURRASCARIAS_RESERVA = [
+    CHURRASCARIA_PADRAO,
+    'Casarão Itau',
+];
+
 const LOGIN_MAX_TENTATIVAS = 5;
 const LOGIN_JANELA_SEGUNDOS = 900;   // 15 minutos para acumular tentativas
 const LOGIN_BLOQUEIO_SEGUNDOS = 900; // 15 minutos de bloqueio ao atingir o limite
@@ -115,6 +121,30 @@ function verificarCsrf(): void
         http_response_code(403);
         die('Token de segurança inválido. Volte e atualize a página.');
     }
+}
+
+function churrascariaReservaValida(?string $churrascaria): bool
+{
+    return in_array($churrascaria ?? '', CHURRASCARIAS_RESERVA, true);
+}
+
+function garantirColunaChurrascaria(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM reservas LIKE 'churrascaria'");
+    if (!$stmt->fetch()) {
+        $pdo->exec(
+            "ALTER TABLE reservas
+             ADD COLUMN churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha' AFTER telefone"
+        );
+    }
+
+    $verificado = true;
 }
 
 function e(?string $valor): string
