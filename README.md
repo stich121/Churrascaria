@@ -36,7 +36,9 @@ Site moderno, responsivo e interativo da Churrascaria Pampulha.
 
 Acesso restrito à equipe (link "Área Funcionário" no rodapé), com banco MySQL via PHP/PDO e 3 níveis de permissão:
 
-- **Nível 1 - Atendente**: cadastra e visualiza reservas, cadastra mesas do espaço.
+- **Nível 1 - Atendente**: cadastra e visualiza reservas (cliente, telefone, data do pedido, data/hora/qtde
+  de pessoas da reserva, valor, status, confirmação, observação), atualiza confirmação/comparecimento,
+  cadastra mesas do espaço.
 - **Nível 2 - Gerente**: tudo do atendente + exclui reservas/mesas + cadastra/gerencia atendentes.
 - **Nível 3 - Nível Superior**: acesso total, incluindo cadastro de gerentes e outros níveis superiores.
 
@@ -62,6 +64,18 @@ Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.
 6. Se o site já estava no ar antes da tabela `mesas` existir, não reimporte `schema.sql` inteiro (o INSERT
    do admin vai falhar por duplicidade). Em vez disso, rode só o trecho `CREATE TABLE IF NOT EXISTS mesas (...)`
    de `schema.sql` na aba "SQL" do phpMyAdmin.
+7. Se o site já estava no ar antes dos campos novos da reserva (data do pedido, valor, status, confirmação,
+   pessoas que compareceram, observação), rode este `ALTER TABLE` na aba "SQL" do phpMyAdmin pra atualizar a
+   tabela `reservas` existente sem perder os dados:
+   ```sql
+   ALTER TABLE reservas
+       ADD COLUMN data_pedido DATE NULL AFTER telefone,
+       ADD COLUMN pessoas_compareceram SMALLINT UNSIGNED NULL AFTER pessoas,
+       ADD COLUMN valor DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER pessoas_compareceram,
+       ADD COLUMN status_reserva VARCHAR(20) NOT NULL DEFAULT 'Reservado' AFTER valor,
+       ADD COLUMN confirmacao VARCHAR(20) NOT NULL DEFAULT 'Pendente' AFTER status_reserva,
+       ADD COLUMN observacao VARCHAR(255) NULL AFTER confirmacao;
+   ```
 
 ## 📅 Desde 1982
 
