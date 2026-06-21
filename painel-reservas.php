@@ -52,6 +52,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($acao === 'editar') {
+        $idReserva = (int) ($_POST['id'] ?? 0);
+        $pessoas = (int) ($_POST['pessoas'] ?? 0);
+        $statusReserva = $_POST['status_reserva'] ?? 'Reservado';
+        $observacao = trim($_POST['observacao'] ?? '');
+
+        if ($idReserva < 1) {
+            $mensagemErro = 'Reserva inválida.';
+        } elseif ($pessoas < 1) {
+            $mensagemErro = 'Informe um número de pessoas válido.';
+        } elseif (!in_array($statusReserva, ['Reservado', 'Cancelado'], true)) {
+            $mensagemErro = 'Escolha um status de reserva válido.';
+        } else {
+            $stmt = $pdo->prepare(
+                'UPDATE reservas SET nome_cliente = ?, telefone = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
+                 WHERE id = ?'
+            );
+            $stmt->execute([
+                trim($_POST['nome'] ?? ''),
+                trim($_POST['telefone'] ?? ''),
+                $_POST['data_pedido'] ?? null,
+                $_POST['data'] ?? '',
+                $_POST['hora'] ?? '',
+                $pessoas,
+                parseValorBr($_POST['valor'] ?? '0'),
+                $statusReserva,
+                $observacao !== '' ? $observacao : null,
+                $idReserva,
+            ]);
+            header('Location: painel-reservas.php');
+            exit;
+        }
+    }
+
     if ($acao === 'atualizar_comparecimento') {
         $idReserva = (int) ($_POST['id'] ?? 0);
         $compareceramPost = $_POST['pessoas_compareceram'] ?? '';
@@ -244,9 +278,7 @@ foreach ($reservas as $reserva) {
                             <th>Confirmação / Compareceram</th>
                             <th>Cadastrada por</th>
                             <th>Observação</th>
-                            <?php if ($nivel >= NIVEL_GERENTE): ?>
-                                <th></th>
-                            <?php endif; ?>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -282,8 +314,22 @@ foreach ($reservas as $reserva) {
                                 </td>
                                 <td><?= e($reserva['criado_por']) ?></td>
                                 <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
-                                <?php if ($nivel >= NIVEL_GERENTE): ?>
-                                    <td>
+                                <td class="reserva-acoes-col">
+                                    <button type="button" class="btn-editar-reserva" title="Editar reserva"
+                                        data-id="<?= e((string) $reserva['id']) ?>"
+                                        data-nome="<?= e($reserva['nome_cliente']) ?>"
+                                        data-telefone="<?= e($reserva['telefone']) ?>"
+                                        data-data-pedido="<?= e($reserva['data_pedido'] ?? '') ?>"
+                                        data-data="<?= e($reserva['data_reserva']) ?>"
+                                        data-hora="<?= e(substr((string) $reserva['hora_reserva'], 0, 5)) ?>"
+                                        data-pessoas="<?= e((string) $reserva['pessoas']) ?>"
+                                        data-valor="<?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?>"
+                                        data-status="<?= e($reserva['status_reserva']) ?>"
+                                        data-observacao="<?= e($reserva['observacao'] ?? '') ?>"
+                                        onclick="abrirEdicaoReserva(this)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <?php if ($nivel >= NIVEL_GERENTE): ?>
                                         <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover esta reserva?');">
                                             <input type="hidden" name="acao" value="excluir">
                                             <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
@@ -292,8 +338,8 @@ foreach ($reservas as $reserva) {
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
-                                    </td>
-                                <?php endif; ?>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -305,10 +351,69 @@ foreach ($reservas as $reserva) {
         </div>
     </section>
 
+    <div id="modalEditarReserva" class="modal-overlay" onclick="if (event.target === this) fecharEdicaoReserva();">
+        <div class="modal-card">
+            <div class="card-header-bar">
+                <i class="fa-solid fa-pen"></i>
+                <h3>Editar Reserva</h3>
+                <button type="button" class="modal-close" onclick="fecharEdicaoReserva()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form method="post" action="painel-reservas.php">
+                <input type="hidden" name="acao" value="editar">
+                <input type="hidden" name="id" id="editar_id" value="">
+                <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                <div class="reserva-form-grid">
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-user"></i>Nome do cliente</span>
+                        <input type="text" name="nome" id="editar_nome" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-phone"></i>Telefone</span>
+                        <input type="tel" name="telefone" id="editar_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
+                        <input type="date" name="data_pedido" id="editar_data_pedido" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
+                        <input type="date" name="data" id="editar_data" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-clock"></i>Horário</span>
+                        <input type="time" name="hora" id="editar_hora" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-users"></i>Nº de pessoas</span>
+                        <input type="number" name="pessoas" id="editar_pessoas" min="1" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-sack-dollar"></i>Valor</span>
+                        <input type="text" name="valor" id="editar_valor" inputmode="numeric" required>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-clipboard-list"></i>Status</span>
+                        <select name="status_reserva" id="editar_status" required>
+                            <option value="Reservado">Reservado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-comment"></i>Observação</span>
+                        <input type="text" name="observacao" id="editar_observacao" placeholder="Observação (opcional)">
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="fecharEdicaoReserva()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i>Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var telefoneInput = document.querySelector('input[name="telefone"]');
-            if (telefoneInput) {
+            document.querySelectorAll('input[name="telefone"]').forEach(function (telefoneInput) {
                 telefoneInput.addEventListener('input', function () {
                     var digitos = telefoneInput.value.replace(/\D/g, '').slice(0, 11);
                     var formatado = digitos;
@@ -323,10 +428,9 @@ foreach ($reservas as $reserva) {
                     }
                     telefoneInput.value = formatado.trim();
                 });
-            }
+            });
 
-            var valorInput = document.querySelector('input[name="valor"]');
-            if (valorInput) {
+            document.querySelectorAll('input[name="valor"]').forEach(function (valorInput) {
                 valorInput.addEventListener('input', function () {
                     var digitos = valorInput.value.replace(/\D/g, '');
                     var numero = (parseInt(digitos || '0', 10) / 100).toFixed(2);
@@ -334,6 +438,30 @@ foreach ($reservas as $reserva) {
                     var inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                     valorInput.value = 'R$ ' + inteiro + ',' + partes[1];
                 });
+            });
+        });
+
+        function abrirEdicaoReserva(botao) {
+            document.getElementById('editar_id').value = botao.dataset.id;
+            document.getElementById('editar_nome').value = botao.dataset.nome;
+            document.getElementById('editar_telefone').value = botao.dataset.telefone;
+            document.getElementById('editar_data_pedido').value = botao.dataset.dataPedido;
+            document.getElementById('editar_data').value = botao.dataset.data;
+            document.getElementById('editar_hora').value = botao.dataset.hora;
+            document.getElementById('editar_pessoas').value = botao.dataset.pessoas;
+            document.getElementById('editar_valor').value = 'R$ ' + botao.dataset.valor;
+            document.getElementById('editar_status').value = botao.dataset.status;
+            document.getElementById('editar_observacao').value = botao.dataset.observacao;
+            document.getElementById('modalEditarReserva').classList.add('aberto');
+        }
+
+        function fecharEdicaoReserva() {
+            document.getElementById('modalEditarReserva').classList.remove('aberto');
+        }
+
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape') {
+                fecharEdicaoReserva();
             }
         });
     </script>
