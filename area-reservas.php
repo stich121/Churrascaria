@@ -1,3 +1,34 @@
+<?php
+require __DIR__ . '/auth.php';
+require __DIR__ . '/config.php';
+
+if (funcionarioLogado()) {
+    header('Location: painel-reservas.php');
+    exit;
+}
+
+$erro = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $usuario = trim($_POST['usuario'] ?? '');
+    $senha = $_POST['senha'] ?? '';
+
+    $stmt = $pdo->prepare('SELECT id, nome, senha_hash, nivel, ativo FROM funcionarios WHERE usuario = ?');
+    $stmt->execute([$usuario]);
+    $funcionario = $stmt->fetch();
+
+    if ($funcionario && (int) $funcionario['ativo'] === 1 && password_verify($senha, $funcionario['senha_hash'])) {
+        session_regenerate_id(true);
+        $_SESSION['funcionario_id'] = $funcionario['id'];
+        $_SESSION['funcionario_nome'] = $funcionario['nome'];
+        $_SESSION['funcionario_nivel'] = (int) $funcionario['nivel'];
+        header('Location: painel-reservas.php');
+        exit;
+    }
+
+    $erro = 'Usuário ou senha incorretos.';
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -27,14 +58,16 @@
             <h2>Área Reservas</h2>
             <p class="login-subtitle">Acesso restrito à equipe da Churrascaria Pampulha</p>
 
-            <form id="loginFuncionarioForm">
+            <form method="post" action="area-reservas.php">
                 <label for="usuario">Usuário</label>
-                <input type="text" id="usuario" placeholder="Digite seu usuário" required autocomplete="username">
+                <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required autocomplete="username">
 
                 <label for="senha">Senha</label>
-                <input type="password" id="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password">
 
-                <p class="login-erro" id="loginErro"></p>
+                <?php if ($erro !== ''): ?>
+                    <p class="login-erro"><?= e($erro) ?></p>
+                <?php endif; ?>
 
                 <button type="submit" class="btn btn-primary">Entrar</button>
             </form>
@@ -48,7 +81,5 @@
             </div>
         </div>
     </footer>
-
-    <script src="funcionario.js"></script>
 </body>
 </html>
