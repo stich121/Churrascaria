@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Reservas - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-3">
+    <link rel="stylesheet" href="style.css?v=20260621-4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="login-erro"><?= e($erro) ?></p>
                 <?php endif; ?>
 
-                <button type="submit" class="btn btn-primary">Entrar</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i>Entrar</button>
             </form>
         </div>
     </section>

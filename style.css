@@ -897,6 +897,18 @@ body {
     section {
         padding: 50px 20px !important;
     }
+
+    .navbar-content {
+        flex-wrap: wrap;
+        row-gap: 0.75rem;
+    }
+
+    .funcionario-nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.6rem 1rem;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1008,7 +1020,9 @@ body {
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    background: linear-gradient(135deg, var(--light-bg) 0%, #eee 100%);
+    background: radial-gradient(circle at 25% 20%, rgba(196, 30, 58, 0.07), transparent 50%),
+                radial-gradient(circle at 80% 85%, rgba(244, 164, 96, 0.1), transparent 50%),
+                linear-gradient(135deg, var(--light-bg) 0%, #eee 100%);
 }
 
 .login-card {
@@ -1016,15 +1030,34 @@ body {
     max-width: 420px;
     width: 100%;
     padding: 3rem 2.5rem;
-    border-radius: var(--border-radius);
+    border-radius: 20px;
     text-align: center;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
 }
 
 .login-icon {
-    font-size: 2.5rem;
+    font-size: 1.7rem;
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    margin: 0 auto 1.2rem;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(196, 30, 58, 0.1), rgba(244, 164, 96, 0.18));
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .login-card h2 {
@@ -1053,17 +1086,19 @@ body {
 
 .login-card input {
     width: 100%;
-    padding: 0.8rem;
+    padding: 0.85rem 1rem;
     margin-bottom: 1.2rem;
-    border: 2px solid #ddd;
-    border-radius: var(--border-radius);
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
     font-size: 0.95rem;
+    background-color: #fafafa;
     transition: var(--transition);
 }
 
 .login-card input:focus {
     outline: none;
     border-color: var(--primary-color);
+    background-color: white;
     box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
 }
 
@@ -1086,19 +1121,10 @@ body {
     font-weight: 600;
 }
 
-.reserva-form-card select {
-    width: 100%;
-    padding: 0.8rem;
-    border: 2px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 0.95rem;
-    font-family: inherit;
-    background-color: white;
-}
-
 .painel-reservas {
     padding: 60px 20px;
     min-height: calc(100vh - 220px);
+    background: linear-gradient(180deg, #ffffff 0%, var(--light-bg) 100%);
 }
 
 .painel-reservas h2 {
@@ -1108,40 +1134,215 @@ body {
     margin-bottom: 0.5rem;
 }
 
+/* ===== Cabeçalho do painel ===== */
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -8%;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(244, 164, 96, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.panel-header-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(244, 164, 96, 0.15);
+    border: 1px solid rgba(244, 164, 96, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: var(--accent-color);
+    position: relative;
+    z-index: 1;
+}
+
+.painel-reservas .panel-header h2 {
+    text-align: left;
+    font-size: 1.9rem;
+    color: white;
+    margin-bottom: 0.3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.panel-header p {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Cards de estatística ===== */
+.stat-cards-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.stat-cards-row .stat {
+    padding: 1.5rem;
+    transition: var(--transition);
+}
+
+.stat-cards-row .stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(196, 30, 58, 0.15);
+}
+
+.stat-cards-row .stat i {
+    color: var(--accent-color);
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.stat-cards-row .stat h4 {
+    font-size: 2rem;
+}
+
+/* ===== Cartão de formulário ===== */
 .reserva-form-card {
-    background: var(--light-bg);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    margin: 2rem 0;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    background: white;
+    border-radius: 16px;
+    padding: 2rem 2.2rem;
+    margin: 0 0 2.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.card-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-bg);
+}
+
+.card-header-bar i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.card-header-bar h3 {
+    color: var(--text-dark);
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
 .reserva-form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
     margin-bottom: 1.5rem;
 }
 
-.reserva-form-grid input {
-    padding: 0.8rem;
-    border: 2px solid #ddd;
-    border-radius: var(--border-radius);
+.reserva-form-grid input,
+.reserva-form-grid select {
+    width: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
     font-size: 0.95rem;
     font-family: inherit;
+    background-color: #fafafa;
+    transition: var(--transition);
 }
 
-.reserva-form-grid input:focus {
+.reserva-form-grid input:focus,
+.reserva-form-grid select:focus {
     outline: none;
     border-color: var(--primary-color);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.08);
 }
 
 .reserva-form-label {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    font-size: 0.85rem;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.reserva-form-label span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.reserva-form-label i {
+    color: var(--primary-color);
+    width: 14px;
+    text-align: center;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* ===== Badges de status ===== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.badge i {
+    font-size: 0.65rem;
+}
+
+.badge-success {
+    background-color: #e3f3e6;
+    color: #2e7d32;
+}
+
+.badge-warning {
+    background-color: #fff2dc;
+    color: #a15c00;
+}
+
+.badge-danger {
+    background-color: #fbe6e9;
+    color: var(--primary-color);
+}
+
+.badge-info {
+    background-color: rgba(244, 164, 96, 0.18);
+    color: #8a5a1f;
 }
 
 .reserva-comparecimento-form {
@@ -1168,16 +1369,24 @@ body {
 }
 
 .reserva-comparecimento-form button {
-    background: none;
+    background-color: #e3f3e6;
     border: none;
     color: #2e7d32;
     cursor: pointer;
-    font-size: 1rem;
-    padding: 0.3rem;
+    font-size: 0.9rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
 }
 
 .reserva-comparecimento-form button:hover {
-    transform: scale(1.15);
+    background-color: #2e7d32;
+    color: white;
+    transform: scale(1.12);
 }
 
 .reservas-lista-wrapper {
@@ -1188,41 +1397,64 @@ body {
     width: 100%;
     border-collapse: collapse;
     background: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border-radius: var(--border-radius);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
     overflow: hidden;
 }
 
 .reservas-tabela th,
 .reservas-tabela td {
-    padding: 1rem;
+    padding: 1rem 1.1rem;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.92rem;
 }
 
 .reservas-tabela th {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
     color: white;
     font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.reservas-tabela tbody tr {
+    transition: var(--transition);
+}
+
+.reservas-tabela tbody tr:nth-child(even) {
+    background-color: #fcfcfc;
 }
 
 .reservas-tabela tbody tr:hover {
-    background-color: var(--light-bg);
+    background-color: rgba(244, 164, 96, 0.1);
+}
+
+.reservas-tabela tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .btn-remover-reserva {
-    background: none;
+    background-color: #fbe6e9;
     border: none;
     color: var(--primary-color);
     cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0.4rem;
+    font-size: 0.95rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: var(--transition);
 }
 
 .btn-remover-reserva:hover {
-    color: var(--secondary-color);
-    transform: scale(1.15);
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.12);
 }
 
 .reservas-vazio {
@@ -1230,12 +1462,6 @@ body {
     color: var(--text-light);
     padding: 2rem;
     display: none;
-}
-
-.mesas-resumo {
-    text-align: center;
-    color: var(--text-dark);
-    margin-bottom: 1rem;
 }
 
 .footer-funcionario-link a {
@@ -1261,6 +1487,20 @@ body {
     .reservas-tabela td {
         padding: 0.7rem;
         font-size: 0.9rem;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .painel-reservas .panel-header h2 {
+        text-align: center;
+    }
+
+    .reserva-form-card {
+        padding: 1.5rem;
     }
 }
 

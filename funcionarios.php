@@ -64,6 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcionarios ORDER BY nivel DESC, nome')->fetchAll();
+
+$totalFuncionarios = count($funcionarios);
+$totalAtivos = 0;
+foreach ($funcionarios as $funcionario) {
+    if ((int) $funcionario['ativo'] === 1) {
+        $totalAtivos++;
+    }
+}
+$totalInativos = $totalFuncionarios - $totalAtivos;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -71,7 +80,7 @@ $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcion
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funcionários - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-3">
+    <link rel="stylesheet" href="style.css?v=20260621-4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -95,25 +104,66 @@ $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcion
 
     <section class="painel-reservas">
         <div class="container">
-            <h2>Funcionários</h2>
-            <p class="section-subtitle">Cadastre e gerencie o acesso da equipe</p>
+            <div class="panel-header">
+                <div class="panel-header-icon"><i class="fa-solid fa-user-tie"></i></div>
+                <div>
+                    <h2>Funcionários</h2>
+                    <p>Cadastre e gerencie o acesso da equipe</p>
+                </div>
+            </div>
+
+            <?php if ($totalFuncionarios > 0): ?>
+                <div class="stat-cards-row">
+                    <div class="stat">
+                        <i class="fa-solid fa-users"></i>
+                        <h4><?= e((string) $totalFuncionarios) ?></h4>
+                        <p>Funcionários cadastrados</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <h4><?= e((string) $totalAtivos) ?></h4>
+                        <p>Ativos</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-ban"></i>
+                        <h4><?= e((string) $totalInativos) ?></h4>
+                        <p>Inativos</p>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="reserva-form-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <h3>Cadastrar Funcionário</h3>
+                </div>
                 <form method="post" action="funcionarios.php">
                     <input type="hidden" name="acao" value="criar">
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <div class="reserva-form-grid">
-                        <input type="text" name="nome" placeholder="Nome completo" required>
-                        <input type="text" name="usuario" placeholder="Usuário de acesso" required>
-                        <input type="password" name="senha" placeholder="Senha (mín. 6 caracteres)" minlength="6" required>
-                        <select name="nivel" required>
-                            <option value="">Nível de acesso</option>
-                            <option value="<?= NIVEL_ATENDENTE ?>">Atendente</option>
-                            <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
-                                <option value="<?= NIVEL_GERENTE ?>">Gerente</option>
-                                <option value="<?= NIVEL_SUPERIOR ?>">Nível Superior</option>
-                            <?php endif; ?>
-                        </select>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-id-card"></i>Nome completo</span>
+                            <input type="text" name="nome" placeholder="Nome completo" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-user"></i>Usuário de acesso</span>
+                            <input type="text" name="usuario" placeholder="Usuário de acesso" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-lock"></i>Senha</span>
+                            <input type="password" name="senha" placeholder="Senha (mín. 6 caracteres)" minlength="6" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-layer-group"></i>Nível de acesso</span>
+                            <select name="nivel" required>
+                                <option value="">Nível de acesso</option>
+                                <option value="<?= NIVEL_ATENDENTE ?>">Atendente</option>
+                                <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
+                                    <option value="<?= NIVEL_GERENTE ?>">Gerente</option>
+                                    <option value="<?= NIVEL_SUPERIOR ?>">Nível Superior</option>
+                                <?php endif; ?>
+                            </select>
+                        </label>
                     </div>
                     <?php if ($erro !== ''): ?>
                         <p class="login-erro"><?= e($erro) ?></p>
@@ -121,7 +171,7 @@ $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcion
                     <?php if ($sucesso !== ''): ?>
                         <p class="login-sucesso"><?= e($sucesso) ?></p>
                     <?php endif; ?>
-                    <button type="submit" class="btn btn-primary">Cadastrar Funcionário</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i>Cadastrar Funcionário</button>
                 </form>
             </div>
 
@@ -146,7 +196,13 @@ $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcion
                                 <td><?= e($funcionario['nome']) ?></td>
                                 <td><?= e($funcionario['usuario']) ?></td>
                                 <td><?= e(nomeNivel((int) $funcionario['nivel'])) ?></td>
-                                <td><?= (int) $funcionario['ativo'] === 1 ? 'Ativo' : 'Inativo' ?></td>
+                                <td>
+                                    <?php if ((int) $funcionario['ativo'] === 1): ?>
+                                        <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i>Ativo</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger"><i class="fa-solid fa-ban"></i>Inativo</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <?php if ($podeAlterarEsteAqui): ?>
                                         <form method="post" action="funcionarios.php" onsubmit="return confirm('Alterar o status deste funcionário?');">

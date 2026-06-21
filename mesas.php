@@ -46,7 +46,7 @@ foreach ($mesas as $mesa) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mesas do Espaço - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-3">
+    <link rel="stylesheet" href="style.css?v=20260621-4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -72,32 +72,58 @@ foreach ($mesas as $mesa) {
 
     <section class="painel-reservas">
         <div class="container">
-            <h2>Mesas do Espaço</h2>
-            <p class="section-subtitle">Cadastre quantas mesas existem em cada capacidade</p>
+            <div class="panel-header">
+                <div class="panel-header-icon"><i class="fa-solid fa-chair"></i></div>
+                <div>
+                    <h2>Mesas do Espaço</h2>
+                    <p>Cadastre quantas mesas existem em cada capacidade</p>
+                </div>
+            </div>
+
+            <?php if (!empty($mesas)): ?>
+                <div class="stat-cards-row">
+                    <div class="stat">
+                        <i class="fa-solid fa-table-cells"></i>
+                        <h4><?= e((string) $totalMesas) ?></h4>
+                        <p>Mesas cadastradas</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-users"></i>
+                        <h4><?= e((string) $totalLugares) ?></h4>
+                        <p>Lugares no espaço</p>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="reserva-form-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <h3>Cadastrar Mesas</h3>
+                </div>
                 <form method="post" action="mesas.php">
                     <input type="hidden" name="acao" value="criar_mesa">
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <div class="reserva-form-grid">
-                        <select name="capacidade" required>
-                            <option value="">Lugares por mesa</option>
-                            <option value="2">2 lugares</option>
-                            <option value="4">4 lugares</option>
-                            <option value="6">6 lugares</option>
-                        </select>
-                        <input type="number" name="quantidade_mesas" placeholder="Nº de mesas" min="1" required>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-chair"></i>Lugares por mesa</span>
+                            <select name="capacidade" required>
+                                <option value="">Lugares por mesa</option>
+                                <option value="2">2 lugares</option>
+                                <option value="4">4 lugares</option>
+                                <option value="6">6 lugares</option>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-table-cells"></i>Nº de mesas</span>
+                            <input type="number" name="quantidade_mesas" placeholder="Nº de mesas" min="1" required>
+                        </label>
                     </div>
                     <?php if ($mensagemErro !== ''): ?>
                         <p class="login-erro"><?= e($mensagemErro) ?></p>
                     <?php endif; ?>
-                    <button type="submit" class="btn btn-primary">Adicionar Mesas</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i>Adicionar Mesas</button>
                 </form>
             </div>
-
-            <?php if (!empty($mesas)): ?>
-                <p class="mesas-resumo">Total: <strong><?= e((string) $totalMesas) ?></strong> mesas — <strong><?= e((string) $totalLugares) ?></strong> lugares no espaço</p>
-            <?php endif; ?>
 
             <div class="reservas-lista-wrapper">
                 <table class="reservas-tabela">

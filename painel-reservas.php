@@ -83,6 +83,21 @@ $reservas = $pdo->query(
      JOIN funcionarios f ON f.id = r.funcionario_id
      ORDER BY r.data_reserva, r.hora_reserva'
 )->fetchAll();
+
+$totalReservas = count($reservas);
+$totalConfirmadas = 0;
+$totalPendentes = 0;
+$totalPessoasEsperadas = 0;
+foreach ($reservas as $reserva) {
+    if ($reserva['confirmacao'] === 'Confirmado') {
+        $totalConfirmadas++;
+    } else {
+        $totalPendentes++;
+    }
+    if ($reserva['status_reserva'] === 'Reservado') {
+        $totalPessoasEsperadas += (int) $reserva['pessoas'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -90,7 +105,7 @@ $reservas = $pdo->query(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Reservas - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-3">
+    <link rel="stylesheet" href="style.css?v=20260621-4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -116,46 +131,99 @@ $reservas = $pdo->query(
 
     <section class="painel-reservas">
         <div class="container">
-            <h2>Painel de Reservas</h2>
-            <p class="section-subtitle">
-                Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — cadastre e acompanhe as reservas da casa
-            </p>
+            <div class="panel-header">
+                <div class="panel-header-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div>
+                    <h2>Painel de Reservas</h2>
+                    <p>Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — cadastre e acompanhe as reservas da casa</p>
+                </div>
+            </div>
+
+            <?php if ($totalReservas > 0): ?>
+                <div class="stat-cards-row">
+                    <div class="stat">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <h4><?= e((string) $totalReservas) ?></h4>
+                        <p>Reservas no total</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <h4><?= e((string) $totalConfirmadas) ?></h4>
+                        <p>Confirmadas</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <h4><?= e((string) $totalPendentes) ?></h4>
+                        <p>Pendentes</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-users"></i>
+                        <h4><?= e((string) $totalPessoasEsperadas) ?></h4>
+                        <p>Pessoas esperadas</p>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <div class="reserva-form-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <h3>Nova Reserva</h3>
+                </div>
                 <form method="post" action="painel-reservas.php">
                     <input type="hidden" name="acao" value="criar">
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <div class="reserva-form-grid">
-                        <input type="text" name="nome" placeholder="Nome do cliente" required>
-                        <input type="tel" name="telefone" inputmode="numeric" placeholder="Telefone" maxlength="15" required>
                         <label class="reserva-form-label">
-                            Data do pedido
+                            <span><i class="fa-solid fa-user"></i>Nome do cliente</span>
+                            <input type="text" name="nome" placeholder="Nome do cliente" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-phone"></i>Telefone</span>
+                            <input type="tel" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
                             <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
                         </label>
                         <label class="reserva-form-label">
-                            Data da reserva
+                            <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
                             <input type="date" name="data" required>
                         </label>
                         <label class="reserva-form-label">
-                            Horário
+                            <span><i class="fa-solid fa-clock"></i>Horário</span>
                             <input type="time" name="hora" required>
                         </label>
-                        <input type="number" name="pessoas" placeholder="Nº de pessoas" min="1" required>
-                        <input type="text" name="valor" inputmode="numeric" placeholder="Valor (R$)" required>
-                        <select name="status_reserva" required>
-                            <option value="Reservado" selected>Reservado</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                        <select name="confirmacao" required>
-                            <option value="Pendente" selected>Confirmação pendente</option>
-                            <option value="Confirmado">Confirmado</option>
-                        </select>
-                        <input type="text" name="observacao" placeholder="Observação (opcional)">
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-users"></i>Nº de pessoas</span>
+                            <input type="number" name="pessoas" placeholder="Nº de pessoas" min="1" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-sack-dollar"></i>Valor</span>
+                            <input type="text" name="valor" inputmode="numeric" placeholder="R$ 0,00" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-clipboard-list"></i>Status</span>
+                            <select name="status_reserva" required>
+                                <option value="Reservado" selected>Reservado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-circle-check"></i>Confirmação</span>
+                            <select name="confirmacao" required>
+                                <option value="Pendente" selected>Confirmação pendente</option>
+                                <option value="Confirmado">Confirmado</option>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-comment"></i>Observação</span>
+                            <input type="text" name="observacao" placeholder="Observação (opcional)">
+                        </label>
                     </div>
                     <?php if ($mensagemErro !== ''): ?>
                         <p class="login-erro"><?= e($mensagemErro) ?></p>
                     <?php endif; ?>
-                    <button type="submit" class="btn btn-primary">Adicionar Reserva</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i>Adicionar Reserva</button>
                 </form>
             </div>
 
@@ -191,7 +259,13 @@ $reservas = $pdo->query(
                                 <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
                                 <td><?= e((string) $reserva['pessoas']) ?></td>
                                 <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
-                                <td><?= e($reserva['status_reserva']) ?></td>
+                                <td>
+                                    <?php if ($reserva['status_reserva'] === 'Reservado'): ?>
+                                        <span class="badge badge-info"><i class="fa-solid fa-calendar-check"></i>Reservado</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger"><i class="fa-solid fa-ban"></i>Cancelado</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <form method="post" action="painel-reservas.php" class="reserva-comparecimento-form">
                                         <input type="hidden" name="acao" value="atualizar_comparecimento">
