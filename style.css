@@ -1125,20 +1125,21 @@ body {
 
 .campo-senha input {
     margin-bottom: 0;
-    padding-right: 2.8rem;
+    padding-right: 2.4rem;
 }
 
 .toggle-senha {
     position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 2.8rem;
+    top: 50%;
+    right: 0.7rem;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--text-light);
     cursor: pointer;
     font-size: 1rem;
+    padding: 0;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
