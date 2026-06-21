@@ -85,6 +85,7 @@ $funcionarios = $pdo->query('SELECT id, nome, usuario, nivel, ativo FROM funcion
                 </div>
                 <ul class="funcionario-nav-links">
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
+                    <li><a href="mesas.php">Mesas</a></li>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>

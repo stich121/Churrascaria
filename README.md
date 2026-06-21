@@ -40,12 +40,13 @@ Acesso restrito à equipe (link "Área Funcionário" no rodapé), com banco MySQ
 - **Nível 2 - Gerente**: tudo do atendente + exclui reservas/mesas + cadastra/gerencia atendentes.
 - **Nível 3 - Nível Superior**: acesso total, incluindo cadastro de gerentes e outros níveis superiores.
 
-No "Painel de Reservas" também é possível cadastrar a quantidade de mesas do espaço, escolhendo entre
-2, 4 ou 6 lugares por mesa — o painel mostra o total de mesas e de lugares disponíveis.
+Na tela "Mesas" (acessível pelo menu, ao lado de "Funcionários") é possível cadastrar a quantidade de mesas
+do espaço, escolhendo entre 2, 4 ou 6 lugares por mesa — a tela mostra o total de mesas e de lugares disponíveis.
 
-Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `funcionarios.php` (gestão de equipe,
-nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php` (sessão e conexão com o banco),
-`schema.sql` (estrutura das tabelas) e `gerar-senha.php` (utilitário de uso único para criar o primeiro admin).
+Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.php` (mesas do espaço),
+`funcionarios.php` (gestão de equipe, nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php`
+(sessão e conexão com o banco), `schema.sql` (estrutura das tabelas) e `gerar-senha.php` (utilitário de uso
+único para criar o primeiro admin).
 
 ### Deploy no Hostinger
 
