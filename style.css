@@ -545,57 +545,103 @@ body {
 /* ===== Contato ===== */
 .contato {
     padding: 80px 20px;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
 }
 
 .contato h2 {
     text-align: center;
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     margin-bottom: 3rem;
-    color: var(--primary-color);
+    color: white;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
-.mapa-card {
-    width: 100%;
+.contato h2 .text-accent {
+    color: var(--accent-color);
+}
+
+.contato-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
     margin-bottom: 3rem;
-    padding: 10px;
-    overflow: hidden;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(26, 26, 26, 0.98), rgba(139, 46, 46, 0.72));
-    box-shadow: 0 24px 58px rgba(0, 0, 0, 0.28);
-    border: 1px solid rgba(244, 164, 96, 0.24);
+}
+
+.contato-card {
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(244, 164, 96, 0.2);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.contato-card:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: var(--accent-color);
+    transform: translateY(-5px);
+}
+
+.contato-card-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    font-size: 1.6rem;
+    color: white;
+    box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
+}
+
+.contato-card h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contato-card p {
+    color: #ccc;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+}
+
+.contato-card a {
+    color: #ccc;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.contato-card a:hover {
+    color: var(--accent-color);
 }
 
 .mapa-container {
-    min-height: 470px;
-    position: relative;
+    width: 100%;
+    margin-bottom: 3rem;
+    border-radius: var(--border-radius);
     overflow: hidden;
-    border-radius: 12px;
-    background: #111;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    height: 450px;
+    border: 1px solid rgba(244, 164, 96, 0.2);
 }
 
-.mapa-container::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(26, 26, 26, 0.1), rgba(26, 26, 26, 0.04));
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 42px rgba(0, 0, 0, 0.28);
-}
-
-.mapa-frame {
+#map {
     width: 100%;
     height: 100%;
-    min-height: 470px;
-    border: 0;
-    display: block;
-    filter: grayscale(0.15) invert(0.9) contrast(0.92) saturate(0.85);
+    border-radius: var(--border-radius);
 }
 
 /* Leaflet Map Customization */
 .leaflet-container {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+    background: #1a1a1a;
 }
 
 .leaflet-control-zoom {
@@ -655,67 +701,23 @@ body {
     filter: brightness(1.1) contrast(1.1);
 }
 
-.contato-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-}
-
-.contato-info {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-}
-
-.contato-item {
-    background-color: var(--light-bg);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    text-align: center;
-    transition: var(--transition);
-}
-
-.contato-item:hover {
-    background-color: white;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.contato-item .icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-.contato-item h3 {
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
-}
-
-.contato-item p {
-    color: var(--text-light);
-}
-
-.contato-item a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-    transition: var(--transition);
-}
-
-.contato-item a:hover {
-    color: var(--accent-color);
+.contato-form-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 .contato-form {
-    background-color: var(--light-bg);
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(244, 164, 96, 0.2);
     padding: 2.5rem;
     border-radius: var(--border-radius);
 }
 
 .contato-form h3 {
-    color: var(--primary-color);
+    color: white;
     margin-bottom: 1.5rem;
     font-size: 1.3rem;
+    text-align: center;
 }
 
 .contato-form input,
@@ -723,18 +725,25 @@ body {
     width: 100%;
     padding: 0.8rem;
     margin-bottom: 1rem;
-    border: 2px solid #ddd;
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 0.95rem;
     transition: var(--transition);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.contato-form input::placeholder,
+.contato-form textarea::placeholder {
+    color: #999;
 }
 
 .contato-form input:focus,
 .contato-form textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(244, 164, 96, 0.15);
 }
 
 .contato-form button {
@@ -938,19 +947,12 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .contato-grid {
+    .contato-cards {
         grid-template-columns: 1fr;
     }
 
-    .mapa-card {
-        margin-bottom: 2rem;
-        padding: 7px;
-        border-radius: 14px;
-    }
-
-    .mapa-container,
-    .mapa-frame {
-        min-height: 330px;
+    .mapa-container {
+        height: 350px;
     }
 
     .evento-card {
@@ -991,7 +993,7 @@ body {
 
     .diferencial-card,
     .promo-card,
-    .contato-item {
+    .contato-card {
         padding: 1.5rem;
     }
 

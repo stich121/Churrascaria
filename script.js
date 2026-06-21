@@ -281,8 +281,8 @@ function initMap() {
         tap: true
     }).setView([lat, lng], 15);
 
-    // Usar tema CartoDB Positron (mais elegante e limpo)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // Usar tema CartoDB Dark Matter (combina com o visual da churrascaria)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '© CartoDB contributors | © OpenStreetMap contributors',
         maxZoom: 19,
         className: 'map-tiles'
@@ -323,23 +323,24 @@ function initMap() {
     // Popup com design profissional
     const popupContent = `
         <div style="
-            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            background: #1a1a1a;
             border-radius: 12px;
             padding: 20px;
             min-width: 280px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             text-align: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            border: 1px solid rgba(244, 164, 96, 0.25);
         ">
             <h3 style="
-                color: #c41e3a;
+                color: #f4a460;
                 margin: 0 0 12px 0;
                 font-size: 22px;
                 font-weight: bold;
             ">🔥 Churrascaria Pampulha</h3>
 
             <p style="
-                color: #666;
+                color: #ccc;
                 margin: 12px 0;
                 font-size: 14px;
                 line-height: 1.6;
@@ -349,13 +350,13 @@ function initMap() {
             </p>
 
             <div style="
-                background: white;
+                background: rgba(255, 255, 255, 0.06);
                 border-radius: 8px;
                 padding: 12px;
                 margin: 12px 0;
                 border-left: 4px solid #c41e3a;
             ">
-                <p style="margin: 0; color: #333; font-size: 13px;">
+                <p style="margin: 0; color: #eee; font-size: 13px;">
                     <strong>📍 Localização:</strong><br>
                     Av. Pedro I, 568<br>
                     Itapoã - Belo Horizonte, MG
@@ -400,7 +401,7 @@ function initMap() {
                style="
                    display: inline-block;
                    margin-top: 12px;
-                   color: #007AFF;
+                   color: #f4a460;
                    text-decoration: none;
                    font-size: 12px;
                    font-weight: 500;

@@ -6,6 +6,8 @@
     <title>Churrascaria Pampulha - A Melhor Churrascaria de BH</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -157,33 +159,36 @@
     <!-- Contato -->
     <section class="contato" id="contato">
         <div class="container">
-            <h2>Entre em Contato</h2>
+            <h2>FALE <span class="text-accent">CONOSCO</span></h2>
 
-            <!-- Google Maps -->
-            <div class="mapa-card">
-                <div class="mapa-container">
-                    <iframe class="mapa-frame" title="Mapa da Churrascaria Pampulha" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Churrascaria%20Pampulha,%20Av.%20Pedro%20I,%20568,%20Itapo%C3%A3,%20Belo%20Horizonte,%20MG&output=embed"></iframe>
+            <div class="contato-cards">
+                <div class="contato-card">
+                    <div class="contato-card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Nosso Local</h3>
+                    <p>Av. Pedro I, 568<br>Itapoã, Belo Horizonte - MG</p>
+                </div>
+                <div class="contato-card">
+                    <div class="contato-card-icon"><i class="fas fa-address-card"></i></div>
+                    <h3>Contatos</h3>
+                    <p><a href="mailto:contato@churrascariapampulha.com.br">contato@churrascariapampulha.com.br</a></p>
+                    <p><a href="tel:+553135825158">(31) 3582-5158</a></p>
+                    <p><a href="https://wa.me/553184449047" target="_blank" rel="noopener noreferrer">(31) 8444-9047 (WhatsApp)</a></p>
+                </div>
+                <div class="contato-card">
+                    <div class="contato-card-icon"><i class="fas fa-clock"></i></div>
+                    <h3>Atendimento</h3>
+                    <p>Segunda a Quinta: 11h às 23h<br>
+                    Sexta a Sábado: 11h às 00h<br>
+                    Domingo: 11h às 22h</p>
                 </div>
             </div>
 
-            <div class="contato-grid">
-                <div class="contato-info">
-                    <div class="contato-item">
-                        <div class="icon">📞</div>
-                        <h3>Telefone</h3>
-                        <p><a href="tel:+553135825158">(31) 3582-5158</a></p>
-                    </div>
-                    <div class="contato-item">
-                        <div class="icon">📧</div>
-                        <h3>Email</h3>
-                        <p><a href="mailto:contato@churrascariapampulha.com.br">contato@churrascariapampulha.com.br</a></p>
-                    </div>
-                    <div class="contato-item">
-                        <div class="icon">📍</div>
-                        <h3>Endereço</h3>
-                        <p>Av. Pedro I, 568 - Itapoã<br>Via Brasil, Belo Horizonte - MG</p>
-                    </div>
-                </div>
+            <!-- Mapa -->
+            <div class="mapa-container">
+                <div id="map"></div>
+            </div>
+
+            <div class="contato-form-wrapper">
                 <div class="contato-form">
                     <h3>Envie uma mensagem</h3>
                     <form id="contactForm">
