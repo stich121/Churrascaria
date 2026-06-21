@@ -1,6 +1,7 @@
 <?php
-// Dados de conexão com o MySQL do Hostinger.
-// Pegue host/usuario/senha em hPanel > Bancos de Dados > Gerenciar.
+// Modelo de config.php — copie este arquivo para config.php e preencha com os
+// dados reais do banco (hPanel > Bancos de Dados > Gerenciar). O config.php real
+// não é versionado (está no .gitignore) para não expor credenciais no GitHub.
 $DB_HOST = 'localhost';
 $DB_NAME = 'u654041352_Reserva';
 $DB_USER = 'TROQUE_PELO_SEU_USUARIO';
