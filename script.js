@@ -269,4 +269,46 @@ if (window.location.hash) {
     }, 500);
 }
 
+// Initialize Google Map
+function initMap() {
+    // Coordenadas da Churrascaria Pampulha
+    const churrascaria = {
+        lat: -19.8765432,
+        lng: -43.9876543
+    };
+
+    // Criar mapa
+    const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: churrascaria,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        streetViewControl: false
+    });
+
+    // Adicionar marcador
+    const marker = new google.maps.Marker({
+        position: churrascaria,
+        map: map,
+        title: 'Churrascaria Pampulha',
+        icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+    });
+
+    // Info window
+    const infoWindow = new google.maps.InfoWindow({
+        content: '<div style="padding: 10px;"><strong>Churrascaria Pampulha</strong><br>Av. Pedro I, 568 - Itapoã<br>Belo Horizonte - MG<br><a href="tel:+553135825158">(31) 3582-5158</a></div>'
+    });
+
+    marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+    });
+
+    // Abrir info window por padrão
+    infoWindow.open(map, marker);
+}
+
+// Carregar mapa quando página carrega
+window.addEventListener('load', initMap);
+
 console.log('🔥 Churrascaria Pampulha - Site carregado com sucesso!');

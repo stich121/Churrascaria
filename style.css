@@ -560,12 +560,13 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: 450px;
 }
 
-.mapa-container iframe {
-    display: block;
+#map {
     width: 100%;
-    border: none;
+    height: 100%;
+    border-radius: var(--border-radius);
 }
 
 .contato-grid {
