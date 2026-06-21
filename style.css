@@ -1320,18 +1320,6 @@ body {
     text-decoration: underline;
 }
 
-.dashboard-views-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-    align-items: start;
-}
-
-.dashboard-view-card {
-    margin: 0;
-}
-
 .dashboard-view-date {
     color: var(--primary-color);
     font-weight: 600;
@@ -1340,28 +1328,70 @@ body {
 
 .dashboard-view-subtitle {
     color: var(--text-light);
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ===== Abas Dia / Semana / Mês ===== */
+.dashboard-tabs {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-tab {
+    background: white;
+    border: 2px solid #e5e5e5;
+    color: var(--text-light);
+    font-weight: 600;
+    padding: 0.7rem 1.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.dashboard-tab:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.dashboard-tab.is-active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.dashboard-tab-panel {
+    display: none;
+}
+
+.dashboard-tab-panel.is-active {
+    display: block;
 }
 
 .dashboard-week-list {
     list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
 }
 
 .dashboard-week-list li a {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.65rem 0.85rem;
-    border-radius: 10px;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.1rem 0.75rem;
+    border-radius: 12px;
     text-decoration: none;
     color: var(--text-dark);
     background-color: var(--light-bg);
     transition: var(--transition);
+    text-align: center;
 }
 
 .dashboard-week-list li a:hover {
@@ -1374,7 +1404,7 @@ body {
 }
 
 .dashboard-week-day {
-    font-weight: 600;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -1389,32 +1419,6 @@ body {
 .dashboard-week-count {
     font-size: 0.8rem;
     white-space: nowrap;
-}
-
-.dashboard-month-summary {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.dashboard-month-summary li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.7rem 0.9rem;
-    border-radius: 10px;
-    background-color: var(--light-bg);
-}
-
-.dashboard-month-summary li span {
-    color: var(--text-light);
-    font-size: 0.9rem;
-}
-
-.dashboard-month-summary li strong {
-    color: var(--primary-color);
-    font-size: 1.2rem;
 }
 
 /* ===== Cartão de formulário ===== */

@@ -24,6 +24,9 @@ $dataSelecionadaDt = new DateTime($dataSelecionada);
 $diaSemanaNum = (int) $dataSelecionadaDt->format('w');
 $dataFormatada = $dataSelecionadaDt->format('d/m/Y');
 
+$abasValidas = ['dia', 'semana', 'mes'];
+$abaSelecionada = in_array($_GET['aba'] ?? '', $abasValidas, true) ? $_GET['aba'] : 'dia';
+
 // ===== Visão do dia =====
 $stmt = $pdo->prepare(
     'SELECT id, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
@@ -108,7 +111,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260621-6">
+    <link rel="stylesheet" href="style.css?v=20260621-7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -145,6 +148,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
 
             <div class="dashboard-date-bar">
                 <form method="get" action="dashboard.php" class="dashboard-date-form">
+                    <input type="hidden" name="aba" id="aba-input" value="<?= e($abaSelecionada) ?>">
                     <label for="data-input"><i class="fa-solid fa-calendar-days"></i> Visualizar reservas do dia</label>
                     <input type="date" id="data-input" name="data" value="<?= e($dataSelecionada) ?>" onchange="this.form.submit()">
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i>Ver</button>
@@ -154,32 +158,38 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                 </form>
             </div>
 
-            <div class="stat-cards-row">
-                <div class="stat">
-                    <i class="fa-solid fa-calendar-day"></i>
-                    <h4><?= e((string) $totalReservasDia) ?></h4>
-                    <p>Reservas no dia</p>
-                </div>
-                <div class="stat">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <h4><?= e((string) $confirmadasDia) ?></h4>
-                    <p>Confirmadas no dia</p>
-                </div>
-                <div class="stat">
-                    <i class="fa-solid fa-users"></i>
-                    <h4><?= e((string) $pessoasEsperadasDia) ?></h4>
-                    <p>Pessoas esperadas</p>
-                </div>
-                <div class="stat">
-                    <i class="fa-solid fa-chair"></i>
-                    <h4><?= e((string) $mesasDisponiveisDia) ?></h4>
-                    <p>Mesas disponíveis</p>
-                </div>
+            <div class="dashboard-tabs">
+                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'dia' ? 'is-active' : '' ?>" data-tab="dia"><i class="fa-solid fa-calendar-day"></i> Dia</button>
+                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'semana' ? 'is-active' : '' ?>" data-tab="semana"><i class="fa-solid fa-calendar-week"></i> Semana</button>
+                <button type="button" class="dashboard-tab <?= $abaSelecionada === 'mes' ? 'is-active' : '' ?>" data-tab="mes"><i class="fa-solid fa-calendar"></i> Mês</button>
             </div>
-            <p class="dashboard-nota">*Mesas disponíveis é uma estimativa, considerando 1 mesa por reserva ativa do dia selecionado, de um total de <?= e((string) $totalMesas) ?> mesas cadastradas.</p>
 
-            <div class="dashboard-views-grid">
-                <div class="reserva-form-card dashboard-view-card">
+            <div class="dashboard-tab-panel <?= $abaSelecionada === 'dia' ? 'is-active' : '' ?>" data-panel="dia">
+                <div class="stat-cards-row">
+                    <div class="stat">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <h4><?= e((string) $totalReservasDia) ?></h4>
+                        <p>Reservas no dia</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <h4><?= e((string) $confirmadasDia) ?></h4>
+                        <p>Confirmadas no dia</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-users"></i>
+                        <h4><?= e((string) $pessoasEsperadasDia) ?></h4>
+                        <p>Pessoas esperadas</p>
+                    </div>
+                    <div class="stat">
+                        <i class="fa-solid fa-chair"></i>
+                        <h4><?= e((string) $mesasDisponiveisDia) ?></h4>
+                        <p>Mesas disponíveis</p>
+                    </div>
+                </div>
+                <p class="dashboard-nota">*Mesas disponíveis é uma estimativa, considerando 1 mesa por reserva ativa do dia selecionado, de um total de <?= e((string) $totalMesas) ?> mesas cadastradas.</p>
+
+                <div class="reserva-form-card">
                     <div class="card-header-bar">
                         <i class="fa-solid fa-list-check"></i>
                         <h3>Reservas do Dia <span class="dashboard-view-date"><?= e($dataFormatada) ?></span></h3>
@@ -190,6 +200,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                 <tr>
                                     <th>Hora</th>
                                     <th>Cliente</th>
+                                    <th>Telefone</th>
                                     <th>Pessoas</th>
                                     <th>Status</th>
                                     <th>Confirmação</th>
@@ -200,6 +211,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                     <tr>
                                         <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
                                         <td><?= e($reserva['nome_cliente']) ?></td>
+                                        <td><?= e($reserva['telefone']) ?></td>
                                         <td><?= e((string) $reserva['pessoas']) ?></td>
                                         <td>
                                             <?php if ($reserva['status_reserva'] === 'Reservado'): ?>
@@ -224,8 +236,10 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         <?php endif; ?>
                     </div>
                 </div>
+            </div>
 
-                <div class="reserva-form-card dashboard-view-card">
+            <div class="dashboard-tab-panel <?= $abaSelecionada === 'semana' ? 'is-active' : '' ?>" data-panel="semana">
+                <div class="reserva-form-card">
                     <div class="card-header-bar">
                         <i class="fa-solid fa-calendar-week"></i>
                         <h3>Visão Semanal</h3>
@@ -245,19 +259,36 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         <?php endforeach; ?>
                     </ul>
                 </div>
+            </div>
 
-                <div class="reserva-form-card dashboard-view-card">
+            <div class="dashboard-tab-panel <?= $abaSelecionada === 'mes' ? 'is-active' : '' ?>" data-panel="mes">
+                <div class="reserva-form-card">
                     <div class="card-header-bar">
                         <i class="fa-solid fa-calendar"></i>
-                        <h3>Visão Mensal</h3>
+                        <h3>Visão Mensal <span class="dashboard-view-date"><?= e(ucfirst($nomeMesAno)) ?></span></h3>
                     </div>
-                    <p class="dashboard-view-subtitle"><?= e(ucfirst($nomeMesAno)) ?></p>
-                    <ul class="dashboard-month-summary">
-                        <li><span>Reservas no mês</span><strong><?= e((string) $totalReservasMes) ?></strong></li>
-                        <li><span>Pessoas esperadas</span><strong><?= e((string) $totalPessoasMes) ?></strong></li>
-                        <li><span>Confirmadas</span><strong><?= e((string) $confirmadasMes) ?></strong></li>
-                        <li><span>Pendentes</span><strong><?= e((string) $pendentesMes) ?></strong></li>
-                    </ul>
+                    <div class="stat-cards-row">
+                        <div class="stat">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <h4><?= e((string) $totalReservasMes) ?></h4>
+                            <p>Reservas no mês</p>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-users"></i>
+                            <h4><?= e((string) $totalPessoasMes) ?></h4>
+                            <p>Pessoas esperadas</p>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <h4><?= e((string) $confirmadasMes) ?></h4>
+                            <p>Confirmadas</p>
+                        </div>
+                        <div class="stat">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                            <h4><?= e((string) $pendentesMes) ?></h4>
+                            <p>Pendentes</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -267,5 +298,31 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             </div>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tabs = document.querySelectorAll('.dashboard-tab');
+            var paineis = document.querySelectorAll('.dashboard-tab-panel');
+            var abaInput = document.getElementById('aba-input');
+
+            tabs.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    var alvo = tab.dataset.tab;
+
+                    tabs.forEach(function (t) { t.classList.remove('is-active'); });
+                    paineis.forEach(function (p) { p.classList.remove('is-active'); });
+
+                    tab.classList.add('is-active');
+                    var painelAlvo = document.querySelector('.dashboard-tab-panel[data-panel="' + alvo + '"]');
+                    if (painelAlvo) {
+                        painelAlvo.classList.add('is-active');
+                    }
+                    if (abaInput) {
+                        abaInput.value = alvo;
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
