@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/auth.php';
-require __DIR__ . '/config.php';
+require __DIR__ . '/../config.php';
 
 if (funcionarioLogado()) {
     header('Location: painel-reservas.php');

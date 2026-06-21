@@ -56,15 +56,20 @@ Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.
    Isso já cria o admin inicial (usuário `Matheus.dias`, nível 3) — troque a senha pela tela "Trocar senha"
    depois do primeiro login.
 2. Edite `config.php` com o host/usuário/senha reais do banco (hPanel > Bancos de Dados > Gerenciar).
-3. Suba todos os arquivos `.php`, `.html`, `.css`, `.js` e as imagens para o servidor.
-4. Faça login em `area-reservas.php` com o usuário admin e cadastre os demais funcionários pela tela
+3. **Importante:** suba o `config.php` (com as credenciais reais) **uma pasta acima da `public_html`**,
+   não dentro dela. No Gerenciador de Arquivos do hPanel, navegue até a pasta do domínio (que contém a
+   `public_html`), e coloque o `config.php` ali, ao lado da pasta `public_html` — não dentro. Assim, mesmo
+   apagando/substituindo tudo dentro da `public_html` num deploy futuro, o `config.php` não é afetado e o
+   site não cai com erro 500 por falta dele.
+4. Suba todos os outros arquivos `.php`, `.html`, `.css`, `.js` e as imagens para dentro da `public_html`.
+5. Faça login em `area-reservas.php` com o usuário admin e cadastre os demais funcionários pela tela
    "Funcionários".
-5. Para criar outro admin via hash manual no futuro, use `gerar-senha.php` pelo navegador e depois
+6. Para criar outro admin via hash manual no futuro, use `gerar-senha.php` pelo navegador e depois
    **apague esse arquivo do servidor** — ele não deve ficar publicado.
-6. Se o site já estava no ar antes da tabela `mesas` existir, não reimporte `schema.sql` inteiro (o INSERT
+7. Se o site já estava no ar antes da tabela `mesas` existir, não reimporte `schema.sql` inteiro (o INSERT
    do admin vai falhar por duplicidade). Em vez disso, rode só o trecho `CREATE TABLE IF NOT EXISTS mesas (...)`
    de `schema.sql` na aba "SQL" do phpMyAdmin.
-7. Se o site já estava no ar antes dos campos novos da reserva (data do pedido, valor, status, confirmação,
+8. Se o site já estava no ar antes dos campos novos da reserva (data do pedido, valor, status, confirmação,
    pessoas que compareceram, observação), rode este `ALTER TABLE` na aba "SQL" do phpMyAdmin pra atualizar a
    tabela `reservas` existente sem perder os dados:
    ```sql

@@ -1,10 +1,17 @@
 <?php
 require __DIR__ . '/auth.php';
-require __DIR__ . '/config.php';
+require __DIR__ . '/../config.php';
 exigirLogin();
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
+
+function parseValorBr(string $valor): float
+{
+    $limpo = str_replace(',', '.', preg_replace('/[^0-9,]/', '', $valor));
+
+    return (float) $limpo;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificarCsrf();
@@ -34,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
                 $pessoas,
-                (float) ($_POST['valor'] ?? 0),
+                parseValorBr($_POST['valor'] ?? '0'),
                 $statusReserva,
                 $confirmacao,
                 $observacao !== '' ? $observacao : null,
@@ -120,7 +127,7 @@ $reservas = $pdo->query(
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <div class="reserva-form-grid">
                         <input type="text" name="nome" placeholder="Nome do cliente" required>
-                        <input type="tel" name="telefone" placeholder="Telefone" required>
+                        <input type="tel" name="telefone" inputmode="numeric" placeholder="Telefone" maxlength="15" required>
                         <label class="reserva-form-label">
                             Data do pedido
                             <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
@@ -134,7 +141,7 @@ $reservas = $pdo->query(
                             <input type="time" name="hora" required>
                         </label>
                         <input type="number" name="pessoas" placeholder="Nº de pessoas" min="1" required>
-                        <input type="number" name="valor" placeholder="Valor (R$)" min="0" step="0.01" required>
+                        <input type="text" name="valor" inputmode="numeric" placeholder="Valor (R$)" required>
                         <select name="status_reserva" required>
                             <option value="Reservado" selected>Reservado</option>
                             <option value="Cancelado">Cancelado</option>
@@ -222,5 +229,38 @@ $reservas = $pdo->query(
             </div>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var telefoneInput = document.querySelector('input[name="telefone"]');
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', function () {
+                    var digitos = telefoneInput.value.replace(/\D/g, '').slice(0, 11);
+                    var formatado = digitos;
+                    if (digitos.length > 10) {
+                        formatado = digitos.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+                    } else if (digitos.length > 6) {
+                        formatado = digitos.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                    } else if (digitos.length > 2) {
+                        formatado = digitos.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                    } else if (digitos.length > 0) {
+                        formatado = digitos.replace(/(\d{0,2})/, '($1');
+                    }
+                    telefoneInput.value = formatado.trim();
+                });
+            }
+
+            var valorInput = document.querySelector('input[name="valor"]');
+            if (valorInput) {
+                valorInput.addEventListener('input', function () {
+                    var digitos = valorInput.value.replace(/\D/g, '');
+                    var numero = (parseInt(digitos || '0', 10) / 100).toFixed(2);
+                    var partes = numero.split('.');
+                    var inteiro = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    valorInput.value = 'R$ ' + inteiro + ',' + partes[1];
+                });
+            }
+        });
+    </script>
 </body>
 </html>
