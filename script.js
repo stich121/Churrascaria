@@ -275,39 +275,153 @@ function initMap() {
     const lat = -19.8765432;
     const lng = -43.9876543;
 
-    // Criar mapa
-    const map = L.map('map').setView([lat, lng], 15);
+    // Criar mapa com opções melhoradas
+    const map = L.map('map', {
+        scrollWheelZoom: true,
+        tap: true
+    }).setView([lat, lng], 15);
 
-    // Adicionar OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
+    // Usar tema CartoDB Positron (mais elegante e limpo)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CartoDB contributors | © OpenStreetMap contributors',
+        maxZoom: 19,
+        className: 'map-tiles'
     }).addTo(map);
 
-    // Adicionar marcador
-    const marker = L.circleMarker([lat, lng], {
-        radius: 8,
-        fillColor: '#c41e3a',
-        color: '#8b2e2e',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
+    // Criar ícone customizado
+    const customIcon = L.divIcon({
+        html: `
+            <div style="
+                background: linear-gradient(135deg, #c41e3a 0%, #8b2e2e 100%);
+                width: 50px;
+                height: 50px;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(196, 30, 58, 0.4);
+                border: 3px solid white;
+            ">
+                <span style="
+                    font-size: 24px;
+                    transform: rotate(45deg);
+                ">🔥</span>
+            </div>
+        `,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -50],
+        className: 'custom-marker'
+    });
+
+    // Adicionar marcador customizado
+    const marker = L.marker([lat, lng], {
+        icon: customIcon
     }).addTo(map);
 
-    // Popup com informações
-    marker.bindPopup(
-        '<div style="text-align: center; padding: 10px;">' +
-        '<strong style="color: #c41e3a; font-size: 16px;">Churrascaria Pampulha</strong><br>' +
-        '<p style="margin: 8px 0; color: #666;">Av. Pedro I, 568 - Itapoã<br>Belo Horizonte - MG</p>' +
-        '<a href="tel:+553135825158" style="color: #c41e3a; text-decoration: none; font-weight: bold;">' +
-        '📞 (31) 3582-5158</a><br>' +
-        '<a href="https://wa.me/553184449047" target="_blank" style="color: #25d366; text-decoration: none; font-weight: bold; margin-top: 8px; display: inline-block;">' +
-        '💬 WhatsApp</a>' +
-        '</div>'
-    );
+    // Popup com design profissional
+    const popupContent = `
+        <div style="
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 280px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        ">
+            <h3 style="
+                color: #c41e3a;
+                margin: 0 0 12px 0;
+                font-size: 22px;
+                font-weight: bold;
+            ">🔥 Churrascaria Pampulha</h3>
 
-    // Abrir popup por padrão
+            <p style="
+                color: #666;
+                margin: 12px 0;
+                font-size: 14px;
+                line-height: 1.6;
+            ">
+                <strong>Desde 1982</strong><br>
+                A melhor churrascaria de BH
+            </p>
+
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 12px;
+                margin: 12px 0;
+                border-left: 4px solid #c41e3a;
+            ">
+                <p style="margin: 0; color: #333; font-size: 13px;">
+                    <strong>📍 Localização:</strong><br>
+                    Av. Pedro I, 568<br>
+                    Itapoã - Belo Horizonte, MG
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <a href="tel:+553135825158" style="
+                    flex: 1;
+                    background: #c41e3a;
+                    color: white;
+                    padding: 10px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    font-size: 12px;
+                    transition: background 0.3s;
+                    border: none;
+                    cursor: pointer;
+                ">
+                    📞 Ligar
+                </a>
+                <a href="https://wa.me/553184449047?text=Olá%20Churrascaria%20Pampulha" target="_blank" style="
+                    flex: 1;
+                    background: #25d366;
+                    color: white;
+                    padding: 10px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    font-size: 12px;
+                    transition: background 0.3s;
+                    border: none;
+                    cursor: pointer;
+                ">
+                    💬 WhatsApp
+                </a>
+            </div>
+
+            <a href="https://www.google.com/maps/place/Churrascaria+Pampulha/-19.8765432,-43.9876543"
+               target="_blank"
+               style="
+                   display: inline-block;
+                   margin-top: 12px;
+                   color: #007AFF;
+                   text-decoration: none;
+                   font-size: 12px;
+                   font-weight: 500;
+               ">
+               Abrir no Google Maps →
+            </a>
+        </div>
+    `;
+
+    marker.bindPopup(popupContent, {
+        maxWidth: 320,
+        className: 'custom-popup'
+    });
+
+    // Abrir popup ao clicar
     marker.openPopup();
+
+    // Adicionar controle melhorado
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
 }
 
 // Carregar mapa quando página carrega
