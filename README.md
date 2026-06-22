@@ -95,3 +95,13 @@ A Churrascaria Pampulha oferece uma opção de churrasco nobre com ambiente fami
 ---
 
 Desenvolvido com ❤️ para a Churrascaria Pampulha
+
+## Feito no codex
+
+- Atualização automática do dashboard a cada 30 segundos, sem recarregar a página inteira.
+- Controle de sessão por inatividade: se o usuário ficar mais de 1 hora sem mexer no site, o login é desconectado.
+- Criação do arquivo `atividade.php` para registrar atividade real do usuário no servidor.
+- Criação do arquivo `sessao.js` para monitorar interações no navegador e redirecionar para logout quando a sessão expirar.
+- Ajuste no refresh automático do dashboard para não renovar a sessão sozinho.
+- Inclusão do controle de sessão nas páginas internas da área de funcionário.
+- Mensagem na tela de login quando a sessão for encerrada por inatividade.
