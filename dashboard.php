@@ -345,8 +345,15 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
         </div>
     </section>
 
+    <?php renderizarControleSessao(); ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            inicializarDashboardTabs();
+            inicializarAtualizacaoDashboard();
+        });
+
+        function inicializarDashboardTabs() {
             var tabs = document.querySelectorAll('.dashboard-period-tab');
             var paineis = document.querySelectorAll('.dashboard-tab-panel');
             var abaInputs = document.querySelectorAll('.dashboard-aba-input');
@@ -374,7 +381,68 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     });
                 });
             });
-        });
+        }
+
+        function inicializarAtualizacaoDashboard() {
+            var intervaloMs = 30000;
+            var atualizando = false;
+
+            function formularioEmUso() {
+                var ativo = document.activeElement;
+
+                return ativo && ativo.closest && ativo.closest('.dashboard-date-form');
+            }
+
+            function atualizarDashboard() {
+                if (atualizando || formularioEmUso()) {
+                    return;
+                }
+
+                atualizando = true;
+
+                var url = new URL(window.location.href);
+                var abaAtiva = document.querySelector('.dashboard-period-tab.is-active');
+                if (abaAtiva && abaAtiva.dataset.tab) {
+                    url.searchParams.set('aba', abaAtiva.dataset.tab);
+                }
+
+                window.fetch(url.toString(), {
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                    headers: {
+                        'X-Dashboard-Auto-Refresh': '1'
+                    }
+                }).then(function (response) {
+                    if (response.redirected && response.url.indexOf('area-reservas.php') !== -1) {
+                        window.location.href = response.url;
+                        return null;
+                    }
+
+                    if (!response.ok) {
+                        return null;
+                    }
+
+                    return response.text();
+                }).then(function (html) {
+                    if (!html) {
+                        return;
+                    }
+
+                    var documento = new DOMParser().parseFromString(html, 'text/html');
+                    var novoPainel = documento.querySelector('.painel-reservas');
+                    var painelAtual = document.querySelector('.painel-reservas');
+
+                    if (novoPainel && painelAtual) {
+                        painelAtual.replaceWith(novoPainel);
+                        inicializarDashboardTabs();
+                    }
+                }).catch(function () {}).finally(function () {
+                    atualizando = false;
+                });
+            }
+
+            window.setInterval(atualizarDashboard, intervaloMs);
+        }
     </script>
 </body>
 </html>

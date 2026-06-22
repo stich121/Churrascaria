@@ -439,6 +439,8 @@ foreach ($reservas as $reserva) {
         </div>
     </div>
 
+    <?php renderizarControleSessao(); ?>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('input[name="telefone"]').forEach(function (telefoneInput) {

@@ -223,5 +223,6 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
             </div>
         </div>
     </section>
+    <?php renderizarControleSessao(); ?>
 </body>
 </html>

@@ -22,6 +22,8 @@ const CHURRASCARIAS_RESERVA = [
 const LOGIN_MAX_TENTATIVAS = 5;
 const LOGIN_JANELA_SEGUNDOS = 900;   // 15 minutos para acumular tentativas
 const LOGIN_BLOQUEIO_SEGUNDOS = 900; // 15 minutos de bloqueio ao atingir o limite
+const SESSAO_INATIVIDADE_SEGUNDOS = 3600; // 1 hora sem atividade real do usuario
+const SESSAO_PING_ATIVIDADE_SEGUNDOS = 60;
 
 function clienteIp(): string
 {
@@ -76,9 +78,57 @@ function limparTentativasLogin(PDO $pdo, string $ip): void
     $pdo->prepare('DELETE FROM login_attempts WHERE ip = ?')->execute([$ip]);
 }
 
+function encerrarSessao(): void
+{
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'] ?? 'Lax',
+        ]);
+    }
+
+    session_destroy();
+}
+
+function sessaoExpiradaPorInatividade(): bool
+{
+    $ultimaAtividade = (int) ($_SESSION['ultima_atividade_usuario'] ?? 0);
+
+    return $ultimaAtividade > 0 && time() - $ultimaAtividade > SESSAO_INATIVIDADE_SEGUNDOS;
+}
+
+function registrarAtividadeUsuario(): void
+{
+    if (!empty($_SESSION['funcionario_id'])) {
+        $_SESSION['ultima_atividade_usuario'] = time();
+    }
+}
+
+function requisicaoAtualizacaoAutomaticaDashboard(): bool
+{
+    return ($_SERVER['HTTP_X_DASHBOARD_AUTO_REFRESH'] ?? '') === '1';
+}
+
 function funcionarioLogado(): bool
 {
-    return !empty($_SESSION['funcionario_id']);
+    if (empty($_SESSION['funcionario_id'])) {
+        return false;
+    }
+
+    if (sessaoExpiradaPorInatividade()) {
+        encerrarSessao();
+
+        return false;
+    }
+
+    return true;
 }
 
 function nivelFuncionario(): int
@@ -89,8 +139,12 @@ function nivelFuncionario(): int
 function exigirLogin(): void
 {
     if (!funcionarioLogado()) {
-        header('Location: area-reservas.php');
+        header('Location: area-reservas.php?timeout=1');
         exit;
+    }
+
+    if (!requisicaoAtualizacaoAutomaticaDashboard()) {
+        registrarAtividadeUsuario();
     }
 }
 
@@ -121,6 +175,21 @@ function verificarCsrf(): void
         http_response_code(403);
         die('Token de segurança inválido. Volte e atualize a página.');
     }
+}
+
+function renderizarControleSessao(): void
+{
+    $config = [
+        'timeoutMs' => SESSAO_INATIVIDADE_SEGUNDOS * 1000,
+        'pingIntervalMs' => SESSAO_PING_ATIVIDADE_SEGUNDOS * 1000,
+        'lastActivityMs' => ((int) ($_SESSION['ultima_atividade_usuario'] ?? time())) * 1000,
+        'pingUrl' => 'atividade.php',
+        'logoutUrl' => 'logout.php?timeout=1',
+        'storageKey' => 'churrascaria:lastUserActivity:' . (int) ($_SESSION['funcionario_id'] ?? 0),
+    ];
+
+    echo '<script>window.AppSessaoConfig = ' . json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';</script>' . PHP_EOL;
+    echo '<script src="sessao.js?v=20260622-1"></script>' . PHP_EOL;
 }
 
 function churrascariaReservaValida(?string $churrascaria): bool

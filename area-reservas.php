@@ -7,7 +7,7 @@ if (funcionarioLogado()) {
     exit;
 }
 
-$erro = '';
+$erro = isset($_GET['timeout']) ? 'Sua sessão foi encerrada por inatividade.' : '';
 $ip = clienteIp();
 $bloqueioRestante = verificarBloqueioLogin($pdo, $ip);
 
@@ -27,6 +27,7 @@ if ($bloqueioRestante > 0) {
         $_SESSION['funcionario_id'] = $funcionario['id'];
         $_SESSION['funcionario_nome'] = $funcionario['nome'];
         $_SESSION['funcionario_nivel'] = (int) $funcionario['nivel'];
+        registrarAtividadeUsuario();
         header('Location: dashboard.php');
         exit;
     }

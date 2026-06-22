@@ -107,6 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
+    <?php renderizarControleSessao(); ?>
+
     <script>
         document.querySelectorAll('.toggle-senha').forEach(function (botao) {
             botao.addEventListener('click', function () {

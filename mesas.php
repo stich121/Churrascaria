@@ -166,5 +166,6 @@ foreach ($mesas as $mesa) {
             </div>
         </div>
     </section>
+    <?php renderizarControleSessao(); ?>
 </body>
 </html>
