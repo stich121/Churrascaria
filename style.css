@@ -8,6 +8,19 @@
     --text-light: #666;
     --border-radius: 8px;
     --transition: all 0.3s ease;
+
+    --font-display: 'Fraunces', 'Segoe UI', serif;
+    --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    --space-xs: 8px;
+    --space-sm: 16px;
+    --space-md: 24px;
+    --space-lg: 48px;
+    --space-xl: 80px;
+
+    --shadow-sm: 0 2px 8px rgba(20, 10, 8, 0.08);
+    --shadow-md: 0 10px 30px rgba(20, 10, 8, 0.14);
+    --shadow-lg: 0 20px 50px rgba(20, 10, 8, 0.22);
 }
 
 * {
@@ -21,16 +34,46 @@ html {
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-body);
     line-height: 1.6;
     color: var(--text-dark);
     background-color: #fff;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+.section-kicker {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    margin-bottom: 0.6rem;
+}
+
+.section-kicker-light {
+    color: var(--accent-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
 }
 
 /* ===== Navigation ===== */
@@ -147,27 +190,68 @@ body {
 
 /* ===== Hero Section ===== */
 .hero {
-    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
+    position: relative;
     color: white;
-    padding: 100px 20px;
+    padding: 140px 20px 120px;
     text-align: center;
-    min-height: 500px;
+    min-height: 92vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    isolation: isolate;
 }
 
-.hero-content h2 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
+.hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+.hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(15, 8, 7, 0.55) 0%, rgba(15, 8, 7, 0.45) 45%, rgba(15, 8, 7, 0.88) 100%),
+        linear-gradient(135deg, rgba(26, 10, 10, 0.55) 0%, rgba(139, 46, 46, 0.35) 100%);
+}
+
+.hero-content {
+    position: relative;
+    max-width: 760px;
+}
+
+.hero-kicker {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    margin-bottom: 1.2rem;
+    animation: fadeIn 1s ease backwards;
+}
+
+.hero-content h1 {
+    font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    margin-bottom: 1.2rem;
+    font-weight: 700;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
     animation: slideInDown 0.8s ease;
 }
 
 .hero-content p {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    color: var(--accent-color);
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    margin-bottom: 2.2rem;
+    color: rgba(255, 255, 255, 0.92);
     animation: slideInUp 0.8s ease;
 }
 
@@ -177,6 +261,51 @@ body {
     justify-content: center;
     flex-wrap: wrap;
     animation: fadeIn 1s ease 0.3s backwards;
+}
+
+.hero-scroll-cue {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.3rem;
+    animation: bounceCue 2s ease-in-out infinite;
+    text-decoration: none;
+}
+
+@keyframes bounceCue {
+    0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+    50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+
+/* ===== Faixa de confiança ===== */
+.trust-strip {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
+    border-top: 1px solid rgba(244, 164, 96, 0.15);
+}
+
+.trust-strip-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem 2.5rem;
+    padding: 1.1rem 20px;
+}
+
+.trust-strip-inner span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.trust-strip-inner i {
+    color: var(--accent-color);
 }
 
 @keyframes slideInDown {
@@ -266,6 +395,14 @@ body {
     background-color: var(--light-bg);
 }
 
+.diferenciais .section-kicker,
+.rodizios .section-kicker,
+.galeria-heading .section-kicker,
+.quem-somos > .container > .section-kicker {
+    display: block;
+    text-align: center;
+}
+
 .diferenciais h2 {
     text-align: center;
     font-size: 2.5rem;
@@ -311,11 +448,11 @@ body {
 
 /* ===== Cardápio Preview ===== */
 .cardapio-preview {
-    padding: 80px 20px;
+    padding: 100px 20px;
+    overflow: hidden;
 }
 
 .cardapio-preview h2 {
-    text-align: center;
     font-size: 2.5rem;
     margin-bottom: 1rem;
     color: var(--primary-color);
@@ -328,56 +465,96 @@ body {
     margin-bottom: 3rem;
 }
 
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
+.section-subtitle-left {
+    text-align: left;
+    margin-bottom: 2rem;
 }
 
-.menu-item {
+.cardapio-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.cardapio-media {
+    position: relative;
+}
+
+.cardapio-media img {
+    width: 100%;
+    height: 560px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+}
+
+.cardapio-badge {
+    position: absolute;
+    bottom: -1.5rem;
+    right: -1.5rem;
     background: var(--primary-color);
     color: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
+    border-radius: 16px;
+    padding: 1.2rem 1.6rem;
     text-align: center;
-    transition: var(--transition);
-    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    line-height: 1.1;
 }
 
-.menu-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 30px rgba(196, 30, 58, 0.3);
+.cardapio-badge strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.8rem;
 }
 
-.menu-item h3 {
-    margin-bottom: 0.5rem;
-    font-size: 1.3rem;
-}
-
-.menu-item p {
-    font-size: 0.95rem;
-    opacity: 0.95;
-}
-
-.menu-item .menu-subtitle {
-    font-size: 0.9rem;
+.cardapio-badge span {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--accent-color);
-    margin-top: 0.5rem;
-    font-weight: 600;
 }
 
-.menu-item .menu-highlight {
-    font-size: 0.9rem;
-    color: #fff;
-    margin-top: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 0.5rem;
-    border-radius: 4px;
+.cardapio-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    margin-bottom: 2.2rem;
+}
+
+.cardapio-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+}
+
+.cardapio-list i {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(196, 30, 58, 0.08);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.cardapio-list h3 {
+    font-size: 1.15rem;
+    color: var(--text-dark);
+    margin-bottom: 0.2rem;
+}
+
+.cardapio-list p {
+    color: var(--text-light);
+    font-size: 0.95rem;
 }
 
 .cardapio-cta {
-    text-align: center;
+    text-align: left;
 }
 
 /* ===== Rodízios ===== */
@@ -428,6 +605,25 @@ body {
     font-weight: bold;
 }
 
+.promo-card {
+    position: relative;
+}
+
+.promo-tag {
+    position: absolute;
+    top: -14px;
+    left: 2rem;
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+}
+
 .promo-card h3 {
     color: var(--primary-color);
     margin-bottom: 0.5rem;
@@ -445,31 +641,156 @@ body {
     font-size: 1.1rem;
 }
 
-/* ===== Eventos ===== */
-.eventos {
-    padding: 80px 20px;
+.rodizios-nota {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 2.5rem;
 }
 
-.eventos h2 {
+/* ===== Galeria / Carrossel ===== */
+.galeria {
+    padding: 100px 0;
+    background-color: var(--light-bg);
+}
+
+.galeria-heading {
     text-align: center;
+    margin-bottom: 3rem;
+}
+
+.galeria-heading h2 {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
     color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.carousel {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.carousel-viewport {
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+}
+
+.carousel-track {
+    list-style: none;
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.carousel-slide {
+    position: relative;
+    flex: 0 0 100%;
+    aspect-ratio: 16 / 9;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.carousel-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 2.5rem 2rem 1.4rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.05rem;
+    background: linear-gradient(180deg, transparent 0%, rgba(15, 8, 7, 0.78) 100%);
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--primary-color);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    z-index: 2;
+}
+
+.carousel-arrow:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.carousel-prev {
+    left: 0;
+}
+
+.carousel-next {
+    right: 0;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+}
+
+.carousel-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #d9c9c2;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.carousel-dots button.is-active {
+    background: var(--primary-color);
+    width: 28px;
+    border-radius: 999px;
+}
+
+/* ===== Eventos ===== */
+.eventos {
+    padding: 100px 20px;
+}
+
+.eventos-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 4rem;
+    align-items: center;
 }
 
 .evento-card {
     background: linear-gradient(135deg, var(--dark-bg), var(--secondary-color));
     color: white;
     padding: 3rem;
-    border-radius: var(--border-radius);
-    margin-top: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
 }
 
-.evento-card h3 {
-    color: var(--accent-color);
+.evento-card h2 {
+    font-size: 2.2rem;
     margin-bottom: 1.5rem;
-    font-size: 1.8rem;
+    color: white;
 }
 
 .evento-list {
@@ -481,11 +802,29 @@ body {
     padding: 0.5rem 0;
     font-size: 1.1rem;
     line-height: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.evento-list i {
+    color: var(--accent-color);
+    width: 20px;
+    text-align: center;
 }
 
 .evento-card p {
     margin-bottom: 1.5rem;
     line-height: 1.8;
+}
+
+.eventos-media img {
+    width: 100%;
+    height: 100%;
+    min-height: 360px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
 }
 
 /* ===== Quem Somos ===== */
@@ -503,9 +842,17 @@ body {
 
 .historia-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    grid-template-columns: 0.9fr 1.1fr 0.8fr;
+    gap: 2.5rem;
     align-items: center;
+}
+
+.historia-media img {
+    width: 100%;
+    height: 480px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
 }
 
 .historia-text h3 {
@@ -844,8 +1191,8 @@ body {
         height: 110px;
     }
 
-    .hero-content h2 {
-        font-size: 2rem;
+    .hero-content h1 {
+        font-size: 2.2rem;
     }
 
     .hero-content p {
@@ -853,8 +1200,8 @@ body {
     }
 
     .hero {
-        padding: 60px 20px;
-        min-height: 350px;
+        padding: 70px 20px 90px;
+        min-height: 100vh;
     }
 
     .hero-buttons {
@@ -865,10 +1212,17 @@ body {
         width: 100%;
     }
 
+    .trust-strip-inner {
+        gap: 0.6rem 1.4rem;
+        font-size: 0.8rem;
+    }
+
     .diferenciais h2,
     .cardapio-preview h2,
     .rodizios h2,
+    .galeria-heading h2,
     .eventos h2,
+    .evento-card h2,
     .quem-somos h2,
     .contato h2 {
         font-size: 1.8rem;
@@ -878,16 +1232,49 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .menu-grid {
+    .cardapio-layout {
         grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .cardapio-media img {
+        height: 320px;
+    }
+
+    .cardapio-badge {
+        right: 1rem;
+        bottom: -1rem;
     }
 
     .promo-grid {
         grid-template-columns: 1fr;
     }
 
+    .eventos-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .eventos-media {
+        order: -1;
+    }
+
+    .eventos-media img {
+        min-height: 240px;
+    }
+
+    .carousel-arrow {
+        width: 38px;
+        height: 38px;
+        font-size: 0.85rem;
+    }
+
     .historia-content {
         grid-template-columns: 1fr;
+    }
+
+    .historia-media img {
+        height: 280px;
     }
 
     .contato-cards {
@@ -938,8 +1325,8 @@ body {
         padding: 1rem;
     }
 
-    .hero-content h2 {
-        font-size: 1.5rem;
+    .hero-content h1 {
+        font-size: 1.7rem;
     }
 
     .hero-content p {
@@ -950,6 +1337,10 @@ body {
     .promo-card,
     .contato-card {
         padding: 1.5rem;
+    }
+
+    .carousel-arrow {
+        display: none;
     }
 
     .historia-stats {

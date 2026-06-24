@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Churrascaria Pampulha - Rodízio de carnes nobres, buffet completo e atendimento especial em Belo Horizonte desde 1982.">
     <title>Churrascaria Pampulha - A Melhor Churrascaria de BH</title>
-    <link rel="stylesheet" href="style.css?v=20260621-7">
+    <link rel="stylesheet" href="style.css?v=20260624-1">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -17,7 +22,7 @@
                         <img src="Logo Branca carroça MC.png" alt="Churrascaria Pampulha" class="logo-img">
                     </a>
                 </div>
-                <button class="menu-toggle" id="menuToggle">
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -26,6 +31,7 @@
                     <li><a href="#inicio">Início</a></li>
                     <li><a href="#cardapio">Cardápio</a></li>
                     <li><a href="#rodizios">Rodízios</a></li>
+                    <li><a href="#galeria">Galeria</a></li>
                     <li><a href="#eventos">Eventos</a></li>
                     <li><a href="#quem-somos">Quem Somos</a></li>
                     <li><a href="#contato" class="btn-contato">Contate-nos</a></li>
@@ -36,40 +42,59 @@
 
     <!-- Hero Section -->
     <section class="hero" id="inicio">
+        <div class="hero-media">
+            <img src="assets/fotos/flambe.jpg" alt="Chef preparando banana flambada em chamas no salão da Churrascaria Pampulha" class="hero-img">
+            <div class="hero-overlay"></div>
+        </div>
         <div class="hero-content">
-            <h2>Bem-vindo à Churrascaria Pampulha</h2>
-            <p>Desde 1982 oferecendo a melhor experiência em churrasco nobre</p>
+            <span class="hero-kicker">Tradição desde 1982 &middot; Belo Horizonte</span>
+            <h1>Sabor que vira espetáculo</h1>
+            <p>Rodízio de carnes nobres, buffet completo e atendimento de dar gosto, na churrascaria que a Pampulha escolhe há mais de 40 anos.</p>
             <div class="hero-buttons">
-                <a href="#cardapio" class="btn btn-primary">Ver Cardápio</a>
+                <a href="#rodizios" class="btn btn-primary">Ver Rodízios</a>
                 <a href="#contato" class="btn btn-secondary">Faça uma Reserva</a>
             </div>
         </div>
+        <a href="#diferenciais" class="hero-scroll-cue" aria-label="Rolar para o conteúdo">
+            <i class="fa-solid fa-chevron-down"></i>
+        </a>
     </section>
 
+    <!-- Faixa de confiança -->
+    <div class="trust-strip">
+        <div class="container trust-strip-inner">
+            <span><i class="fa-solid fa-fire-flame-curved"></i> Carnes na brasa, sem pressa</span>
+            <span><i class="fa-solid fa-champagne-glasses"></i> Drinks e bebidas especiais</span>
+            <span><i class="fa-solid fa-people-roof"></i> Ambiente familiar</span>
+            <span><i class="fa-solid fa-calendar-check"></i> Eventos e confraternizações</span>
+        </div>
+    </div>
+
     <!-- Diferenciais -->
-    <section class="diferenciais">
+    <section class="diferenciais" id="diferenciais">
         <div class="container">
+            <span class="section-kicker">Por que a Pampulha</span>
             <h2>Por que nos escolher?</h2>
             <div class="diferencial-grid">
                 <div class="diferencial-card">
-                    <div class="icon">🥩</div>
+                    <div class="icon"><i class="fa-solid fa-drumstick-bite"></i></div>
                     <h3>Carnes Premium</h3>
-                    <p>Selecionadas e preparadas com total atenção para garantir o melhor sabor</p>
+                    <p>Selecionadas e preparadas com total atenção para garantir o melhor sabor em cada espeto.</p>
                 </div>
                 <div class="diferencial-card">
-                    <div class="icon">👨‍🍳</div>
+                    <div class="icon"><i class="fa-solid fa-user-tie"></i></div>
                     <h3>Atendimento Especial</h3>
-                    <p>Gerenciamento pessoal dos proprietários para sua satisfação total</p>
+                    <p>Gerenciamento pessoal dos proprietários, presentes todos os dias para sua satisfação total.</p>
                 </div>
                 <div class="diferencial-card">
-                    <div class="icon">🍺</div>
-                    <h3>Choperia</h3>
-                    <p>Diversas opções de bebidas com cardápio dedicado</p>
+                    <div class="icon"><i class="fa-solid fa-martini-glass-citrus"></i></div>
+                    <h3>Drinks</h3>
+                    <p>Cardápio próprio de drinks autorais e bebidas selecionadas para acompanhar cada corte.</p>
                 </div>
                 <div class="diferencial-card">
-                    <div class="icon">🌟</div>
-                    <h3>Experiência 5 Estrelas</h3>
-                    <p>Ambiente familiar e descontraído que faz você se sentir em casa</p>
+                    <div class="icon"><i class="fa-solid fa-house-chimney"></i></div>
+                    <h3>Ambiente Acolhedor</h3>
+                    <p>Espaço climatizado e descontraído que faz você se sentir em casa a cada visita.</p>
                 </div>
             </div>
         </div>
@@ -77,50 +102,140 @@
 
     <!-- Cardápio Preview -->
     <section class="cardapio-preview" id="cardapio">
-        <div class="container">
-            <h2>Nosso Cardápio</h2>
-            <p class="section-subtitle">Aproveite nossa seleção exclusiva de carnes e pratos especiais</p>
-            <div class="menu-grid">
-                <div class="menu-item">
-                    <h3>Churrasco a Rodízio</h3>
-                    <p>Variedade de carnes selecionadas servidas direto na mesa</p>
-                    <p class="menu-subtitle">Mais de 20 cortes servidos</p>
-                </div>
-                <div class="menu-item">
-                    <h3>Carnes Grelhadas</h3>
-                    <p>Bifes, costelas e outros cortes preparados na hora</p>
-                </div>
-                <div class="menu-item">
-                    <h3>Acompanhamentos</h3>
-                    <p>Queijos especiais, banana flambada, batata frita e grande variedade de saladas</p>
-                </div>
-                <div class="menu-item">
-                    <h3>Bebidas Especiais</h3>
-                    <p>Chopp gelado e drinques selecionados</p>
+        <div class="container cardapio-layout">
+            <div class="cardapio-media">
+                <img src="assets/fotos/picanha-1.jpg" alt="Picanha suculenta grelhada no espeto, pronta para ser servida" loading="lazy">
+                <div class="cardapio-badge">
+                    <strong>+20</strong>
+                    <span>cortes no rodízio</span>
                 </div>
             </div>
-            <div class="cardapio-cta">
-                <a href="#contato" class="btn btn-primary">Ver Cardápio Completo</a>
+            <div class="cardapio-text">
+                <span class="section-kicker">Nosso Cardápio</span>
+                <h2>Cada corte, no ponto certo</h2>
+                <p class="section-subtitle section-subtitle-left">Da picanha à fraldinha, passando pelo buffet e pelas bebidas: tudo pensado para uma experiência completa de churrasco nobre.</p>
+                <ul class="cardapio-list">
+                    <li>
+                        <i class="fa-solid fa-fire"></i>
+                        <div>
+                            <h3>Churrasco a Rodízio</h3>
+                            <p>Variedade de carnes selecionadas, servidas direto no espeto até a mesa.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-kitchen-set"></i>
+                        <div>
+                            <h3>Carnes Grelhadas</h3>
+                            <p>Bifes, costelas e outros cortes preparados na hora, no ponto que você pedir.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-bowl-food"></i>
+                        <div>
+                            <h3>Acompanhamentos</h3>
+                            <p>Queijos especiais, banana flambada, batata frita e grande variedade de saladas.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-martini-glass-citrus"></i>
+                        <div>
+                            <h3>Bebidas Especiais</h3>
+                            <p>Drinks autorais e bebidas geladas para acompanhar cada corte.</p>
+                        </div>
+                    </li>
+                </ul>
+                <div class="cardapio-cta">
+                    <a href="#contato" class="btn btn-primary">Ver Cardápio Completo</a>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- Rodízios -->
+    <section class="rodizios" id="rodizios">
+        <div class="container">
+            <span class="section-kicker">Opções de Rodízio</span>
+            <h2>Escolha seu rodízio</h2>
+            <p class="section-subtitle">Carnes à vontade, buffet completo e tudo servido na sua mesa.</p>
+            <div class="promo-grid">
+                <div class="promo-card promo-highlight-card">
+                    <span class="promo-tag">Mais pedido</span>
+                    <h3>Rodízio Tradicional</h3>
+                    <p class="promo-desc">Mais de 20 cortes de carnes nobres servidos à vontade direto no espeto, acompanhados do nosso buffet de saladas e acompanhamentos.</p>
+                    <p class="promo-highlight">Carnes à vontade na mesa</p>
+                </div>
+                <div class="promo-card">
+                    <h3>Buffet Completo</h3>
+                    <p class="promo-desc">Saladas, massas, frios e pratos quentes preparados todos os dias, para compor o prato do seu jeito antes ou durante o rodízio.</p>
+                </div>
+                <div class="promo-card">
+                    <h3>Crianças</h3>
+                    <p class="promo-desc">Condições especiais para os pequenos. Fale com nossa equipe e confira a política vigente para crianças.</p>
+                </div>
+            </div>
+            <p class="rodizios-nota">Valores, formas de pagamento e condições especiais podem ser confirmados diretamente com nossa equipe pelo WhatsApp.</p>
+        </div>
+    </section>
+
+    <!-- Galeria / Carrossel -->
+    <section class="galeria" id="galeria">
+        <div class="container galeria-heading">
+            <span class="section-kicker">Galeria</span>
+            <h2>Viva a experiência Pampulha</h2>
+            <p class="section-subtitle">Do buffet generoso ao show de flambê na mesa: um gostinho do que te espera por aqui.</p>
+        </div>
+        <div class="carousel" data-carousel role="region" aria-roledescription="carrossel" aria-label="Fotos da Churrascaria Pampulha">
+            <div class="carousel-viewport">
+                <ul class="carousel-track" id="carouselTrack">
+                    <li class="carousel-slide">
+                        <img src="assets/fotos/buffet.jpg" alt="Buffet completo da Pampulha com saladas, massas e acompanhamentos variados" loading="lazy">
+                        <p class="carousel-caption">Buffet completo, renovado todos os dias</p>
+                    </li>
+                    <li class="carousel-slide">
+                        <img src="assets/fotos/picanha-1.jpg" alt="Picanha grelhada no espeto sendo preparada para o rodízio" loading="lazy">
+                        <p class="carousel-caption">Picanha no ponto, direto do espeto</p>
+                    </li>
+                    <li class="carousel-slide">
+                        <img src="assets/fotos/picanha-2.jpg" alt="Corte de carne nobre suculenta no espeto da churrascaria" loading="lazy">
+                        <p class="carousel-caption">Cortes nobres selecionados a dedo</p>
+                    </li>
+                    <li class="carousel-slide">
+                        <img src="assets/fotos/drinks.jpg" alt="Drinques coloridos com frutas frescas servidos na Pampulha" loading="lazy">
+                        <p class="carousel-caption">Drinques autorais para todos os gostos</p>
+                    </li>
+                    <li class="carousel-slide">
+                        <img src="assets/fotos/flambe.jpg" alt="Show de banana flambada em chamas preparado à mesa" loading="lazy">
+                        <p class="carousel-caption">O show da banana flambada, direto na sua mesa</p>
+                    </li>
+                </ul>
+            </div>
+            <button type="button" class="carousel-arrow carousel-prev" aria-label="Foto anterior">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="carousel-arrow carousel-next" aria-label="Próxima foto">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Selecionar foto"></div>
+        </div>
+    </section>
 
     <!-- Eventos -->
     <section class="eventos" id="eventos">
-        <div class="container">
-            <h2>Eventos e Grupos</h2>
-            <p class="section-subtitle">Ambientes especiais para seu evento memorável</p>
+        <div class="container eventos-layout">
             <div class="evento-card">
-                <h3>Comemorações Especiais</h3>
+                <span class="section-kicker section-kicker-light">Eventos e Grupos</span>
+                <h2>Comemorações Especiais</h2>
                 <ul class="evento-list">
-                    <li>✨ Aniversários</li>
-                    <li>💒 Casamentos</li>
-                    <li>👥 Confraternizações corporativas</li>
-                    <li>🎉 Reuniões e eventos privados</li>
+                    <li><i class="fa-solid fa-cake-candles"></i> Aniversários</li>
+                    <li><i class="fa-solid fa-rings-wedding"></i> Casamentos</li>
+                    <li><i class="fa-solid fa-people-group"></i> Confraternizações corporativas</li>
+                    <li><i class="fa-solid fa-champagne-glasses"></i> Reuniões e eventos privados</li>
                 </ul>
                 <p>Faça sua reserva e deixe conosco a responsabilidade de criar um evento inesquecível!</p>
                 <a href="#contato" class="btn btn-primary">Solicitar Orçamento</a>
+            </div>
+            <div class="eventos-media">
+                <img src="assets/fotos/picanha-2.jpg" alt="Corte de carne nobre preparado para receber grupos e eventos" loading="lazy">
             </div>
         </div>
     </section>
@@ -128,13 +243,16 @@
     <!-- Quem Somos -->
     <section class="quem-somos" id="quem-somos">
         <div class="container">
-            <h2>Nossa História</h2>
+            <span class="section-kicker">Nossa História</span>
+            <h2>Desde 1982 em Belo Horizonte</h2>
             <div class="historia-content">
+                <div class="historia-media">
+                    <img src="assets/fotos/buffet.jpg" alt="Buffet da Churrascaria Pampulha, símbolo de tradição em Belo Horizonte" loading="lazy">
+                </div>
                 <div class="historia-text">
-                    <h3>Desde 1982</h3>
                     <p>A Churrascaria Pampulha é sinônimo de qualidade e tradição na capital mineira. Por mais de 40 anos, oferecemos uma opção de churrasco nobre com ambiente familiar e atendimento especial.</p>
                     <p>Tudo aqui é pensado para que você se sinta em casa, contando com o atendimento pessoal dos proprietários que gerenciam a casa diariamente.</p>
-                    <p class="destaque">Carnes rigorosamente selecionadas e preparadas com total atenção - garantindo o espetacular sabor que só a Churrascaria da Pampulha oferece.</p>
+                    <p class="destaque">Carnes rigorosamente selecionadas e preparadas com total atenção — garantindo o espetacular sabor que só a Churrascaria da Pampulha oferece.</p>
                 </div>
                 <div class="historia-stats">
                     <div class="stat">
@@ -142,8 +260,8 @@
                         <p>Anos de tradição</p>
                     </div>
                     <div class="stat">
-                        <h4>100%</h4>
-                        <p>Satisfação garantida</p>
+                        <h4>+20</h4>
+                        <p>Cortes no rodízio</p>
                     </div>
                 </div>
             </div>
@@ -153,6 +271,7 @@
     <!-- Contato -->
     <section class="contato" id="contato">
         <div class="container">
+            <span class="section-kicker section-kicker-light">Fale com a gente</span>
             <h2>Fale <span class="text-accent">Conosco</span></h2>
 
             <div class="contato-cards">
@@ -228,7 +347,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Churrascaria Pampulha - CNPJ 26.240.071/0001-55 | Todos os direitos reservados</p>
+                <p>&copy; <span id="footerYear">2025</span> Churrascaria Pampulha - CNPJ 26.240.071/0001-55 | Todos os direitos reservados</p>
                 <p><a href="#politica">Política de Privacidade</a></p>
                 <p class="footer-funcionario-link"><a href="area-reservas.php">Área Funcionário</a></p>
             </div>

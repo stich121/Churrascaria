@@ -242,12 +242,103 @@ window.addEventListener('scroll', function() {
     });
 });
 
-// Adicionar data atual ao footer dinamicamente
-const year = new Date().getFullYear();
-const footerYear = document.querySelector('.footer-bottom p');
+// Adicionar ano atual ao footer dinamicamente
+const footerYear = document.getElementById('footerYear');
 if (footerYear) {
-    // Já tem 2025 no HTML, deixar como está para demonstrar
+    footerYear.textContent = new Date().getFullYear();
 }
+
+// Carrossel de fotos
+(function initCarousel() {
+    const carousel = document.querySelector('[data-carousel]');
+    if (!carousel) return;
+
+    const track = carousel.querySelector('.carousel-track');
+    const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+    const prevBtn = carousel.querySelector('.carousel-prev');
+    const nextBtn = carousel.querySelector('.carousel-next');
+    const dotsWrap = carousel.querySelector('.carousel-dots');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let index = 0;
+    let autoplayId = null;
+
+    slides.forEach((slide, i) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-label', `Ir para foto ${i + 1}`);
+        dot.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(dot);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function render() {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+    }
+
+    function goTo(i) {
+        index = (i + slides.length) % slides.length;
+        render();
+    }
+
+    function next() {
+        goTo(index + 1);
+    }
+
+    function prev() {
+        goTo(index - 1);
+    }
+
+    function startAutoplay() {
+        if (prefersReducedMotion) return;
+        stopAutoplay();
+        autoplayId = setInterval(next, 5000);
+    }
+
+    function stopAutoplay() {
+        if (autoplayId) {
+            clearInterval(autoplayId);
+            autoplayId = null;
+        }
+    }
+
+    nextBtn.addEventListener('click', () => { next(); startAutoplay(); });
+    prevBtn.addEventListener('click', () => { prev(); startAutoplay(); });
+
+    carousel.addEventListener('mouseenter', stopAutoplay);
+    carousel.addEventListener('mouseleave', startAutoplay);
+    carousel.addEventListener('focusin', stopAutoplay);
+    carousel.addEventListener('focusout', startAutoplay);
+
+    carousel.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { next(); startAutoplay(); }
+        if (e.key === 'ArrowLeft') { prev(); startAutoplay(); }
+    });
+
+    // Swipe (touch e mouse)
+    let startX = 0;
+    let isDragging = false;
+
+    track.addEventListener('pointerdown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        stopAutoplay();
+    });
+
+    track.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const diff = e.clientX - startX;
+        if (diff > 50) prev();
+        else if (diff < -50) next();
+        startAutoplay();
+    });
+
+    render();
+    startAutoplay();
+})();
 
 // Melhorar UX com feedback visual nos botões
 document.querySelectorAll('.btn').forEach(btn => {

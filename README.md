@@ -105,3 +105,27 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
 - Ajuste no refresh automático do dashboard para não renovar a sessão sozinho.
 - Inclusão do controle de sessão nas páginas internas da área de funcionário.
 - Mensagem na tela de login quando a sessão for encerrada por inatividade.
+
+## Feito no Claude
+
+- Backend PHP/MySQL completo da Área do Funcionário, com 3 níveis de acesso (atendente, gerente, nível superior).
+- Tela de login (`area-reservas.php`), painel de reservas (`painel-reservas.php`), gestão de equipe (`funcionarios.php`),
+  troca de senha (`trocar-senha.php`) e logout, além de `auth.php`/`config.php` (sessão e conexão com o banco) e
+  `schema.sql` (estrutura das tabelas).
+- Cadastro de admin inicial (`Matheus.dias`, nível 3) no `schema.sql` e utilitário `gerar-senha.php` para gerar hash
+  de senha de novos admins.
+- Campos completos na reserva: cliente, telefone, churrascaria, data do pedido, data/hora/quantidade de pessoas,
+  pessoas que compareceram, valor, status, confirmação e observação — com máscaras de telefone e valor.
+- Seletor de churrascaria nas reservas e no filtro do dashboard.
+- Botão de edição das reservas no painel.
+- Cadastro de mesas do espaço (2, 4 ou 6 lugares), movido para página própria (`mesas.php`) ao lado de Funcionários,
+  com totais de mesas e lugares disponíveis.
+- Dashboard inicial pós-login com resumo do dia, seletor de data e visões diária, semanal e mensal (em abas).
+- Redesenho visual das páginas internas (login, painel, mesas, funcionários).
+- Bloqueio anti-bruteforce no login da área de reservas.
+- Botão de mostrar/ocultar senha no login e na troca de senha, com ajuste de posição no campo.
+- Organização do `config.php` fora da `public_html` por segurança, com `config.example.php` como modelo.
+- Cache-busting (`?v=`) no `style.css` para evitar cache desatualizado após deploys.
+- Ajustes visuais do site público: remoção de gradiente escuro dos cards do cardápio, atualização do mapa de
+  contato (Leaflet/Google Maps), simplificação da seção de contato e remoção de seções (Promoções, Happy Hour,
+  Vouchers).
