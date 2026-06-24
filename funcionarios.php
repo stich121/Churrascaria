@@ -96,6 +96,7 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
                     <li><a href="mesas.php">Mesas</a></li>
+                    <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>

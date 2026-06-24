@@ -1983,6 +1983,20 @@ h1, h2, h3, h4 {
     color: #8a5a1f;
 }
 
+.reserva-form-link-gerenciar {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.reserva-form-link-gerenciar:hover {
+    text-decoration: underline;
+}
+
 .tipo-reserva-form {
     display: flex;
     align-items: flex-end;

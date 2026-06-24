@@ -8,7 +8,6 @@ garantirColunaTipoReserva($pdo);
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
-$mensagemErroTipo = '';
 
 function parseValorBr(string $valor): float
 {
@@ -102,33 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($acao === 'criar_tipo_reserva') {
-        $nomeTipo = trim($_POST['nome_tipo'] ?? '');
-
-        if ($nomeTipo === '') {
-            $mensagemErroTipo = 'Informe um nome para o tipo de reserva.';
-        } else {
-            $stmt = $pdo->prepare('SELECT id FROM tipos_reserva WHERE nome = ?');
-            $stmt->execute([$nomeTipo]);
-
-            if ($stmt->fetch()) {
-                $mensagemErroTipo = 'Esse tipo de reserva já existe.';
-            } else {
-                $pdo->prepare('INSERT INTO tipos_reserva (nome, criado_por) VALUES (?, ?)')
-                    ->execute([$nomeTipo, $_SESSION['funcionario_id']]);
-                header('Location: painel-reservas.php');
-                exit;
-            }
-        }
-    }
-
-    if ($acao === 'excluir_tipo_reserva' && $nivel >= NIVEL_GERENTE) {
-        $stmt = $pdo->prepare('DELETE FROM tipos_reserva WHERE id = ?');
-        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
-        header('Location: painel-reservas.php');
-        exit;
-    }
-
     if ($acao === 'atualizar_comparecimento') {
         $idReserva = (int) ($_POST['id'] ?? 0);
         $compareceramPost = $_POST['pessoas_compareceram'] ?? '';
@@ -199,6 +171,7 @@ foreach ($reservas as $reserva) {
                 <ul class="funcionario-nav-links">
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="mesas.php">Mesas</a></li>
+                    <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
                     <?php endif; ?>
@@ -278,6 +251,7 @@ foreach ($reservas as $reserva) {
                                     <option value="<?= e($tipoOpcao['nome']) ?>"><?= e($tipoOpcao['nome']) ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <a href="tipos-reserva.php" class="reserva-form-link-gerenciar"><i class="fa-solid fa-gear"></i>Gerenciar tipos de reserva</a>
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
@@ -323,43 +297,6 @@ foreach ($reservas as $reserva) {
                     <?php endif; ?>
                     <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i>Adicionar Reserva</button>
                 </form>
-            </div>
-
-            <div class="reserva-form-card">
-                <div class="card-header-bar">
-                    <i class="fa-solid fa-cake-candles"></i>
-                    <h3>Tipos de Reserva</h3>
-                </div>
-                <form method="post" action="painel-reservas.php" class="tipo-reserva-form">
-                    <input type="hidden" name="acao" value="criar_tipo_reserva">
-                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                    <label class="reserva-form-label">
-                        <span><i class="fa-solid fa-tag"></i>Novo tipo de reserva</span>
-                        <input type="text" name="nome_tipo" placeholder="Ex: Aniversário, Casamento..." maxlength="60" required>
-                    </label>
-                    <button type="submit" class="btn btn-outline"><i class="fa-solid fa-plus"></i>Adicionar tipo</button>
-                </form>
-                <?php if ($mensagemErroTipo !== ''): ?>
-                    <p class="login-erro"><?= e($mensagemErroTipo) ?></p>
-                <?php endif; ?>
-                <div class="tipos-reserva-lista">
-                    <?php foreach ($tiposReserva as $tipo): ?>
-                        <span class="badge badge-info tipo-reserva-chip">
-                            <i class="fa-solid fa-tag"></i><?= e($tipo['nome']) ?>
-                            <?php if ($nivel >= NIVEL_GERENTE): ?>
-                                <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover o tipo de reserva &quot;<?= e($tipo['nome']) ?>&quot;?');">
-                                    <input type="hidden" name="acao" value="excluir_tipo_reserva">
-                                    <input type="hidden" name="id" value="<?= e((string) $tipo['id']) ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                                    <button type="submit" title="Remover tipo"><i class="fa-solid fa-xmark"></i></button>
-                                </form>
-                            <?php endif; ?>
-                        </span>
-                    <?php endforeach; ?>
-                    <?php if (empty($tiposReserva)): ?>
-                        <p class="reservas-vazio">Nenhum tipo de reserva cadastrado ainda.</p>
-                    <?php endif; ?>
-                </div>
             </div>
 
             <div class="reservas-lista-wrapper">
