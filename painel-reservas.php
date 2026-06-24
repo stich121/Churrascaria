@@ -157,7 +157,7 @@ foreach ($reservas as $reserva) {
             <div class="navbar-content">
                 <div class="logo">
                     <a href="index.html">
-                        <img src="Logo Branca carroça MC.png" alt="Churrascaria Pampulha" class="logo-img">
+                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
                     </a>
                 </div>
                 <ul class="funcionario-nav-links">
@@ -181,6 +181,7 @@ foreach ($reservas as $reserva) {
                     <h2>Painel de Reservas</h2>
                     <p>Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — cadastre e acompanhe as reservas da casa</p>
                 </div>
+                <a href="imprimir-reservas.php" target="_blank" class="btn btn-outline btn-imprimir-reservas-dia"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
             </div>
 
             <?php if ($totalReservas > 0): ?>

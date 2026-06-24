@@ -1629,6 +1629,14 @@ h1, h2, h3, h4 {
     z-index: 1;
 }
 
+.btn-imprimir-reservas-dia {
+    margin-left: auto;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+}
+
 /* ===== Cards de estatística ===== */
 .stat-cards-row {
     display: grid;
@@ -2205,6 +2213,10 @@ h1, h2, h3, h4 {
 
     .painel-reservas .panel-header h2 {
         text-align: center;
+    }
+
+    .btn-imprimir-reservas-dia {
+        margin-left: 0;
     }
 
     .reserva-form-card {
