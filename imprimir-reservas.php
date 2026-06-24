@@ -3,6 +3,7 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
 garantirColunaChurrascaria($pdo);
+garantirColunaTipoReserva($pdo);
 
 $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -12,7 +13,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataSelecionada) || strtotime($dataSel
 }
 
 $stmt = $pdo->prepare(
-    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.data_reserva, r.hora_reserva, r.pessoas,
+    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_reserva, r.hora_reserva, r.pessoas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao
      FROM reservas r
      WHERE r.data_reserva = ?
@@ -207,6 +208,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
                         <th>Cliente</th>
                         <th>Telefone</th>
                         <th>Churrascaria</th>
+                        <th>Tipo</th>
                         <th>Pessoas</th>
                         <th>Valor</th>
                         <th>Status</th>
@@ -221,6 +223,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
                             <td><?= e($reserva['nome_cliente']) ?></td>
                             <td><?= e($reserva['telefone']) ?></td>
                             <td><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></td>
+                            <td><?= $reserva['tipo_reserva'] ? e($reserva['tipo_reserva']) : '-' ?></td>
                             <td><?= e((string) $reserva['pessoas']) ?></td>
                             <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
                             <td><?= $reserva['status_reserva'] === 'Reservado' ? 'Reservado' : 'Cancelado' ?></td>

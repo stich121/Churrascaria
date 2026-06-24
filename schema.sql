@@ -12,11 +12,21 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     CONSTRAINT chk_funcionarios_nivel CHECK (nivel IN (1, 2, 3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS tipos_reserva (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(60) NOT NULL,
+    criado_por INT UNSIGNED NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_tipos_reserva_nome (nome),
+    CONSTRAINT fk_tipos_reserva_funcionario FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS reservas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome_cliente VARCHAR(100) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
     churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha',
+    tipo_reserva VARCHAR(60) NULL,
     data_pedido DATE NULL,
     data_reserva DATE NOT NULL,
     hora_reserva TIME NOT NULL,

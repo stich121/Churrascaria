@@ -27,6 +27,35 @@ function dashboardUrl(array $params = []): string
     return $query !== '' ? 'dashboard.php?' . $query : 'dashboard.php';
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'atualizar_comparecimento') {
+    exigirNivel(NIVEL_GERENTE);
+    verificarCsrf();
+
+    $idReserva = (int) ($_POST['id'] ?? 0);
+    $statusComparecimento = $_POST['status_comparecimento'] ?? '';
+
+    if ($statusComparecimento === 'nao') {
+        $pessoasCompareceram = 0;
+    } elseif ($statusComparecimento === 'sim') {
+        $pessoasCompareceram = max(1, (int) ($_POST['pessoas_compareceram'] ?? 0));
+    } else {
+        $pessoasCompareceram = null;
+    }
+
+    if ($idReserva > 0) {
+        $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ? WHERE id = ?')
+            ->execute([$pessoasCompareceram, $idReserva]);
+    }
+
+    $abaRetorno = in_array($_POST['aba'] ?? '', ['dia', 'semana', 'mes'], true) ? $_POST['aba'] : 'dia';
+    header('Location: ' . dashboardUrl([
+        'data' => validarDataYmd($_POST['data'] ?? null),
+        'aba' => $abaRetorno,
+        'churrascaria' => $_POST['churrascaria'] ?? 'pampulha',
+    ]));
+    exit;
+}
+
 $dataSelecionada = validarDataYmd($_GET['data'] ?? null);
 $dataSelecionadaDt = new DateTime($dataSelecionada);
 $diaSemanaNum = (int) $dataSelecionadaDt->format('w');
@@ -60,7 +89,7 @@ if ($churrascariaDashboard !== 'todas') {
 
 // ===== Visão do dia =====
 $stmt = $pdo->prepare(
-    "SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, status_reserva, confirmacao
+    "SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, pessoas_compareceram, status_reserva, confirmacao
      FROM reservas
      WHERE data_reserva = ?{$filtroChurrascariaSql}
      ORDER BY hora_reserva"
@@ -249,10 +278,16 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                     <th>Pessoas</th>
                                     <th>Status</th>
                                     <th>Confirmação</th>
+                                    <th>Compareceu</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($reservasDia as $reserva): ?>
+                                    <?php
+                                        $statusComparecimentoAtual = $reserva['pessoas_compareceram'] === null
+                                            ? ''
+                                            : ((int) $reserva['pessoas_compareceram'] === 0 ? 'nao' : 'sim');
+                                    ?>
                                     <tr>
                                         <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
                                         <td><?= e($reserva['nome_cliente']) ?></td>
@@ -271,6 +306,40 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                                 <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i>Confirmado</span>
                                             <?php else: ?>
                                                 <span class="badge badge-warning"><i class="fa-solid fa-hourglass-half"></i>Pendente</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($nivel >= NIVEL_GERENTE): ?>
+                                                <form method="post" action="dashboard.php" class="dashboard-comparecimento-form">
+                                                    <input type="hidden" name="acao" value="atualizar_comparecimento">
+                                                    <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
+                                                    <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
+                                                    <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
+                                                    <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                                                    <select name="status_comparecimento" class="dashboard-comparecimento-select">
+                                                        <option value="" <?= $statusComparecimentoAtual === '' ? 'selected' : '' ?>>Pendente</option>
+                                                        <option value="sim" <?= $statusComparecimentoAtual === 'sim' ? 'selected' : '' ?>>Veio</option>
+                                                        <option value="nao" <?= $statusComparecimentoAtual === 'nao' ? 'selected' : '' ?>>Não veio</option>
+                                                    </select>
+                                                    <input
+                                                        type="number"
+                                                        name="pessoas_compareceram"
+                                                        min="1"
+                                                        placeholder="Qtd"
+                                                        class="dashboard-comparecimento-qtd"
+                                                        value="<?= $statusComparecimentoAtual === 'sim' ? e((string) $reserva['pessoas_compareceram']) : '' ?>"
+                                                        style="<?= $statusComparecimentoAtual === 'sim' ? '' : 'display:none;' ?>">
+                                                    <button type="submit" title="Salvar"><i class="fa-solid fa-check"></i></button>
+                                                </form>
+                                            <?php else: ?>
+                                                <?php if ($statusComparecimentoAtual === 'sim'): ?>
+                                                    <span class="badge badge-success"><i class="fa-solid fa-user-check"></i><?= e((string) $reserva['pessoas_compareceram']) ?> vieram</span>
+                                                <?php elseif ($statusComparecimentoAtual === 'nao'): ?>
+                                                    <span class="badge badge-danger"><i class="fa-solid fa-user-xmark"></i>Não veio</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-warning"><i class="fa-solid fa-hourglass-half"></i>Pendente</span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -352,7 +421,22 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
         document.addEventListener('DOMContentLoaded', function () {
             inicializarDashboardTabs();
             inicializarAtualizacaoDashboard();
+            inicializarComparecimentoDashboard();
         });
+
+        function inicializarComparecimentoDashboard() {
+            document.querySelectorAll('.dashboard-comparecimento-select').forEach(function (select) {
+                select.addEventListener('change', function () {
+                    var qtdInput = select.closest('.dashboard-comparecimento-form').querySelector('.dashboard-comparecimento-qtd');
+                    if (select.value === 'sim') {
+                        qtdInput.style.display = '';
+                    } else {
+                        qtdInput.style.display = 'none';
+                        qtdInput.value = '';
+                    }
+                });
+            });
+        }
 
         function inicializarDashboardTabs() {
             var tabs = document.querySelectorAll('.dashboard-period-tab');
@@ -436,6 +520,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     if (novoPainel && painelAtual) {
                         painelAtual.replaceWith(novoPainel);
                         inicializarDashboardTabs();
+                        inicializarComparecimentoDashboard();
                     }
                 }).catch(function () {}).finally(function () {
                     atualizando = false;

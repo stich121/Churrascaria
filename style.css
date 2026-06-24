@@ -1983,6 +1983,40 @@ h1, h2, h3, h4 {
     color: #8a5a1f;
 }
 
+.tipo-reserva-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.tipo-reserva-form .reserva-form-label {
+    flex: 1;
+    min-width: 220px;
+}
+
+.tipos-reserva-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+}
+
+.tipo-reserva-chip form {
+    display: inline-flex;
+    margin-left: 0.3rem;
+}
+
+.tipo-reserva-chip button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 0;
+    line-height: 1;
+}
+
 .reserva-comparecimento-form {
     display: flex;
     align-items: center;

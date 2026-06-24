@@ -216,6 +216,53 @@ function garantirColunaChurrascaria(PDO $pdo): void
     $verificado = true;
 }
 
+function garantirTabelaTiposReserva(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS tipos_reserva (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(60) NOT NULL,
+            criado_por INT UNSIGNED NULL,
+            criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_tipos_reserva_nome (nome),
+            CONSTRAINT fk_tipos_reserva_funcionario FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
+
+    $stmt = $pdo->query('SELECT COUNT(*) AS total FROM tipos_reserva');
+    if ((int) $stmt->fetch()['total'] === 0) {
+        $padrao = ['Aniversário', 'Casamento', 'Confraternização', 'Reunião de negócios', 'Outro'];
+        $insercao = $pdo->prepare('INSERT INTO tipos_reserva (nome) VALUES (?)');
+        foreach ($padrao as $nomeTipo) {
+            $insercao->execute([$nomeTipo]);
+        }
+    }
+
+    $verificado = true;
+}
+
+function garantirColunaTipoReserva(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM reservas LIKE 'tipo_reserva'");
+    if (!$stmt->fetch()) {
+        $pdo->exec('ALTER TABLE reservas ADD COLUMN tipo_reserva VARCHAR(60) NULL AFTER churrascaria');
+    }
+
+    $verificado = true;
+}
+
 function e(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');

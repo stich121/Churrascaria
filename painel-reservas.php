@@ -3,9 +3,12 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
 garantirColunaChurrascaria($pdo);
+garantirTabelaTiposReserva($pdo);
+garantirColunaTipoReserva($pdo);
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
+$mensagemErroTipo = '';
 
 function parseValorBr(string $valor): float
 {
@@ -20,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'criar') {
         $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
+        $tipoReserva = trim($_POST['tipo_reserva'] ?? '');
         $pessoas = (int) ($_POST['pessoas'] ?? 0);
         $statusReserva = $_POST['status_reserva'] ?? 'Reservado';
         $confirmacao = $_POST['confirmacao'] ?? 'Pendente';
@@ -35,13 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagemErro = 'Escolha uma confirmação válida.';
         } else {
             $stmt = $pdo->prepare(
-                'INSERT INTO reservas (nome_cliente, telefone, churrascaria, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO reservas (nome_cliente, telefone, churrascaria, tipo_reserva, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $stmt->execute([
                 trim($_POST['nome'] ?? ''),
                 trim($_POST['telefone'] ?? ''),
                 $churrascaria,
+                $tipoReserva !== '' ? $tipoReserva : null,
                 $_POST['data_pedido'] ?? null,
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
@@ -60,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($acao === 'editar') {
         $idReserva = (int) ($_POST['id'] ?? 0);
         $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
+        $tipoReserva = trim($_POST['tipo_reserva'] ?? '');
         $pessoas = (int) ($_POST['pessoas'] ?? 0);
         $statusReserva = $_POST['status_reserva'] ?? 'Reservado';
         $observacao = trim($_POST['observacao'] ?? '');
@@ -74,13 +80,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagemErro = 'Escolha um status de reserva válido.';
         } else {
             $stmt = $pdo->prepare(
-                'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
+                'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, tipo_reserva = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
                  WHERE id = ?'
             );
             $stmt->execute([
                 trim($_POST['nome'] ?? ''),
                 trim($_POST['telefone'] ?? ''),
                 $churrascaria,
+                $tipoReserva !== '' ? $tipoReserva : null,
                 $_POST['data_pedido'] ?? null,
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
@@ -93,6 +100,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: painel-reservas.php');
             exit;
         }
+    }
+
+    if ($acao === 'criar_tipo_reserva') {
+        $nomeTipo = trim($_POST['nome_tipo'] ?? '');
+
+        if ($nomeTipo === '') {
+            $mensagemErroTipo = 'Informe um nome para o tipo de reserva.';
+        } else {
+            $stmt = $pdo->prepare('SELECT id FROM tipos_reserva WHERE nome = ?');
+            $stmt->execute([$nomeTipo]);
+
+            if ($stmt->fetch()) {
+                $mensagemErroTipo = 'Esse tipo de reserva já existe.';
+            } else {
+                $pdo->prepare('INSERT INTO tipos_reserva (nome, criado_por) VALUES (?, ?)')
+                    ->execute([$nomeTipo, $_SESSION['funcionario_id']]);
+                header('Location: painel-reservas.php');
+                exit;
+            }
+        }
+    }
+
+    if ($acao === 'excluir_tipo_reserva' && $nivel >= NIVEL_GERENTE) {
+        $stmt = $pdo->prepare('DELETE FROM tipos_reserva WHERE id = ?');
+        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        header('Location: painel-reservas.php');
+        exit;
     }
 
     if ($acao === 'atualizar_comparecimento') {
@@ -119,8 +153,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
+$tiposReserva = $pdo->query('SELECT id, nome FROM tipos_reserva ORDER BY nome')->fetchAll();
+
 $reservas = $pdo->query(
-    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
+    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
      JOIN funcionarios f ON f.id = r.funcionario_id
@@ -235,6 +271,15 @@ foreach ($reservas as $reserva) {
                             </select>
                         </label>
                         <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-cake-candles"></i>Tipo de reserva</span>
+                            <select name="tipo_reserva">
+                                <option value="">Selecione (opcional)</option>
+                                <?php foreach ($tiposReserva as $tipoOpcao): ?>
+                                    <option value="<?= e($tipoOpcao['nome']) ?>"><?= e($tipoOpcao['nome']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
                             <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
                             <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
                         </label>
@@ -280,12 +325,50 @@ foreach ($reservas as $reserva) {
                 </form>
             </div>
 
+            <div class="reserva-form-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-cake-candles"></i>
+                    <h3>Tipos de Reserva</h3>
+                </div>
+                <form method="post" action="painel-reservas.php" class="tipo-reserva-form">
+                    <input type="hidden" name="acao" value="criar_tipo_reserva">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-tag"></i>Novo tipo de reserva</span>
+                        <input type="text" name="nome_tipo" placeholder="Ex: Aniversário, Casamento..." maxlength="60" required>
+                    </label>
+                    <button type="submit" class="btn btn-outline"><i class="fa-solid fa-plus"></i>Adicionar tipo</button>
+                </form>
+                <?php if ($mensagemErroTipo !== ''): ?>
+                    <p class="login-erro"><?= e($mensagemErroTipo) ?></p>
+                <?php endif; ?>
+                <div class="tipos-reserva-lista">
+                    <?php foreach ($tiposReserva as $tipo): ?>
+                        <span class="badge badge-info tipo-reserva-chip">
+                            <i class="fa-solid fa-tag"></i><?= e($tipo['nome']) ?>
+                            <?php if ($nivel >= NIVEL_GERENTE): ?>
+                                <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover o tipo de reserva &quot;<?= e($tipo['nome']) ?>&quot;?');">
+                                    <input type="hidden" name="acao" value="excluir_tipo_reserva">
+                                    <input type="hidden" name="id" value="<?= e((string) $tipo['id']) ?>">
+                                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                                    <button type="submit" title="Remover tipo"><i class="fa-solid fa-xmark"></i></button>
+                                </form>
+                            <?php endif; ?>
+                        </span>
+                    <?php endforeach; ?>
+                    <?php if (empty($tiposReserva)): ?>
+                        <p class="reservas-vazio">Nenhum tipo de reserva cadastrado ainda.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <div class="reservas-lista-wrapper">
                 <table class="reservas-tabela">
                     <thead>
                         <tr>
                             <th>Cliente</th>
                             <th>Churrascaria</th>
+                            <th>Tipo</th>
                             <th>Telefone</th>
                             <th>Pedido</th>
                             <th>Data</th>
@@ -305,6 +388,7 @@ foreach ($reservas as $reserva) {
                             <tr>
                                 <td><?= e($reserva['nome_cliente']) ?></td>
                                 <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
+                                <td><?= $reserva['tipo_reserva'] ? '<span class="badge badge-info"><i class="fa-solid fa-tag"></i>' . e($reserva['tipo_reserva']) . '</span>' : '-' ?></td>
                                 <td><?= e($reserva['telefone']) ?></td>
                                 <td><?= $reserva['data_pedido'] ? e(date('d/m/Y', strtotime($reserva['data_pedido']))) : '-' ?></td>
                                 <td><?= e(date('d/m/Y', strtotime($reserva['data_reserva']))) ?></td>
@@ -340,6 +424,7 @@ foreach ($reservas as $reserva) {
                                         data-nome="<?= e($reserva['nome_cliente']) ?>"
                                         data-telefone="<?= e($reserva['telefone']) ?>"
                                         data-churrascaria="<?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?>"
+                                        data-tipo-reserva="<?= e($reserva['tipo_reserva'] ?? '') ?>"
                                         data-data-pedido="<?= e($reserva['data_pedido'] ?? '') ?>"
                                         data-data="<?= e($reserva['data_reserva']) ?>"
                                         data-hora="<?= e(substr((string) $reserva['hora_reserva'], 0, 5)) ?>"
@@ -397,6 +482,15 @@ foreach ($reservas as $reserva) {
                         <select name="churrascaria" id="editar_churrascaria" required>
                             <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
                                 <option value="<?= e($churrascariaOpcao) ?>"><?= e($churrascariaOpcao) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-cake-candles"></i>Tipo de reserva</span>
+                        <select name="tipo_reserva" id="editar_tipo_reserva">
+                            <option value="">Selecione (opcional)</option>
+                            <?php foreach ($tiposReserva as $tipoOpcao): ?>
+                                <option value="<?= e($tipoOpcao['nome']) ?>"><?= e($tipoOpcao['nome']) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </label>
@@ -477,6 +571,7 @@ foreach ($reservas as $reserva) {
             document.getElementById('editar_nome').value = botao.dataset.nome;
             document.getElementById('editar_telefone').value = botao.dataset.telefone;
             document.getElementById('editar_churrascaria').value = botao.dataset.churrascaria || 'Churrascaria Pampulha';
+            document.getElementById('editar_tipo_reserva').value = botao.dataset.tipoReserva || '';
             document.getElementById('editar_data_pedido').value = botao.dataset.dataPedido;
             document.getElementById('editar_data').value = botao.dataset.data;
             document.getElementById('editar_hora').value = botao.dataset.hora;
