@@ -151,7 +151,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             <div class="navbar-content">
                 <div class="logo">
                     <a href="index.html">
-                        <img src="Logo Branca carroça MC.png" alt="Churrascaria Pampulha" class="logo-img">
+                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
                     </a>
                 </div>
                 <ul class="funcionario-nav-links">

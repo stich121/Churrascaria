@@ -51,7 +51,7 @@ if ($bloqueioRestante > 0) {
             <div class="navbar-content">
                 <div class="logo">
                     <a href="index.html">
-                        <img src="Logo Branca carroça MC.png" alt="Churrascaria Pampulha" class="logo-img">
+                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
                     </a>
                 </div>
                 <a href="index.html" class="btn-voltar-site"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
