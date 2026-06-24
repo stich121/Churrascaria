@@ -1899,7 +1899,8 @@ h1, h2, h3, h4 {
 }
 
 .reserva-form-grid input,
-.reserva-form-grid select {
+.reserva-form-grid select,
+.reserva-form-grid textarea {
     width: 100%;
     padding: 0.75rem 0.9rem;
     border: 2px solid #e5e5e5;
@@ -1911,11 +1912,22 @@ h1, h2, h3, h4 {
 }
 
 .reserva-form-grid input:focus,
-.reserva-form-grid select:focus {
+.reserva-form-grid select:focus,
+.reserva-form-grid textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     background-color: white;
     box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.08);
+}
+
+.reserva-form-grid textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.5;
+}
+
+.reserva-form-label--full {
+    grid-column: 1 / -1;
 }
 
 .reserva-form-label {

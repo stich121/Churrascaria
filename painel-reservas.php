@@ -287,9 +287,9 @@ foreach ($reservas as $reserva) {
                                 <option value="Confirmado">Confirmado</option>
                             </select>
                         </label>
-                        <label class="reserva-form-label">
+                        <label class="reserva-form-label reserva-form-label--full">
                             <span><i class="fa-solid fa-comment"></i>Observação</span>
-                            <input type="text" name="observacao" placeholder="Observação (opcional)">
+                            <textarea name="observacao" placeholder="Observação (opcional)" rows="3"></textarea>
                         </label>
                     </div>
                     <?php if ($mensagemErro !== ''): ?>
@@ -458,9 +458,9 @@ foreach ($reservas as $reserva) {
                             <option value="Cancelado">Cancelado</option>
                         </select>
                     </label>
-                    <label class="reserva-form-label">
+                    <label class="reserva-form-label reserva-form-label--full">
                         <span><i class="fa-solid fa-comment"></i>Observação</span>
-                        <input type="text" name="observacao" id="editar_observacao" placeholder="Observação (opcional)">
+                        <textarea name="observacao" id="editar_observacao" placeholder="Observação (opcional)" rows="3"></textarea>
                     </label>
                 </div>
                 <div class="modal-actions">
