@@ -3,6 +3,7 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
 garantirColunaChurrascaria($pdo);
+garantirColunaChurrascariaMesas($pdo);
 
 $nivel = nivelFuncionario();
 $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -110,7 +111,13 @@ foreach ($reservasDia as $reserva) {
     }
 }
 
-$totalMesas = (int) $pdo->query('SELECT COALESCE(SUM(quantidade), 0) FROM mesas')->fetchColumn();
+if ($churrascariaDashboard === 'todas') {
+    $totalMesas = (int) $pdo->query('SELECT COALESCE(SUM(quantidade), 0) FROM mesas')->fetchColumn();
+} else {
+    $stmtMesas = $pdo->prepare('SELECT COALESCE(SUM(quantidade), 0) FROM mesas WHERE churrascaria = ?');
+    $stmtMesas->execute([$rotuloDashboardChurrascaria]);
+    $totalMesas = (int) $stmtMesas->fetchColumn();
+}
 $mesasDisponiveisDia = max(0, $totalMesas - $totalReservasDia);
 
 // ===== Visão semanal =====
