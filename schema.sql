@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 CREATE TABLE IF NOT EXISTS mesas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     capacidade TINYINT UNSIGNED NOT NULL,
+    churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha',
     quantidade SMALLINT UNSIGNED NOT NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_mesas_capacidade CHECK (capacidade IN (2, 4, 6))

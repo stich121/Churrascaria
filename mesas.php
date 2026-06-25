@@ -2,6 +2,7 @@
 require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
+garantirColunaChurrascariaMesas($pdo);
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
@@ -13,12 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($acao === 'criar_mesa') {
         $capacidade = (int) ($_POST['capacidade'] ?? 0);
         $quantidadeMesas = (int) ($_POST['quantidade_mesas'] ?? 0);
+        $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
 
         if (!in_array($capacidade, [2, 4, 6], true) || $quantidadeMesas < 1) {
             $mensagemErro = 'Escolha uma capacidade válida (2, 4 ou 6 lugares) e uma quantidade de mesas maior que zero.';
+        } elseif (!churrascariaReservaValida($churrascaria)) {
+            $mensagemErro = 'Escolha uma churrascaria válida.';
         } else {
-            $stmt = $pdo->prepare('INSERT INTO mesas (capacidade, quantidade) VALUES (?, ?)');
-            $stmt->execute([$capacidade, $quantidadeMesas]);
+            $stmt = $pdo->prepare('INSERT INTO mesas (capacidade, quantidade, churrascaria) VALUES (?, ?, ?)');
+            $stmt->execute([$capacidade, $quantidadeMesas, $churrascaria]);
             header('Location: mesas.php');
             exit;
         }
@@ -32,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$mesas = $pdo->query('SELECT id, capacidade, quantidade FROM mesas ORDER BY capacidade, id')->fetchAll();
+$mesas = $pdo->query('SELECT id, capacidade, quantidade, churrascaria FROM mesas ORDER BY churrascaria, capacidade, id')->fetchAll();
 $totalMesas = 0;
 $totalLugares = 0;
 foreach ($mesas as $mesa) {
@@ -107,6 +111,14 @@ foreach ($mesas as $mesa) {
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <div class="reserva-form-grid">
                         <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                            <select name="churrascaria" required>
+                                <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                    <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
                             <span><i class="fa-solid fa-chair"></i>Lugares por mesa</span>
                             <select name="capacidade" required>
                                 <option value="">Lugares por mesa</option>
@@ -131,6 +143,7 @@ foreach ($mesas as $mesa) {
                 <table class="reservas-tabela">
                     <thead>
                         <tr>
+                            <th>Churrascaria</th>
                             <th>Lugares por mesa</th>
                             <th>Quantidade de mesas</th>
                             <th>Lugares totais</th>
@@ -142,6 +155,7 @@ foreach ($mesas as $mesa) {
                     <tbody>
                         <?php foreach ($mesas as $mesa): ?>
                             <tr>
+                                <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($mesa['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
                                 <td><?= e((string) $mesa['capacidade']) ?></td>
                                 <td><?= e((string) $mesa['quantidade']) ?></td>
                                 <td><?= e((string) ($mesa['capacidade'] * $mesa['quantidade'])) ?></td>

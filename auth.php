@@ -216,6 +216,25 @@ function garantirColunaChurrascaria(PDO $pdo): void
     $verificado = true;
 }
 
+function garantirColunaChurrascariaMesas(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM mesas LIKE 'churrascaria'");
+    if (!$stmt->fetch()) {
+        $pdo->exec(
+            "ALTER TABLE mesas
+             ADD COLUMN churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha' AFTER capacidade"
+        );
+    }
+
+    $verificado = true;
+}
+
 function garantirTabelaTiposReserva(PDO $pdo): void
 {
     static $verificado = false;
