@@ -14,8 +14,9 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataSelecionada) || strtotime($dataSel
 
 $stmt = $pdo->prepare(
     'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_reserva, r.hora_reserva, r.pessoas,
-            r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao
+            r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS atendente
      FROM reservas r
+     LEFT JOIN funcionarios f ON f.id = r.funcionario_id
      WHERE r.data_reserva = ?
      ORDER BY r.hora_reserva'
 );
@@ -214,6 +215,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
                         <th>Status</th>
                         <th>Confirmação</th>
                         <th>Observação</th>
+                        <th>Atendente</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -229,6 +231,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
                             <td><?= $reserva['status_reserva'] === 'Reservado' ? 'Reservado' : 'Cancelado' ?></td>
                             <td><?= $reserva['confirmacao'] === 'Confirmado' ? 'Confirmado' : 'Pendente' ?></td>
                             <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
+                            <td><?= $reserva['atendente'] ? e($reserva['atendente']) : '-' ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
