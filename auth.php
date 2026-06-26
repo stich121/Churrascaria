@@ -304,6 +304,18 @@ function garantirTabelaClientes(PDO $pdo): void
     $verificado = true;
 }
 
+function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone): void
+{
+    if ($nome === '' || $telefone === '') {
+        return;
+    }
+
+    $pdo->prepare(
+        'INSERT INTO clientes (nome, telefone) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE nome = VALUES(nome)'
+    )->execute([$nome, $telefone]);
+}
+
 function e(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');

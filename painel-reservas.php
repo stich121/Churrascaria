@@ -5,6 +5,7 @@ exigirLogin();
 garantirColunaChurrascaria($pdo);
 garantirTabelaTiposReserva($pdo);
 garantirColunaTipoReserva($pdo);
+garantirTabelaClientes($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
     header('Content-Type: application/json; charset=utf-8');
@@ -105,13 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($confirmacao, ['Pendente', 'Confirmado'], true)) {
             $mensagemErro = 'Escolha uma confirmação válida.';
         } else {
+            $nomeCliente = trim($_POST['nome'] ?? '');
+            $telefoneCliente = trim($_POST['telefone'] ?? '');
+
             $stmt = $pdo->prepare(
                 'INSERT INTO reservas (nome_cliente, telefone, churrascaria, tipo_reserva, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $stmt->execute([
-                trim($_POST['nome'] ?? ''),
-                trim($_POST['telefone'] ?? ''),
+                $nomeCliente,
+                $telefoneCliente,
                 $churrascaria,
                 $tipoReserva !== '' ? $tipoReserva : null,
                 $_POST['data_pedido'] ?? null,
@@ -124,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $_SESSION['funcionario_id'],
             ]);
+            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente);
             header('Location: painel-reservas.php');
             exit;
         }
@@ -146,13 +151,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($statusReserva, ['Reservado', 'Cancelado'], true)) {
             $mensagemErro = 'Escolha um status de reserva válido.';
         } else {
+            $nomeCliente = trim($_POST['nome'] ?? '');
+            $telefoneCliente = trim($_POST['telefone'] ?? '');
+
             $stmt = $pdo->prepare(
                 'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, tipo_reserva = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
                  WHERE id = ?'
             );
             $stmt->execute([
-                trim($_POST['nome'] ?? ''),
-                trim($_POST['telefone'] ?? ''),
+                $nomeCliente,
+                $telefoneCliente,
                 $churrascaria,
                 $tipoReserva !== '' ? $tipoReserva : null,
                 $_POST['data_pedido'] ?? null,
@@ -164,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $idReserva,
             ]);
+            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente);
             header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
             exit;
         }
