@@ -2150,6 +2150,34 @@ h1, h2, h3, h4 {
     margin-bottom: 1.5rem;
 }
 
+.reserva-form-secionado .reserva-form-secao {
+    background-color: #fbfafa;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.reserva-form-secionado .reserva-form-secao .reserva-form-grid {
+    margin-bottom: 0;
+}
+
+.reserva-form-secao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.reserva-form-secao-titulo i {
+    font-size: 1rem;
+}
+
 .reserva-form-grid input,
 .reserva-form-grid select,
 .reserva-form-grid textarea {

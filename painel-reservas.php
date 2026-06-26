@@ -353,80 +353,97 @@ $reservas = $stmtReservas->fetchAll();
                     <i class="fa-solid fa-circle-plus"></i>
                     <h3>Nova Reserva</h3>
                 </div>
-                <form method="post" action="painel-reservas.php">
+                <form method="post" action="painel-reservas.php" class="reserva-form-secionado">
                     <input type="hidden" name="acao" value="criar">
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                    <div class="reserva-form-grid">
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-user"></i>Nome do cliente</span>
-                            <input type="text" name="nome" id="novo_nome" placeholder="Nome do cliente" required autocomplete="off">
-                            <small id="novo_cliente_aviso" class="reserva-form-aviso" style="display:none;"></small>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-phone"></i>Telefone</span>
-                            <input type="tel" name="telefone" id="novo_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento do cliente</span>
-                            <input type="date" name="cliente_data_nascimento" id="novo_cliente_aniversario">
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-store"></i>Churrascaria</span>
-                            <select name="churrascaria" id="novo_churrascaria" required>
-                                <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
-                                    <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-cake-candles"></i>Tipo de reserva</span>
-                            <select name="tipo_reserva">
-                                <option value="">Selecione (opcional)</option>
-                                <?php foreach ($tiposReserva as $tipoOpcao): ?>
-                                    <option value="<?= e($tipoOpcao['nome']) ?>"><?= e($tipoOpcao['nome']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <a href="tipos-reserva.php" class="reserva-form-link-gerenciar"><i class="fa-solid fa-gear"></i>Gerenciar tipos de reserva</a>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
-                            <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
-                            <input type="date" name="data" id="novo_data" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-clock"></i>Horário</span>
-                            <input type="time" name="hora" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-users"></i>Nº de pessoas</span>
-                            <input type="number" name="pessoas" placeholder="Nº de pessoas" min="1" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-sack-dollar"></i>Valor</span>
-                            <input type="text" name="valor" inputmode="numeric" placeholder="R$ 0,00" required>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-clipboard-list"></i>Status</span>
-                            <select name="status_reserva" required>
-                                <option value="Reservado" selected>Reservado</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </label>
-                        <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-circle-check"></i>Confirmação</span>
-                            <select name="confirmacao" required>
-                                <option value="Pendente" selected>Confirmação pendente</option>
-                                <option value="Confirmado">Confirmado</option>
-                            </select>
-                        </label>
-                        <label class="reserva-form-label reserva-form-label--full">
-                            <span><i class="fa-solid fa-comment"></i>Observação</span>
-                            <textarea name="observacao" placeholder="Observação (opcional)" rows="3"></textarea>
-                        </label>
+
+                    <div class="reserva-form-secao">
+                        <h4 class="reserva-form-secao-titulo"><i class="fa-solid fa-id-card"></i>Dados do cliente</h4>
+                        <div class="reserva-form-grid">
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-user"></i>Nome do cliente</span>
+                                <input type="text" name="nome" id="novo_nome" placeholder="Nome do cliente" required autocomplete="off">
+                                <small id="novo_cliente_aviso" class="reserva-form-aviso" style="display:none;"></small>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-phone"></i>Telefone</span>
+                                <input type="tel" name="telefone" id="novo_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento</span>
+                                <input type="date" name="cliente_data_nascimento" id="novo_cliente_aniversario">
+                            </label>
+                        </div>
                     </div>
+
+                    <div class="reserva-form-secao">
+                        <h4 class="reserva-form-secao-titulo"><i class="fa-solid fa-calendar-days"></i>Detalhes da reserva</h4>
+                        <div class="reserva-form-grid">
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                                <select name="churrascaria" id="novo_churrascaria" required>
+                                    <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                        <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-cake-candles"></i>Tipo de reserva</span>
+                                <select name="tipo_reserva">
+                                    <option value="">Selecione (opcional)</option>
+                                    <?php foreach ($tiposReserva as $tipoOpcao): ?>
+                                        <option value="<?= e($tipoOpcao['nome']) ?>"><?= e($tipoOpcao['nome']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <a href="tipos-reserva.php" class="reserva-form-link-gerenciar"><i class="fa-solid fa-gear"></i>Gerenciar tipos de reserva</a>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-calendar"></i>Data do pedido</span>
+                                <input type="date" name="data_pedido" value="<?= e(date('Y-m-d')) ?>" required>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
+                                <input type="date" name="data" id="novo_data" required>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-clock"></i>Horário</span>
+                                <input type="time" name="hora" required>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-users"></i>Nº de pessoas</span>
+                                <input type="number" name="pessoas" placeholder="Nº de pessoas" min="1" required>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-sack-dollar"></i>Valor</span>
+                                <input type="text" name="valor" inputmode="numeric" placeholder="R$ 0,00" required>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="reserva-form-secao">
+                        <h4 class="reserva-form-secao-titulo"><i class="fa-solid fa-clipboard-check"></i>Status e observação</h4>
+                        <div class="reserva-form-grid">
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-clipboard-list"></i>Status</span>
+                                <select name="status_reserva" required>
+                                    <option value="Reservado" selected>Reservado</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </label>
+                            <label class="reserva-form-label">
+                                <span><i class="fa-solid fa-circle-check"></i>Confirmação</span>
+                                <select name="confirmacao" required>
+                                    <option value="Pendente" selected>Confirmação pendente</option>
+                                    <option value="Confirmado">Confirmado</option>
+                                </select>
+                            </label>
+                            <label class="reserva-form-label reserva-form-label--full">
+                                <span><i class="fa-solid fa-comment"></i>Observação</span>
+                                <textarea name="observacao" placeholder="Observação (opcional)" rows="3"></textarea>
+                            </label>
+                        </div>
+                    </div>
+
                     <?php if ($mensagemErro !== ''): ?>
                         <p class="login-erro"><?= e($mensagemErro) ?></p>
                     <?php endif; ?>
