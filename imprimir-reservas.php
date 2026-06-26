@@ -48,6 +48,9 @@ $reservas = $stmt->fetchAll();
 
 $totalPessoas = 0;
 $totalConfirmadas = 0;
+$reservasAlmoco = [];
+$reservasJanta = [];
+
 foreach ($reservas as $reserva) {
     if ($reserva['status_reserva'] === 'Reservado') {
         $totalPessoas += (int) $reserva['pessoas'];
@@ -55,6 +58,28 @@ foreach ($reservas as $reserva) {
     if ($reserva['confirmacao'] === 'Confirmado') {
         $totalConfirmadas++;
     }
+
+    if (substr($reserva['hora_reserva'], 0, 5) <= '16:00') {
+        $reservasAlmoco[] = $reserva;
+    } else {
+        $reservasJanta[] = $reserva;
+    }
+}
+
+function turnoResumo(array $reservasTurno): array
+{
+    $pessoas = 0;
+    $confirmadas = 0;
+    foreach ($reservasTurno as $reserva) {
+        if ($reserva['status_reserva'] === 'Reservado') {
+            $pessoas += (int) $reserva['pessoas'];
+        }
+        if ($reserva['confirmacao'] === 'Confirmado') {
+            $confirmadas++;
+        }
+    }
+
+    return ['pessoas' => $pessoas, 'confirmadas' => $confirmadas];
 }
 
 $dataFormatada = date('d/m/Y', strtotime($dataSelecionada));
@@ -181,6 +206,21 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
             color: #777;
             padding: 2rem 0;
         }
+        .relatorio-turno-titulo {
+            margin: 2rem 0 0.5rem;
+            font-size: 1.15rem;
+            color: #b03a2e;
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 0.4rem;
+        }
+        .relatorio-turno-titulo:first-of-type {
+            margin-top: 0;
+        }
+        .relatorio-turno-resumo {
+            margin: 0 0 0.75rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
         .relatorio-rodape {
             margin-top: 1.5rem;
             font-size: 0.8rem;
@@ -239,40 +279,59 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
         <?php if (empty($reservas)): ?>
             <p class="relatorio-vazio">Nenhuma reserva encontrada para esta data.</p>
         <?php else: ?>
-            <table class="relatorio-tabela">
-                <thead>
-                    <tr>
-                        <th>Hora</th>
-                        <th>Cliente</th>
-                        <th>Telefone</th>
-                        <th>Churrascaria</th>
-                        <th>Tipo</th>
-                        <th>Pessoas</th>
-                        <th>Valor</th>
-                        <th>Status</th>
-                        <th>Confirmação</th>
-                        <th>Observação</th>
-                        <th>Atendente</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($reservas as $reserva): ?>
-                        <tr>
-                            <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
-                            <td><?= e($reserva['nome_cliente']) ?></td>
-                            <td><?= e($reserva['telefone']) ?></td>
-                            <td><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></td>
-                            <td><?= $reserva['tipo_reserva'] ? e($reserva['tipo_reserva']) : '-' ?></td>
-                            <td><?= e((string) $reserva['pessoas']) ?></td>
-                            <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
-                            <td><?= $reserva['status_reserva'] === 'Reservado' ? 'Reservado' : 'Cancelado' ?></td>
-                            <td><?= $reserva['confirmacao'] === 'Confirmado' ? 'Confirmado' : 'Pendente' ?></td>
-                            <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
-                            <td><?= $reserva['atendente'] ? e($reserva['atendente']) : '-' ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php
+            $turnos = [
+                ['titulo' => 'Almoço (10:45 às 16:00)', 'reservas' => $reservasAlmoco],
+                ['titulo' => 'Janta (16:01 às 23:00)', 'reservas' => $reservasJanta],
+            ];
+            ?>
+            <?php foreach ($turnos as $turno): ?>
+                <?php $resumoTurno = turnoResumo($turno['reservas']); ?>
+                <h2 class="relatorio-turno-titulo"><?= e($turno['titulo']) ?></h2>
+                <?php if (empty($turno['reservas'])): ?>
+                    <p class="relatorio-vazio">Nenhuma reserva neste turno.</p>
+                <?php else: ?>
+                    <p class="relatorio-turno-resumo">
+                        <?= e((string) count($turno['reservas'])) ?> reservas ·
+                        <?= e((string) $resumoTurno['confirmadas']) ?> confirmadas ·
+                        <?= e((string) $resumoTurno['pessoas']) ?> pessoas esperadas
+                    </p>
+                    <table class="relatorio-tabela">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Cliente</th>
+                                <th>Telefone</th>
+                                <th>Churrascaria</th>
+                                <th>Tipo</th>
+                                <th>Pessoas</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Confirmação</th>
+                                <th>Observação</th>
+                                <th>Atendente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($turno['reservas'] as $reserva): ?>
+                                <tr>
+                                    <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
+                                    <td><?= e($reserva['nome_cliente']) ?></td>
+                                    <td><?= e($reserva['telefone']) ?></td>
+                                    <td><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></td>
+                                    <td><?= $reserva['tipo_reserva'] ? e($reserva['tipo_reserva']) : '-' ?></td>
+                                    <td><?= e((string) $reserva['pessoas']) ?></td>
+                                    <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
+                                    <td><?= $reserva['status_reserva'] === 'Reservado' ? 'Reservado' : 'Cancelado' ?></td>
+                                    <td><?= $reserva['confirmacao'] === 'Confirmado' ? 'Confirmado' : 'Pendente' ?></td>
+                                    <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
+                                    <td><?= $reserva['atendente'] ? e($reserva['atendente']) : '-' ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            <?php endforeach; ?>
         <?php endif; ?>
 
         <p class="relatorio-rodape">Gerado em <?= e(date('d/m/Y H:i')) ?> por <?= e($_SESSION['funcionario_nome']) ?></p>
