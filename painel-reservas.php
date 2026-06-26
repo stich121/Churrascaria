@@ -6,6 +6,7 @@ garantirColunaChurrascaria($pdo);
 garantirTabelaTiposReserva($pdo);
 garantirColunaTipoReserva($pdo);
 garantirTabelaClientes($pdo);
+garantirColunaChurrascariaClientes($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
     header('Content-Type: application/json; charset=utf-8');

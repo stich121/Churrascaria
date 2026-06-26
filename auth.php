@@ -329,6 +329,9 @@ function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?stri
         return;
     }
 
+    garantirTabelaClientes($pdo);
+    garantirColunaChurrascariaClientes($pdo);
+
     $churrascaria = $churrascaria !== null && $churrascaria !== '' ? $churrascaria : CHURRASCARIA_PADRAO;
 
     if ($dataNascimento !== null) {
