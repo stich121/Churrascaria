@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'atualiz
         'data' => validarDataYmd($_POST['data'] ?? null),
         'aba' => $abaRetorno,
         'churrascaria' => $_POST['churrascaria'] ?? 'pampulha',
+        'ordenacao_dia' => $_POST['ordenacao_dia'] ?? 'hora_asc',
     ]));
     exit;
 }
@@ -79,6 +80,30 @@ if (!array_key_exists($churrascariaDashboard, $opcoesDashboardChurrascaria)) {
     $churrascariaDashboard = 'pampulha';
 }
 
+$ordenacoesDashboardDia = [
+    'hora_asc' => [
+        'label' => 'Horário mais próximo',
+        'sql' => 'hora_reserva ASC, nome_cliente ASC',
+    ],
+    'hora_desc' => [
+        'label' => 'Horário mais distante',
+        'sql' => 'hora_reserva DESC, nome_cliente ASC',
+    ],
+    'cliente_asc' => [
+        'label' => 'Cliente A-Z',
+        'sql' => 'nome_cliente ASC, hora_reserva ASC',
+    ],
+    'cliente_desc' => [
+        'label' => 'Cliente Z-A',
+        'sql' => 'nome_cliente DESC, hora_reserva ASC',
+    ],
+];
+$ordenacaoDashboardDia = $_GET['ordenacao_dia'] ?? 'hora_asc';
+if (!array_key_exists($ordenacaoDashboardDia, $ordenacoesDashboardDia)) {
+    $ordenacaoDashboardDia = 'hora_asc';
+}
+$ordenacaoDashboardDiaSql = $ordenacoesDashboardDia[$ordenacaoDashboardDia]['sql'];
+
 $rotuloDashboardChurrascaria = $opcoesDashboardChurrascaria[$churrascariaDashboard];
 $filtroChurrascariaSql = '';
 $filtroChurrascariaParams = [];
@@ -93,7 +118,7 @@ $stmt = $pdo->prepare(
     "SELECT id, churrascaria, nome_cliente, telefone, hora_reserva, pessoas, pessoas_compareceram, status_reserva, confirmacao
      FROM reservas
      WHERE data_reserva = ?{$filtroChurrascariaSql}
-     ORDER BY hora_reserva"
+     ORDER BY {$ordenacaoDashboardDiaSql}"
 );
 $stmt->execute(array_merge([$dataSelecionada], $filtroChurrascariaParams));
 $reservasDia = $stmt->fetchAll();
@@ -218,11 +243,12 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                 <form method="get" action="dashboard.php" class="dashboard-date-form">
                     <input type="hidden" name="aba" id="aba-input" class="dashboard-aba-input" value="<?= e($abaSelecionada) ?>">
                     <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                    <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
                     <label for="data-input"><i class="fa-solid fa-calendar-days"></i> Visualizar reservas do dia</label>
                     <input type="date" id="data-input" name="data" value="<?= e($dataSelecionada) ?>" onchange="this.form.submit()">
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i>Ver</button>
                     <?php if ($dataSelecionada !== date('Y-m-d')): ?>
-                        <a href="<?= e(dashboardUrl(['aba' => $abaSelecionada, 'churrascaria' => $churrascariaDashboard])) ?>" class="dashboard-date-reset"><i class="fa-solid fa-rotate-left"></i>Voltar para hoje</a>
+                        <a href="<?= e(dashboardUrl(['aba' => $abaSelecionada, 'churrascaria' => $churrascariaDashboard, 'ordenacao_dia' => $ordenacaoDashboardDia])) ?>" class="dashboard-date-reset"><i class="fa-solid fa-rotate-left"></i>Voltar para hoje</a>
                     <?php endif; ?>
                 </form>
             </div>
@@ -230,7 +256,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             <div class="dashboard-tabs dashboard-unit-tabs" aria-label="Selecionar churrascaria">
                 <?php foreach ($opcoesDashboardChurrascaria as $chaveOpcao => $rotuloOpcao): ?>
                     <a
-                        href="<?= e(dashboardUrl(['data' => $dataSelecionada, 'aba' => $abaSelecionada, 'churrascaria' => $chaveOpcao])) ?>"
+                        href="<?= e(dashboardUrl(['data' => $dataSelecionada, 'aba' => $abaSelecionada, 'churrascaria' => $chaveOpcao, 'ordenacao_dia' => $ordenacaoDashboardDia])) ?>"
                         class="dashboard-tab <?= $churrascariaDashboard === $chaveOpcao ? 'is-active' : '' ?>"
                         <?= $churrascariaDashboard === $chaveOpcao ? 'aria-current="page"' : '' ?>>
                         <i class="fa-solid <?= $chaveOpcao === 'todas' ? 'fa-layer-group' : 'fa-location-dot' ?>"></i>
@@ -274,10 +300,23 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     <div class="card-header-bar dashboard-reservas-dia-header">
                         <i class="fa-solid fa-list-check"></i>
                         <h3>Reservas do Dia <span class="dashboard-view-date"><?= e($dataFormatada) ?></span></h3>
-                        <label class="dashboard-reservas-busca">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="search" class="dashboard-reservas-busca-input" placeholder="Pesquisar nome ou telefone" autocomplete="off">
-                        </label>
+                        <div class="dashboard-reservas-controles">
+                            <form method="get" action="dashboard.php" class="dashboard-reservas-ordenacao-form">
+                                <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
+                                <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
+                                <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                                <label for="ordenacao_dashboard_dia"><i class="fa-solid fa-arrow-down-a-z"></i>Ordenar</label>
+                                <select name="ordenacao_dia" id="ordenacao_dashboard_dia" onchange="this.form.submit()">
+                                    <?php foreach ($ordenacoesDashboardDia as $valorOrdenacao => $dadosOrdenacao): ?>
+                                        <option value="<?= e($valorOrdenacao) ?>" <?= $valorOrdenacao === $ordenacaoDashboardDia ? 'selected' : '' ?>><?= e($dadosOrdenacao['label']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
+                            <label class="dashboard-reservas-busca">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="search" class="dashboard-reservas-busca-input" placeholder="Pesquisar nome ou telefone" autocomplete="off">
+                            </label>
+                        </div>
                     </div>
                     <div class="reservas-lista-wrapper">
                         <table class="reservas-tabela">
@@ -328,6 +367,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                                     <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
                                                     <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
                                                     <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                                                    <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
                                                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                                     <div class="dashboard-comparecimento-opcoes" role="radiogroup" aria-label="Comparecimento">
                                                         <label class="dashboard-comparecimento-opcao">
@@ -390,7 +430,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     <ul class="dashboard-week-list">
                         <?php foreach ($diasDaSemana as $dia): ?>
                             <li class="<?= $dia['selecionado'] ? 'is-selected' : '' ?>">
-                                <a href="<?= e(dashboardUrl(['data' => $dia['data'], 'aba' => 'dia', 'churrascaria' => $churrascariaDashboard])) ?>">
+                                <a href="<?= e(dashboardUrl(['data' => $dia['data'], 'aba' => 'dia', 'churrascaria' => $churrascariaDashboard, 'ordenacao_dia' => $ordenacaoDashboardDia])) ?>">
                                     <span class="dashboard-week-day"><?= e($dia['label']) ?> <small><?= e($dia['dataFormatada']) ?></small></span>
                                     <span class="dashboard-week-count"><?= e((string) $dia['total']) ?> res. · <?= e((string) $dia['pessoas']) ?> pessoas</span>
                                 </a>

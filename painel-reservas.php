@@ -9,9 +9,21 @@ garantirColunaTipoReserva($pdo);
 $nivel = nivelFuncionario();
 $mensagemErro = '';
 
-function urlPainelReservas(int $pagina): string
+function urlPainelReservas(int $pagina, string $ordenacao = 'data_asc'): string
 {
-    return 'painel-reservas.php' . ($pagina > 1 ? '?pagina=' . $pagina : '');
+    $params = [];
+
+    if ($pagina > 1) {
+        $params['pagina'] = $pagina;
+    }
+
+    if ($ordenacao !== 'data_asc') {
+        $params['ordenacao'] = $ordenacao;
+    }
+
+    $query = http_build_query($params);
+
+    return 'painel-reservas.php' . ($query !== '' ? '?' . $query : '');
 }
 
 function parseValorBr(string $valor): float
@@ -25,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificarCsrf();
     $acao = $_POST['acao'] ?? '';
     $paginaRetorno = max(1, (int) ($_POST['pagina'] ?? 1));
+    $ordenacoesValidasPost = ['data_asc', 'data_desc', 'cliente_asc', 'cliente_desc'];
+    $ordenacaoRetorno = in_array($_POST['ordenacao'] ?? 'data_asc', $ordenacoesValidasPost, true) ? $_POST['ordenacao'] : 'data_asc';
 
     if ($acao === 'criar') {
         $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
@@ -102,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $idReserva,
             ]);
-            header('Location: ' . urlPainelReservas($paginaRetorno));
+            header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
             exit;
         }
     }
@@ -117,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ?, confirmacao = ? WHERE id = ?');
             $stmt->execute([$compareceram, $confirmacaoAtualizada, $idReserva]);
         }
-        header('Location: ' . urlPainelReservas($paginaRetorno));
+        header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
         exit;
     }
 
     if ($acao === 'excluir' && $nivel >= NIVEL_GERENTE) {
         $stmt = $pdo->prepare('DELETE FROM reservas WHERE id = ?');
         $stmt->execute([(int) ($_POST['id'] ?? 0)]);
-        header('Location: ' . urlPainelReservas($paginaRetorno));
+        header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
         exit;
     }
 }
@@ -135,6 +149,29 @@ $tiposReserva = $pdo->query('SELECT id, nome FROM tipos_reserva ORDER BY nome')-
 
 $reservasPorPagina = 50;
 $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
+$ordenacoesReservas = [
+    'data_asc' => [
+        'label' => 'Data mais próxima',
+        'sql' => 'r.data_reserva ASC, r.hora_reserva ASC, r.nome_cliente ASC',
+    ],
+    'data_desc' => [
+        'label' => 'Data mais recente',
+        'sql' => 'r.data_reserva DESC, r.hora_reserva DESC, r.nome_cliente ASC',
+    ],
+    'cliente_asc' => [
+        'label' => 'Cliente A-Z',
+        'sql' => 'r.nome_cliente ASC, r.data_reserva ASC, r.hora_reserva ASC',
+    ],
+    'cliente_desc' => [
+        'label' => 'Cliente Z-A',
+        'sql' => 'r.nome_cliente DESC, r.data_reserva ASC, r.hora_reserva ASC',
+    ],
+];
+$ordenacaoAtual = $_GET['ordenacao'] ?? 'data_asc';
+if (!array_key_exists($ordenacaoAtual, $ordenacoesReservas)) {
+    $ordenacaoAtual = 'data_asc';
+}
+$ordenacaoSql = $ordenacoesReservas[$ordenacaoAtual]['sql'];
 
 $resumoReservas = $pdo->query(
     "SELECT
@@ -164,7 +201,7 @@ $stmtReservas = $pdo->prepare(
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
      JOIN funcionarios f ON f.id = r.funcionario_id
-     ORDER BY r.data_reserva, r.hora_reserva
+     ORDER BY ' . $ordenacaoSql . '
      LIMIT :limite OFFSET :offset'
 );
 $stmtReservas->bindValue(':limite', $reservasPorPagina, PDO::PARAM_INT);
@@ -321,6 +358,21 @@ $reservas = $stmtReservas->fetchAll();
                 </form>
             </div>
 
+            <div class="reservas-lista-toolbar">
+                <div>
+                    <h3>Reservas cadastradas</h3>
+                    <p><?= e($ordenacoesReservas[$ordenacaoAtual]['label']) ?> · <?= e((string) $totalReservas) ?> reservas</p>
+                </div>
+                <form method="get" action="painel-reservas.php" class="reservas-ordenacao-form">
+                    <label for="ordenacao_reservas"><i class="fa-solid fa-arrow-down-a-z"></i>Ordenar por</label>
+                    <select name="ordenacao" id="ordenacao_reservas" onchange="this.form.submit()">
+                        <?php foreach ($ordenacoesReservas as $valorOrdenacao => $dadosOrdenacao): ?>
+                            <option value="<?= e($valorOrdenacao) ?>" <?= $valorOrdenacao === $ordenacaoAtual ? 'selected' : '' ?>><?= e($dadosOrdenacao['label']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </form>
+            </div>
+
             <div class="reservas-lista-wrapper">
                 <table class="reservas-tabela">
                     <thead>
@@ -367,6 +419,7 @@ $reservas = $stmtReservas->fetchAll();
                                         <input type="hidden" name="acao" value="atualizar_comparecimento">
                                         <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
                                         <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
+                                        <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
                                         <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                         <select name="confirmacao">
                                             <option value="Pendente" <?= $reserva['confirmacao'] === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
@@ -400,6 +453,7 @@ $reservas = $stmtReservas->fetchAll();
                                             <input type="hidden" name="acao" value="excluir">
                                             <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
                                             <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
+                                            <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
                                             <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                             <button type="submit" class="btn-remover-reserva" title="Remover reserva">
                                                 <i class="fa-solid fa-trash"></i>
@@ -419,13 +473,13 @@ $reservas = $stmtReservas->fetchAll();
                         <span class="reservas-paginacao-info">Mostrando <?= e((string) $primeiraReservaPagina) ?>-<?= e((string) $ultimaReservaPagina) ?> de <?= e((string) $totalReservas) ?></span>
                         <div class="reservas-paginacao-links">
                             <?php if ($paginaAtual > 1): ?>
-                                <a href="<?= e(urlPainelReservas($paginaAtual - 1)) ?>" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></a>
+                                <a href="<?= e(urlPainelReservas($paginaAtual - 1, $ordenacaoAtual)) ?>" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></a>
                             <?php endif; ?>
                             <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
-                                <a href="<?= e(urlPainelReservas($pagina)) ?>" class="<?= $pagina === $paginaAtual ? 'ativa' : '' ?>" <?= $pagina === $paginaAtual ? 'aria-current="page"' : '' ?>><?= e((string) $pagina) ?></a>
+                                <a href="<?= e(urlPainelReservas($pagina, $ordenacaoAtual)) ?>" class="<?= $pagina === $paginaAtual ? 'ativa' : '' ?>" <?= $pagina === $paginaAtual ? 'aria-current="page"' : '' ?>><?= e((string) $pagina) ?></a>
                             <?php endfor; ?>
                             <?php if ($paginaAtual < $totalPaginas): ?>
-                                <a href="<?= e(urlPainelReservas($paginaAtual + 1)) ?>" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></a>
+                                <a href="<?= e(urlPainelReservas($paginaAtual + 1, $ordenacaoAtual)) ?>" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></a>
                             <?php endif; ?>
                         </div>
                     </nav>
@@ -445,6 +499,7 @@ $reservas = $stmtReservas->fetchAll();
                 <input type="hidden" name="acao" value="editar">
                 <input type="hidden" name="id" id="editar_id" value="">
                 <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
+                <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
                 <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                 <div class="reserva-form-grid">
                     <label class="reserva-form-label">
