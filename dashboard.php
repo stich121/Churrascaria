@@ -418,7 +418,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             <div class="dashboard-actions">
                 <a href="painel-reservas.php" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i>Ver Painel de Reservas</a>
                 <a href="mesas.php" class="btn btn-outline"><i class="fa-solid fa-chair"></i>Gerenciar Mesas</a>
-                <a href="imprimir-reservas.php?data=<?= e($dataSelecionada) ?>" target="_blank" class="btn btn-outline"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
+                <a href="imprimir-reservas.php?data=<?= e($dataSelecionada) ?>&churrascaria=<?= e($churrascariaDashboard) ?>" target="_blank" class="btn btn-outline"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
             </div>
         </div>
     </section>

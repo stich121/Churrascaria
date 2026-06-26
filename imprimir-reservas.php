@@ -12,15 +12,38 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataSelecionada) || strtotime($dataSel
     $dataSelecionada = date('Y-m-d');
 }
 
+$opcoesChurrascaria = [
+    'pampulha' => CHURRASCARIA_PADRAO,
+    'casarao-itau' => 'Casarão Itau',
+];
+
+if (nivelFuncionario() >= NIVEL_SUPERIOR) {
+    $opcoesChurrascaria['todas'] = 'Todos';
+}
+
+$churrascariaSelecionada = $_GET['churrascaria'] ?? 'pampulha';
+if (!array_key_exists($churrascariaSelecionada, $opcoesChurrascaria)) {
+    $churrascariaSelecionada = 'pampulha';
+}
+
+$rotuloChurrascaria = $opcoesChurrascaria[$churrascariaSelecionada];
+$filtroChurrascariaSql = '';
+$parametrosConsulta = [$dataSelecionada];
+
+if ($churrascariaSelecionada !== 'todas') {
+    $filtroChurrascariaSql = ' AND r.churrascaria = ?';
+    $parametrosConsulta[] = $rotuloChurrascaria;
+}
+
 $stmt = $pdo->prepare(
     'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_reserva, r.hora_reserva, r.pessoas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS atendente
      FROM reservas r
      LEFT JOIN funcionarios f ON f.id = r.funcionario_id
-     WHERE r.data_reserva = ?
+     WHERE r.data_reserva = ?' . $filtroChurrascariaSql . '
      ORDER BY r.hora_reserva'
 );
-$stmt->execute([$dataSelecionada]);
+$stmt->execute($parametrosConsulta);
 $reservas = $stmt->fetchAll();
 
 $totalPessoas = 0;
@@ -74,6 +97,13 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
             padding: 0.5rem 0.75rem;
             border: 1px solid var(--print-border);
             border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .relatorio-toolbar select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--print-border);
+            border-radius: 6px;
+            background: #fff;
             font-size: 0.95rem;
         }
         .relatorio-toolbar button,
@@ -178,6 +208,12 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
         <form method="get" action="imprimir-reservas.php">
             <label for="data">Data:</label>
             <input type="date" id="data" name="data" value="<?= e($dataSelecionada) ?>">
+            <label for="churrascaria">Churrascaria:</label>
+            <select id="churrascaria" name="churrascaria">
+                <?php foreach ($opcoesChurrascaria as $chaveOpcao => $rotuloOpcao): ?>
+                    <option value="<?= e($chaveOpcao) ?>" <?= $churrascariaSelecionada === $chaveOpcao ? 'selected' : '' ?>><?= e($rotuloOpcao) ?></option>
+                <?php endforeach; ?>
+            </select>
             <button type="submit"><i class="fa-solid fa-magnifying-glass"></i>Ver</button>
         </form>
         <button type="button" class="btn-imprimir-agora" onclick="window.print()"><i class="fa-solid fa-print"></i>Imprimir / Salvar PDF</button>
@@ -189,6 +225,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
             <div>
                 <h1>Relatório de Reservas do Dia</h1>
                 <p><?= e($dataFormatada) ?> (<?= e($diaSemana) ?>)</p>
+                <p><?= e($rotuloChurrascaria) ?></p>
             </div>
             <img src="logo-pampulha.png" alt="Churrascaria Pampulha">
         </div>
