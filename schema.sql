@@ -64,6 +64,15 @@ CREATE TABLE IF NOT EXISTS mesas (
     CONSTRAINT chk_mesas_capacidade CHECK (capacidade IN (2, 4, 6))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS clientes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    data_nascimento DATE NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_clientes_telefone (telefone)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Primeiro administrador (nível 3). Hash gerado localmente com password_hash() do PHP
 -- para a senha informada — rode este INSERT uma vez, na aba SQL do phpMyAdmin.
 INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES

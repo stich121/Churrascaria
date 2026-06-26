@@ -238,6 +238,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
                     <li><a href="mesas.php">Mesas</a></li>
                     <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
+                    <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
                     <?php endif; ?>

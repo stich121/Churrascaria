@@ -66,6 +66,7 @@ foreach ($mesas as $mesa) {
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
                     <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
+                    <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
                     <?php endif; ?>

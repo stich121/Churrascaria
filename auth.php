@@ -282,6 +282,28 @@ function garantirColunaTipoReserva(PDO $pdo): void
     $verificado = true;
 }
 
+function garantirTabelaClientes(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS clientes (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            telefone VARCHAR(20) NOT NULL,
+            data_nascimento DATE NULL,
+            criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_clientes_telefone (telefone)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
+
+    $verificado = true;
+}
+
 function e(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
