@@ -1542,11 +1542,13 @@ h1, h2, h3, h4 {
     padding-right: 2.4rem;
 }
 
-.toggle-senha {
+.campo-senha .toggle-senha {
     position: absolute;
     top: 50%;
     right: 0.7rem;
     transform: translateY(-50%);
+    width: auto;
+    height: auto;
     background: none;
     border: none;
     color: var(--text-light);
