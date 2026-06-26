@@ -363,14 +363,20 @@ $reservas = $stmtReservas->fetchAll();
                     <h3>Reservas cadastradas</h3>
                     <p><?= e($ordenacoesReservas[$ordenacaoAtual]['label']) ?> · <?= e((string) $totalReservas) ?> reservas</p>
                 </div>
-                <form method="get" action="painel-reservas.php" class="reservas-ordenacao-form">
-                    <label for="ordenacao_reservas"><i class="fa-solid fa-arrow-down-a-z"></i>Ordenar por</label>
-                    <select name="ordenacao" id="ordenacao_reservas" onchange="this.form.submit()">
-                        <?php foreach ($ordenacoesReservas as $valorOrdenacao => $dadosOrdenacao): ?>
-                            <option value="<?= e($valorOrdenacao) ?>" <?= $valorOrdenacao === $ordenacaoAtual ? 'selected' : '' ?>><?= e($dadosOrdenacao['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </form>
+                <div class="reservas-lista-controles">
+                    <form method="get" action="painel-reservas.php" class="reservas-ordenacao-form">
+                        <label for="ordenacao_reservas"><i class="fa-solid fa-arrow-down-a-z"></i>Ordenar por</label>
+                        <select name="ordenacao" id="ordenacao_reservas" onchange="this.form.submit()">
+                            <?php foreach ($ordenacoesReservas as $valorOrdenacao => $dadosOrdenacao): ?>
+                                <option value="<?= e($valorOrdenacao) ?>" <?= $valorOrdenacao === $ordenacaoAtual ? 'selected' : '' ?>><?= e($dadosOrdenacao['label']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
+                    <label class="reservas-busca">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" class="reservas-busca-input" placeholder="Pesquisar nome ou telefone" autocomplete="off">
+                    </label>
+                </div>
             </div>
 
             <div class="reservas-lista-wrapper">
@@ -468,6 +474,7 @@ $reservas = $stmtReservas->fetchAll();
                 <?php if (empty($reservas)): ?>
                     <p class="reservas-vazio" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
                 <?php endif; ?>
+                <p class="reservas-vazio reservas-busca-vazio">Nenhuma reserva encontrada para essa pesquisa.</p>
                 <?php if ($totalPaginas > 1): ?>
                     <nav class="reservas-paginacao" aria-label="Paginação de reservas">
                         <span class="reservas-paginacao-info">Mostrando <?= e((string) $primeiraReservaPagina) ?>-<?= e((string) $ultimaReservaPagina) ?> de <?= e((string) $totalReservas) ?></span>
@@ -571,6 +578,7 @@ $reservas = $stmtReservas->fetchAll();
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            inicializarBuscaReservasPainel();
             document.querySelectorAll('input[name="telefone"]').forEach(function (telefoneInput) {
                 telefoneInput.addEventListener('input', function () {
                     var digitos = telefoneInput.value.replace(/\D/g, '').slice(0, 11);
@@ -598,6 +606,48 @@ $reservas = $stmtReservas->fetchAll();
                 });
             });
         });
+
+        function inicializarBuscaReservasPainel() {
+            document.querySelectorAll('.reservas-busca-input').forEach(function (input) {
+                var bloco = input.closest('.painel-reservas');
+                if (!bloco) {
+                    return;
+                }
+
+                var linhas = Array.prototype.slice.call(bloco.querySelectorAll('.reservas-tabela tbody tr'));
+                var mensagemVazia = bloco.querySelector('.reservas-busca-vazio');
+
+                function normalizar(valor) {
+                    return (valor || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                }
+
+                function filtrarReservas() {
+                    var busca = normalizar(input.value);
+                    var buscaDigitos = busca.replace(/\D/g, '');
+                    var visiveis = 0;
+
+                    linhas.forEach(function (linha) {
+                        var celulas = linha.querySelectorAll('td');
+                        var cliente = normalizar(celulas[0] ? celulas[0].textContent : '');
+                        var telefone = normalizar(celulas[3] ? celulas[3].textContent : '');
+                        var telefoneDigitos = telefone.replace(/\D/g, '');
+                        var corresponde = busca === '' || cliente.indexOf(busca) !== -1 || telefone.indexOf(busca) !== -1 || (buscaDigitos !== '' && telefoneDigitos.indexOf(buscaDigitos) !== -1);
+
+                        linha.style.display = corresponde ? '' : 'none';
+                        if (corresponde) {
+                            visiveis++;
+                        }
+                    });
+
+                    if (mensagemVazia) {
+                        mensagemVazia.style.display = busca !== '' && linhas.length > 0 && visiveis === 0 ? 'block' : 'none';
+                    }
+                }
+
+                input.addEventListener('input', filtrarReservas);
+                filtrarReservas();
+            });
+        }
 
         function abrirEdicaoReserva(botao) {
             document.getElementById('editar_id').value = botao.dataset.id;

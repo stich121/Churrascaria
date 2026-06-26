@@ -2366,6 +2366,15 @@ h1, h2, h3, h4 {
     margin: 0;
 }
 
+.reservas-lista-controles {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
 .reservas-ordenacao-form {
     display: inline-flex;
     align-items: center;
@@ -2409,6 +2418,51 @@ h1, h2, h3, h4 {
 .reservas-ordenacao-form:focus-within {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.12);
+}
+
+.reservas-busca {
+    width: min(360px, 100%);
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.85rem;
+    background: #fff;
+    border: 1px solid rgba(139, 69, 19, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+}
+
+.reservas-busca:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.12);
+}
+
+.reservas-busca i {
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.reservas-busca-input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.reservas-busca-input::placeholder {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.reservas-busca-vazio {
+    display: none;
 }
 
 .reservas-lista-wrapper {
@@ -2629,8 +2683,14 @@ h1, h2, h3, h4 {
     }
 
     .reservas-lista-toolbar,
-    .reservas-ordenacao-form {
+    .reservas-lista-controles,
+    .reservas-ordenacao-form,
+    .reservas-busca {
         width: 100%;
+    }
+
+    .reservas-lista-controles {
+        align-items: stretch;
     }
 
     .reservas-ordenacao-form {
