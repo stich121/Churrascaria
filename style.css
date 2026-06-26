@@ -2260,6 +2260,51 @@ h1, h2, h3, h4 {
     gap: 0.8rem;
 }
 
+
+.reservas-paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0.25rem 0;
+    flex-wrap: wrap;
+}
+
+.reservas-paginacao-info {
+    color: var(--text-light);
+    font-size: 0.92rem;
+}
+
+.reservas-paginacao-links {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.reservas-paginacao-links a {
+    min-width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 69, 19, 0.18);
+    background: #fff;
+    color: var(--secondary-color);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.reservas-paginacao-links a:hover,
+.reservas-paginacao-links a.ativa {
+    background: var(--secondary-color);
+    color: #fff;
+    border-color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
 .reservas-vazio {
     text-align: center;
     color: var(--text-light);

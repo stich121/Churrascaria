@@ -9,6 +9,11 @@ garantirColunaTipoReserva($pdo);
 $nivel = nivelFuncionario();
 $mensagemErro = '';
 
+function urlPainelReservas(int $pagina): string
+{
+    return 'painel-reservas.php' . ($pagina > 1 ? '?pagina=' . $pagina : '');
+}
+
 function parseValorBr(string $valor): float
 {
     $limpo = str_replace(',', '.', preg_replace('/[^0-9,]/', '', $valor));
@@ -19,6 +24,7 @@ function parseValorBr(string $valor): float
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificarCsrf();
     $acao = $_POST['acao'] ?? '';
+    $paginaRetorno = max(1, (int) ($_POST['pagina'] ?? 1));
 
     if ($acao === 'criar') {
         $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
@@ -96,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $idReserva,
             ]);
-            header('Location: painel-reservas.php');
+            header('Location: ' . urlPainelReservas($paginaRetorno));
             exit;
         }
     }
@@ -111,14 +117,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ?, confirmacao = ? WHERE id = ?');
             $stmt->execute([$compareceram, $confirmacaoAtualizada, $idReserva]);
         }
-        header('Location: painel-reservas.php');
+        header('Location: ' . urlPainelReservas($paginaRetorno));
         exit;
     }
 
     if ($acao === 'excluir' && $nivel >= NIVEL_GERENTE) {
         $stmt = $pdo->prepare('DELETE FROM reservas WHERE id = ?');
         $stmt->execute([(int) ($_POST['id'] ?? 0)]);
-        header('Location: painel-reservas.php');
+        header('Location: ' . urlPainelReservas($paginaRetorno));
         exit;
     }
 }
@@ -127,28 +133,44 @@ $diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sá
 
 $tiposReserva = $pdo->query('SELECT id, nome FROM tipos_reserva ORDER BY nome')->fetchAll();
 
-$reservas = $pdo->query(
+$reservasPorPagina = 50;
+$paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
+
+$resumoReservas = $pdo->query(
+    "SELECT
+        COUNT(*) AS total,
+        COALESCE(SUM(CASE WHEN confirmacao = 'Confirmado' THEN 1 ELSE 0 END), 0) AS confirmadas,
+        COALESCE(SUM(CASE WHEN confirmacao <> 'Confirmado' OR confirmacao IS NULL THEN 1 ELSE 0 END), 0) AS pendentes,
+        COALESCE(SUM(CASE WHEN status_reserva = 'Reservado' THEN pessoas ELSE 0 END), 0) AS pessoas_esperadas
+     FROM reservas"
+)->fetch();
+
+$totalReservas = (int) ($resumoReservas['total'] ?? 0);
+$totalConfirmadas = (int) ($resumoReservas['confirmadas'] ?? 0);
+$totalPendentes = (int) ($resumoReservas['pendentes'] ?? 0);
+$totalPessoasEsperadas = (int) ($resumoReservas['pessoas_esperadas'] ?? 0);
+$totalPaginas = max(1, (int) ceil($totalReservas / $reservasPorPagina));
+
+if ($paginaAtual > $totalPaginas) {
+    $paginaAtual = $totalPaginas;
+}
+
+$offsetReservas = ($paginaAtual - 1) * $reservasPorPagina;
+$primeiraReservaPagina = $totalReservas > 0 ? $offsetReservas + 1 : 0;
+$ultimaReservaPagina = min($offsetReservas + $reservasPorPagina, $totalReservas);
+
+$stmtReservas = $pdo->prepare(
     'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
      JOIN funcionarios f ON f.id = r.funcionario_id
-     ORDER BY r.data_reserva, r.hora_reserva'
-)->fetchAll();
-
-$totalReservas = count($reservas);
-$totalConfirmadas = 0;
-$totalPendentes = 0;
-$totalPessoasEsperadas = 0;
-foreach ($reservas as $reserva) {
-    if ($reserva['confirmacao'] === 'Confirmado') {
-        $totalConfirmadas++;
-    } else {
-        $totalPendentes++;
-    }
-    if ($reserva['status_reserva'] === 'Reservado') {
-        $totalPessoasEsperadas += (int) $reserva['pessoas'];
-    }
-}
+     ORDER BY r.data_reserva, r.hora_reserva
+     LIMIT :limite OFFSET :offset'
+);
+$stmtReservas->bindValue(':limite', $reservasPorPagina, PDO::PARAM_INT);
+$stmtReservas->bindValue(':offset', $offsetReservas, PDO::PARAM_INT);
+$stmtReservas->execute();
+$reservas = $stmtReservas->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -344,6 +366,7 @@ foreach ($reservas as $reserva) {
                                     <form method="post" action="painel-reservas.php" class="reserva-comparecimento-form">
                                         <input type="hidden" name="acao" value="atualizar_comparecimento">
                                         <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
+                                        <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                                         <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                         <select name="confirmacao">
                                             <option value="Pendente" <?= $reserva['confirmacao'] === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
@@ -376,6 +399,7 @@ foreach ($reservas as $reserva) {
                                         <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover esta reserva?');">
                                             <input type="hidden" name="acao" value="excluir">
                                             <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
+                                            <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                                             <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                             <button type="submit" class="btn-remover-reserva" title="Remover reserva">
                                                 <i class="fa-solid fa-trash"></i>
@@ -389,6 +413,22 @@ foreach ($reservas as $reserva) {
                 </table>
                 <?php if (empty($reservas)): ?>
                     <p class="reservas-vazio" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
+                <?php endif; ?>
+                <?php if ($totalPaginas > 1): ?>
+                    <nav class="reservas-paginacao" aria-label="Paginação de reservas">
+                        <span class="reservas-paginacao-info">Mostrando <?= e((string) $primeiraReservaPagina) ?>-<?= e((string) $ultimaReservaPagina) ?> de <?= e((string) $totalReservas) ?></span>
+                        <div class="reservas-paginacao-links">
+                            <?php if ($paginaAtual > 1): ?>
+                                <a href="<?= e(urlPainelReservas($paginaAtual - 1)) ?>" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></a>
+                            <?php endif; ?>
+                            <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
+                                <a href="<?= e(urlPainelReservas($pagina)) ?>" class="<?= $pagina === $paginaAtual ? 'ativa' : '' ?>" <?= $pagina === $paginaAtual ? 'aria-current="page"' : '' ?>><?= e((string) $pagina) ?></a>
+                            <?php endfor; ?>
+                            <?php if ($paginaAtual < $totalPaginas): ?>
+                                <a href="<?= e(urlPainelReservas($paginaAtual + 1)) ?>" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></a>
+                            <?php endif; ?>
+                        </div>
+                    </nav>
                 <?php endif; ?>
             </div>
         </div>
@@ -404,6 +444,7 @@ foreach ($reservas as $reserva) {
             <form method="post" action="painel-reservas.php">
                 <input type="hidden" name="acao" value="editar">
                 <input type="hidden" name="id" id="editar_id" value="">
+                <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                 <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                 <div class="reserva-form-grid">
                     <label class="reserva-form-label">
@@ -531,3 +572,4 @@ foreach ($reservas as $reserva) {
     </script>
 </body>
 </html>
+
