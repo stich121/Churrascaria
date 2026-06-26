@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $_SESSION['funcionario_id'],
             ]);
-            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, $aniversarioCliente !== '' ? $aniversarioCliente : null);
+            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, $aniversarioCliente !== '' ? $aniversarioCliente : null, $churrascaria);
             header('Location: painel-reservas.php');
             exit;
         }
@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $idReserva,
             ]);
-            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente);
+            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, null, $churrascaria);
             header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
             exit;
         }

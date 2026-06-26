@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
+    churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha',
     data_nascimento DATE NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_clientes_telefone (telefone)

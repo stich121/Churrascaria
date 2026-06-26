@@ -304,25 +304,46 @@ function garantirTabelaClientes(PDO $pdo): void
     $verificado = true;
 }
 
-function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?string $dataNascimento = null): void
+function garantirColunaChurrascariaClientes(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM clientes LIKE 'churrascaria'");
+    if (!$stmt->fetch()) {
+        $pdo->exec(
+            "ALTER TABLE clientes
+             ADD COLUMN churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha' AFTER telefone"
+        );
+    }
+
+    $verificado = true;
+}
+
+function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?string $dataNascimento = null, ?string $churrascaria = null): void
 {
     if ($nome === '' || $telefone === '') {
         return;
     }
 
+    $churrascaria = $churrascaria !== null && $churrascaria !== '' ? $churrascaria : CHURRASCARIA_PADRAO;
+
     if ($dataNascimento !== null) {
         $pdo->prepare(
-            'INSERT INTO clientes (nome, telefone, data_nascimento) VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE nome = VALUES(nome), data_nascimento = VALUES(data_nascimento)'
-        )->execute([$nome, $telefone, $dataNascimento]);
+            'INSERT INTO clientes (nome, telefone, churrascaria, data_nascimento) VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE nome = VALUES(nome), churrascaria = VALUES(churrascaria), data_nascimento = VALUES(data_nascimento)'
+        )->execute([$nome, $telefone, $churrascaria, $dataNascimento]);
 
         return;
     }
 
     $pdo->prepare(
-        'INSERT INTO clientes (nome, telefone) VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE nome = VALUES(nome)'
-    )->execute([$nome, $telefone]);
+        'INSERT INTO clientes (nome, telefone, churrascaria) VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE nome = VALUES(nome), churrascaria = VALUES(churrascaria)'
+    )->execute([$nome, $telefone, $churrascaria]);
 }
 
 function logoChurrascaria(?string $churrascaria): string

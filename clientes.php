@@ -3,6 +3,7 @@ require __DIR__ . '/auth.php';
 require __DIR__ . '/../config.php';
 exigirLogin();
 garantirTabelaClientes($pdo);
+garantirColunaChurrascariaClientes($pdo);
 
 $nivel = nivelFuncionario();
 $mensagemErro = '';
@@ -14,10 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($acao === 'criar_cliente') {
         $nome = trim($_POST['nome'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
+        $churrascariaCliente = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
         $dataNascimento = trim($_POST['data_nascimento'] ?? '');
 
         if ($nome === '' || $telefone === '') {
             $mensagemErro = 'Informe nome e telefone do cliente.';
+        } elseif (!churrascariaReservaValida($churrascariaCliente)) {
+            $mensagemErro = 'Escolha uma churrascaria válida.';
         } else {
             $stmt = $pdo->prepare('SELECT id FROM clientes WHERE telefone = ?');
             $stmt->execute([$telefone]);
@@ -25,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetch()) {
                 $mensagemErro = 'Já existe um cliente cadastrado com esse telefone.';
             } else {
-                $pdo->prepare('INSERT INTO clientes (nome, telefone, data_nascimento) VALUES (?, ?, ?)')
-                    ->execute([$nome, $telefone, $dataNascimento !== '' ? $dataNascimento : null]);
+                $pdo->prepare('INSERT INTO clientes (nome, telefone, churrascaria, data_nascimento) VALUES (?, ?, ?, ?)')
+                    ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null]);
                 header('Location: clientes.php');
                 exit;
             }
@@ -37,10 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $idCliente = (int) ($_POST['id'] ?? 0);
         $nome = trim($_POST['nome'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
+        $churrascariaCliente = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
         $dataNascimento = trim($_POST['data_nascimento'] ?? '');
 
         if ($idCliente < 1 || $nome === '' || $telefone === '') {
             $mensagemErro = 'Informe nome e telefone do cliente.';
+        } elseif (!churrascariaReservaValida($churrascariaCliente)) {
+            $mensagemErro = 'Escolha uma churrascaria válida.';
         } else {
             $stmt = $pdo->prepare('SELECT id FROM clientes WHERE telefone = ? AND id <> ?');
             $stmt->execute([$telefone, $idCliente]);
@@ -48,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetch()) {
                 $mensagemErro = 'Já existe um cliente cadastrado com esse telefone.';
             } else {
-                $pdo->prepare('UPDATE clientes SET nome = ?, telefone = ?, data_nascimento = ? WHERE id = ?')
-                    ->execute([$nome, $telefone, $dataNascimento !== '' ? $dataNascimento : null, $idCliente]);
+                $pdo->prepare('UPDATE clientes SET nome = ?, telefone = ?, churrascaria = ?, data_nascimento = ? WHERE id = ?')
+                    ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null, $idCliente]);
                 header('Location: clientes.php');
                 exit;
             }
@@ -64,15 +71,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$buscaCliente = trim($_GET['busca'] ?? '');
-if ($buscaCliente !== '') {
-    $termo = '%' . $buscaCliente . '%';
-    $stmt = $pdo->prepare('SELECT id, nome, telefone, data_nascimento FROM clientes WHERE nome LIKE ? OR telefone LIKE ? ORDER BY nome');
-    $stmt->execute([$termo, $termo]);
-    $clientes = $stmt->fetchAll();
-} else {
-    $clientes = $pdo->query('SELECT id, nome, telefone, data_nascimento FROM clientes ORDER BY nome')->fetchAll();
+$opcoesChurrascariaClientes = [
+    'pampulha' => CHURRASCARIA_PADRAO,
+    'casarao-itau' => 'Casarão Itau',
+    'todas' => 'Todos',
+];
+
+$churrascariaFiltro = $_GET['churrascaria'] ?? 'todas';
+if (!array_key_exists($churrascariaFiltro, $opcoesChurrascariaClientes)) {
+    $churrascariaFiltro = 'todas';
 }
+
+$buscaCliente = trim($_GET['busca'] ?? '');
+$condicoesClientes = [];
+$parametrosClientes = [];
+
+if ($churrascariaFiltro !== 'todas') {
+    $condicoesClientes[] = 'churrascaria = ?';
+    $parametrosClientes[] = $opcoesChurrascariaClientes[$churrascariaFiltro];
+}
+
+if ($buscaCliente !== '') {
+    $condicoesClientes[] = '(nome LIKE ? OR telefone LIKE ?)';
+    $parametrosClientes[] = '%' . $buscaCliente . '%';
+    $parametrosClientes[] = '%' . $buscaCliente . '%';
+}
+
+$sqlClientes = 'SELECT id, nome, telefone, churrascaria, data_nascimento FROM clientes';
+if (!empty($condicoesClientes)) {
+    $sqlClientes .= ' WHERE ' . implode(' AND ', $condicoesClientes);
+}
+$sqlClientes .= ' ORDER BY nome';
+
+$stmt = $pdo->prepare($sqlClientes);
+$stmt->execute($parametrosClientes);
+$clientes = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -118,6 +151,17 @@ if ($buscaCliente !== '') {
                 </div>
             </div>
 
+            <div class="dashboard-tabs dashboard-unit-tabs" aria-label="Selecionar churrascaria">
+                <?php foreach ($opcoesChurrascariaClientes as $chaveOpcao => $rotuloOpcao): ?>
+                    <a
+                        href="clientes.php?<?= e(http_build_query(['churrascaria' => $chaveOpcao, 'busca' => $buscaCliente])) ?>"
+                        class="dashboard-tab <?= $churrascariaFiltro === $chaveOpcao ? 'is-active' : '' ?>"
+                        <?= $churrascariaFiltro === $chaveOpcao ? 'aria-current="page"' : '' ?>>
+                        <?= e($rotuloOpcao) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
             <div class="reserva-form-card">
                 <div class="card-header-bar">
                     <i class="fa-solid fa-circle-plus"></i>
@@ -134,6 +178,14 @@ if ($buscaCliente !== '') {
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-phone"></i>Telefone</span>
                             <input type="tel" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                            <select name="churrascaria" required>
+                                <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                    <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento</span>
@@ -154,11 +206,12 @@ if ($buscaCliente !== '') {
                 </div>
                 <div class="reservas-lista-controles">
                     <form method="get" action="clientes.php" class="reservas-ordenacao-form">
+                        <input type="hidden" name="churrascaria" value="<?= e($churrascariaFiltro) ?>">
                         <label for="busca_clientes"><i class="fa-solid fa-magnifying-glass"></i></label>
                         <input type="search" id="busca_clientes" name="busca" value="<?= e($buscaCliente) ?>" placeholder="Pesquisar nome ou telefone">
                         <button type="submit" class="btn btn-outline btn-sm"><i class="fa-solid fa-magnifying-glass"></i>Buscar</button>
                         <?php if ($buscaCliente !== ''): ?>
-                            <a href="clientes.php" class="btn btn-outline btn-sm">Limpar</a>
+                            <a href="clientes.php?churrascaria=<?= e($churrascariaFiltro) ?>" class="btn btn-outline btn-sm">Limpar</a>
                         <?php endif; ?>
                     </form>
                 </div>
@@ -170,6 +223,7 @@ if ($buscaCliente !== '') {
                         <tr>
                             <th>Nome</th>
                             <th>Telefone</th>
+                            <th>Churrascaria</th>
                             <th>Nascimento</th>
                             <th>Ações</th>
                         </tr>
@@ -179,13 +233,14 @@ if ($buscaCliente !== '') {
                             <tr>
                                 <td><?= e($cliente['nome']) ?></td>
                                 <td><?= e($cliente['telefone']) ?></td>
+                                <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($cliente['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
                                 <td><?= $cliente['data_nascimento'] ? e(date('d/m/Y', strtotime($cliente['data_nascimento']))) : '-' ?></td>
                                 <td class="reserva-acoes-col">
                                     <button
                                         type="button"
                                         class="btn-editar-reserva"
                                         title="Editar cliente"
-                                        onclick="abrirEdicaoCliente(<?= e((string) $cliente['id']) ?>, '<?= e(addslashes($cliente['nome'])) ?>', '<?= e(addslashes($cliente['telefone'])) ?>', '<?= e($cliente['data_nascimento'] ?? '') ?>')">
+                                        onclick="abrirEdicaoCliente(<?= e((string) $cliente['id']) ?>, '<?= e(addslashes($cliente['nome'])) ?>', '<?= e(addslashes($cliente['telefone'])) ?>', '<?= e(addslashes($cliente['churrascaria'] ?? CHURRASCARIA_PADRAO)) ?>', '<?= e($cliente['data_nascimento'] ?? '') ?>')">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
                                     <?php if ($nivel >= NIVEL_GERENTE): ?>
@@ -231,7 +286,15 @@ if ($buscaCliente !== '') {
                         <input type="tel" name="telefone" id="editar_cliente_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
                     </label>
                     <label class="reserva-form-label">
-                        <span><i class="fa-solid fa-cake-candles"></i>Data de aniversário</span>
+                        <span><i class="fa-solid fa-store"></i>Churrascaria</span>
+                        <select name="churrascaria" id="editar_cliente_churrascaria" required>
+                            <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
+                                <option value="<?= e($churrascariaOpcao) ?>"><?= e($churrascariaOpcao) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label class="reserva-form-label">
+                        <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento</span>
                         <input type="date" name="data_nascimento" id="editar_cliente_data_nascimento">
                     </label>
                 </div>
@@ -265,10 +328,11 @@ if ($buscaCliente !== '') {
             });
         });
 
-        function abrirEdicaoCliente(id, nome, telefone, dataNascimento) {
+        function abrirEdicaoCliente(id, nome, telefone, churrascaria, dataNascimento) {
             document.getElementById('editar_cliente_id').value = id;
             document.getElementById('editar_cliente_nome').value = nome;
             document.getElementById('editar_cliente_telefone').value = telefone;
+            document.getElementById('editar_cliente_churrascaria').value = churrascaria;
             document.getElementById('editar_cliente_data_nascimento').value = dataNascimento || '';
             document.getElementById('modalEditarCliente').classList.add('aberto');
         }
