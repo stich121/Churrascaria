@@ -271,9 +271,13 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                 <p class="dashboard-nota">*Mesas disponíveis é uma estimativa, considerando 1 mesa por reserva ativa do dia selecionado, de um total de <?= e((string) $totalMesas) ?> mesas cadastradas.</p>
 
                 <div class="reserva-form-card">
-                    <div class="card-header-bar">
+                    <div class="card-header-bar dashboard-reservas-dia-header">
                         <i class="fa-solid fa-list-check"></i>
                         <h3>Reservas do Dia <span class="dashboard-view-date"><?= e($dataFormatada) ?></span></h3>
+                        <label class="dashboard-reservas-busca">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="search" class="dashboard-reservas-busca-input" placeholder="Pesquisar nome ou telefone" autocomplete="off">
+                        </label>
                     </div>
                     <div class="reservas-lista-wrapper">
                         <table class="reservas-tabela">
@@ -368,6 +372,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         <?php if (empty($reservasDia)): ?>
                             <p class="reservas-vazio" style="display: block;">Nenhuma reserva neste dia.</p>
                         <?php endif; ?>
+                        <p class="reservas-vazio dashboard-reservas-busca-vazio">Nenhuma reserva encontrada para essa pesquisa.</p>
                     </div>
                 </div>
             </div>
@@ -441,7 +446,55 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             inicializarDashboardTabs();
             inicializarAtualizacaoDashboard();
             inicializarComparecimentoDashboard();
+            inicializarBuscaReservasDia();
         });
+
+        function inicializarBuscaReservasDia() {
+            document.querySelectorAll('.dashboard-reservas-busca-input').forEach(function (input) {
+                if (input.dataset.inicializado === 'true') {
+                    return;
+                }
+
+                input.dataset.inicializado = 'true';
+                var card = input.closest('.reserva-form-card');
+                if (!card) {
+                    return;
+                }
+
+                var linhas = Array.prototype.slice.call(card.querySelectorAll('.reservas-tabela tbody tr'));
+                var mensagemVazia = card.querySelector('.dashboard-reservas-busca-vazio');
+
+                function normalizar(valor) {
+                    return (valor || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                }
+
+                function filtrarReservas() {
+                    var busca = normalizar(input.value);
+                    var buscaDigitos = busca.replace(/\D/g, '');
+                    var visiveis = 0;
+
+                    linhas.forEach(function (linha) {
+                        var celulas = linha.querySelectorAll('td');
+                        var cliente = normalizar(celulas[1] ? celulas[1].textContent : '');
+                        var telefone = normalizar(celulas[3] ? celulas[3].textContent : '');
+                        var telefoneDigitos = telefone.replace(/\D/g, '');
+                        var corresponde = busca === '' || cliente.indexOf(busca) !== -1 || telefone.indexOf(busca) !== -1 || (buscaDigitos !== '' && telefoneDigitos.indexOf(buscaDigitos) !== -1);
+
+                        linha.style.display = corresponde ? '' : 'none';
+                        if (corresponde) {
+                            visiveis++;
+                        }
+                    });
+
+                    if (mensagemVazia) {
+                        mensagemVazia.style.display = busca !== '' && linhas.length > 0 && visiveis === 0 ? 'block' : 'none';
+                    }
+                }
+
+                input.addEventListener('input', filtrarReservas);
+                filtrarReservas();
+            });
+        }
 
         function inicializarComparecimentoDashboard() {
             document.querySelectorAll('.dashboard-comparecimento-form').forEach(function (form) {
@@ -536,14 +589,21 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         return;
                     }
 
+                    var buscaReservas = document.querySelector('.dashboard-reservas-busca-input');
+                    var termoBuscaReservas = buscaReservas ? buscaReservas.value : '';
                     var documento = new DOMParser().parseFromString(html, 'text/html');
                     var novoPainel = documento.querySelector('.painel-reservas');
                     var painelAtual = document.querySelector('.painel-reservas');
 
                     if (novoPainel && painelAtual) {
                         painelAtual.replaceWith(novoPainel);
+                        var novaBuscaReservas = document.querySelector('.dashboard-reservas-busca-input');
+                        if (novaBuscaReservas) {
+                            novaBuscaReservas.value = termoBuscaReservas;
+                        }
                         inicializarDashboardTabs();
                         inicializarComparecimentoDashboard();
+                        inicializarBuscaReservasDia();
                     }
                 }).catch(function () {}).finally(function () {
                     atualizando = false;
