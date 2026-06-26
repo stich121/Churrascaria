@@ -382,40 +382,13 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                         </td>
                                         <td>
                                             <?php if ($nivel >= NIVEL_GERENTE): ?>
-                                                <form method="post" action="dashboard.php" class="dashboard-comparecimento-form">
-                                                    <input type="hidden" name="acao" value="atualizar_comparecimento">
-                                                    <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
-                                                    <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
-                                                    <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
-                                                    <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
-                                                    <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                                                    <div class="dashboard-comparecimento-opcoes" role="radiogroup" aria-label="Comparecimento">
-                                                        <label class="dashboard-comparecimento-opcao">
-                                                            <input type="radio" name="status_comparecimento" value="" <?= $statusComparecimentoAtual === '' ? 'checked' : '' ?>>
-                                                            <span><i class="fa-solid fa-hourglass-half"></i>Pendente</span>
-                                                        </label>
-                                                        <label class="dashboard-comparecimento-opcao">
-                                                            <input type="radio" name="status_comparecimento" value="sim" <?= $statusComparecimentoAtual === 'sim' ? 'checked' : '' ?>>
-                                                            <span><i class="fa-solid fa-user-check"></i>Veio</span>
-                                                        </label>
-                                                        <label class="dashboard-comparecimento-opcao">
-                                                            <input type="radio" name="status_comparecimento" value="nao" <?= $statusComparecimentoAtual === 'nao' ? 'checked' : '' ?>>
-                                                            <span><i class="fa-solid fa-user-xmark"></i>Não veio</span>
-                                                        </label>
-                                                    </div>
-                                                    <label class="dashboard-comparecimento-qtd-wrap" style="<?= $statusComparecimentoAtual === 'sim' ? '' : 'display:none;' ?>">
-                                                        <span>Qtd</span>
-                                                        <input
-                                                            type="number"
-                                                            name="pessoas_compareceram"
-                                                            min="1"
-                                                            placeholder="0"
-                                                            class="dashboard-comparecimento-qtd"
-                                                            value="<?= $statusComparecimentoAtual === 'sim' ? e((string) $reserva['pessoas_compareceram']) : '' ?>">
-                                                    </label>
-                                                    <button type="submit" class="dashboard-comparecimento-salvar" title="Salvar comparecimento"><i class="fa-solid fa-check"></i></button>
-                                                </form>
+                                                <?php if ($statusComparecimentoAtual === 'sim'): ?>
+                                                    <button type="button" class="badge badge-success badge-clicavel" onclick="abrirCompareceu(<?= e((string) $reserva['id']) ?>, 'sim', <?= e((string) $reserva['pessoas_compareceram']) ?>)"><i class="fa-solid fa-user-check"></i><?= e((string) $reserva['pessoas_compareceram']) ?> vieram</button>
+                                                <?php elseif ($statusComparecimentoAtual === 'nao'): ?>
+                                                    <button type="button" class="badge badge-danger badge-clicavel" onclick="abrirCompareceu(<?= e((string) $reserva['id']) ?>, 'nao', 0)"><i class="fa-solid fa-user-xmark"></i>Não veio</button>
+                                                <?php else: ?>
+                                                    <button type="button" class="badge badge-warning badge-clicavel" onclick="abrirCompareceu(<?= e((string) $reserva['id']) ?>, '', 0)"><i class="fa-solid fa-circle-question"></i>Compareceu?</button>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <?php if ($statusComparecimentoAtual === 'sim'): ?>
                                                     <span class="badge badge-success"><i class="fa-solid fa-user-check"></i><?= e((string) $reserva['pessoas_compareceram']) ?> vieram</span>
@@ -523,19 +496,97 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
         </div>
     </div>
 
+    <div id="modalCompareceu" class="modal-overlay" onclick="if (event.target === this) fecharCompareceu();">
+        <div class="modal-card">
+            <div class="card-header-bar">
+                <i class="fa-solid fa-user-check"></i>
+                <h3>Esse cliente compareceu?</h3>
+                <button type="button" class="modal-close" onclick="fecharCompareceu()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form method="post" action="dashboard.php" id="formCompareceu" onsubmit="return validarFormCompareceu();">
+                <input type="hidden" name="acao" value="atualizar_comparecimento">
+                <input type="hidden" name="id" id="compareceu_id" value="">
+                <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
+                <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
+                <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
+                <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                <input type="hidden" name="status_comparecimento" id="compareceu_status" value="">
+                <div class="modal-actions" id="compareceu_opcoes">
+                    <button type="button" class="btn btn-danger" onclick="escolherCompareceu('nao')"><i class="fa-solid fa-user-xmark"></i>Não veio</button>
+                    <button type="button" class="btn btn-success" onclick="escolherCompareceu('sim')"><i class="fa-solid fa-user-check"></i>Veio</button>
+                </div>
+                <label class="reserva-form-label" id="compareceu_qtd_wrap" style="display:none; margin-top:1rem;">
+                    <span><i class="fa-solid fa-users"></i>Quantas pessoas vieram?</span>
+                    <input type="number" name="pessoas_compareceram" id="compareceu_qtd" min="1" placeholder="Nº de pessoas">
+                </label>
+                <div class="modal-actions" id="compareceu_confirmar_wrap" style="display:none; margin-top:1rem;">
+                    <button type="button" class="btn btn-outline" onclick="voltarOpcoesCompareceu()">Voltar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i>Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <?php renderizarControleSessao(); ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             inicializarDashboardTabs();
             inicializarAtualizacaoDashboard();
-            inicializarComparecimentoDashboard();
             inicializarBuscaReservasDia();
         });
 
         function abrirConfirmarReserva(id) {
             document.getElementById('confirmar_id').value = id;
             document.getElementById('modalConfirmarReserva').classList.add('aberto');
+        }
+
+        function abrirCompareceu(id, statusAtual, qtdAtual) {
+            document.getElementById('compareceu_id').value = id;
+            document.getElementById('compareceu_status').value = '';
+            document.getElementById('compareceu_qtd').value = statusAtual === 'sim' && qtdAtual > 0 ? qtdAtual : '';
+            document.getElementById('compareceu_opcoes').style.display = '';
+            document.getElementById('compareceu_qtd_wrap').style.display = 'none';
+            document.getElementById('compareceu_confirmar_wrap').style.display = 'none';
+            document.getElementById('modalCompareceu').classList.add('aberto');
+        }
+
+        function fecharCompareceu() {
+            document.getElementById('modalCompareceu').classList.remove('aberto');
+        }
+
+        function escolherCompareceu(status) {
+            document.getElementById('compareceu_status').value = status;
+
+            if (status === 'sim') {
+                document.getElementById('compareceu_opcoes').style.display = 'none';
+                document.getElementById('compareceu_qtd_wrap').style.display = '';
+                document.getElementById('compareceu_confirmar_wrap').style.display = '';
+                document.getElementById('compareceu_qtd').focus();
+                return;
+            }
+
+            document.getElementById('formCompareceu').submit();
+        }
+
+        function voltarOpcoesCompareceu() {
+            document.getElementById('compareceu_status').value = '';
+            document.getElementById('compareceu_opcoes').style.display = '';
+            document.getElementById('compareceu_qtd_wrap').style.display = 'none';
+            document.getElementById('compareceu_confirmar_wrap').style.display = 'none';
+        }
+
+        function validarFormCompareceu() {
+            var status = document.getElementById('compareceu_status').value;
+            var qtd = document.getElementById('compareceu_qtd');
+
+            if (status === 'sim' && (!qtd.value || parseInt(qtd.value, 10) < 1)) {
+                qtd.focus();
+                return false;
+            }
+
+            return true;
         }
 
         function fecharConfirmarReserva() {
@@ -586,24 +637,6 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
 
                 input.addEventListener('input', filtrarReservas);
                 filtrarReservas();
-            });
-        }
-
-        function inicializarComparecimentoDashboard() {
-            document.querySelectorAll('.dashboard-comparecimento-form').forEach(function (form) {
-                form.querySelectorAll('input[name="status_comparecimento"]').forEach(function (radio) {
-                    radio.addEventListener('change', function () {
-                        var qtdWrap = form.querySelector('.dashboard-comparecimento-qtd-wrap');
-                        var qtdInput = form.querySelector('.dashboard-comparecimento-qtd');
-                        if (radio.value === 'sim') {
-                            qtdWrap.style.display = '';
-                            qtdInput.focus();
-                        } else {
-                            qtdWrap.style.display = 'none';
-                            qtdInput.value = '';
-                        }
-                    });
-                });
             });
         }
 
@@ -695,7 +728,6 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                             novaBuscaReservas.value = termoBuscaReservas;
                         }
                         inicializarDashboardTabs();
-                        inicializarComparecimentoDashboard();
                         inicializarBuscaReservasDia();
                     }
                 }).catch(function () {}).finally(function () {
