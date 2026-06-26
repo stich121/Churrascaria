@@ -6,6 +6,40 @@ garantirColunaChurrascaria($pdo);
 garantirTabelaTiposReserva($pdo);
 garantirColunaTipoReserva($pdo);
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
+    header('Content-Type: application/json; charset=utf-8');
+    $nomeBusca = trim($_GET['nome'] ?? '');
+    $dataBusca = $_GET['data'] ?? '';
+    $resposta = ['duplicado' => false, 'telefone' => null, 'churrascaria' => null];
+
+    if ($nomeBusca !== '') {
+        if ($dataBusca !== '') {
+            $stmtDup = $pdo->prepare(
+                "SELECT id FROM reservas WHERE nome_cliente = ? AND data_reserva = ? AND status_reserva = 'Reservado' LIMIT 1"
+            );
+            $stmtDup->execute([$nomeBusca, $dataBusca]);
+            if ($stmtDup->fetch()) {
+                $resposta['duplicado'] = true;
+            }
+        }
+
+        if (!$resposta['duplicado']) {
+            $stmtAnterior = $pdo->prepare(
+                'SELECT telefone, churrascaria FROM reservas WHERE nome_cliente = ? ORDER BY criado_em DESC LIMIT 1'
+            );
+            $stmtAnterior->execute([$nomeBusca]);
+            $anterior = $stmtAnterior->fetch();
+            if ($anterior) {
+                $resposta['telefone'] = $anterior['telefone'];
+                $resposta['churrascaria'] = $anterior['churrascaria'];
+            }
+        }
+    }
+
+    echo json_encode($resposta);
+    exit;
+}
+
 $nivel = nivelFuncionario();
 $mensagemErro = '';
 
@@ -288,15 +322,16 @@ $reservas = $stmtReservas->fetchAll();
                     <div class="reserva-form-grid">
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-user"></i>Nome do cliente</span>
-                            <input type="text" name="nome" placeholder="Nome do cliente" required>
+                            <input type="text" name="nome" id="novo_nome" placeholder="Nome do cliente" required autocomplete="off">
+                            <small id="novo_cliente_aviso" class="reserva-form-aviso" style="display:none;"></small>
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-phone"></i>Telefone</span>
-                            <input type="tel" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                            <input type="tel" name="telefone" id="novo_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-store"></i>Churrascaria</span>
-                            <select name="churrascaria" required>
+                            <select name="churrascaria" id="novo_churrascaria" required>
                                 <?php foreach (CHURRASCARIAS_RESERVA as $churrascariaOpcao): ?>
                                     <option value="<?= e($churrascariaOpcao) ?>" <?= $churrascariaOpcao === CHURRASCARIA_PADRAO ? 'selected' : '' ?>><?= e($churrascariaOpcao) ?></option>
                                 <?php endforeach; ?>
@@ -318,7 +353,7 @@ $reservas = $stmtReservas->fetchAll();
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
-                            <input type="date" name="data" required>
+                            <input type="date" name="data" id="novo_data" required>
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-clock"></i>Horário</span>
@@ -579,6 +614,7 @@ $reservas = $stmtReservas->fetchAll();
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             inicializarBuscaReservasPainel();
+            inicializarVerificacaoClienteNovaReserva();
             document.querySelectorAll('input[name="telefone"]').forEach(function (telefoneInput) {
                 telefoneInput.addEventListener('input', function () {
                     var digitos = telefoneInput.value.replace(/\D/g, '').slice(0, 11);
@@ -606,6 +642,58 @@ $reservas = $stmtReservas->fetchAll();
                 });
             });
         });
+
+        function inicializarVerificacaoClienteNovaReserva() {
+            var nomeInput = document.getElementById('novo_nome');
+            var telefoneInput = document.getElementById('novo_telefone');
+            var churrascariaSelect = document.getElementById('novo_churrascaria');
+            var dataInput = document.getElementById('novo_data');
+            var aviso = document.getElementById('novo_cliente_aviso');
+
+            if (!nomeInput || !dataInput || !aviso) {
+                return;
+            }
+
+            var timeoutId = null;
+
+            function verificarCliente() {
+                var nome = nomeInput.value.trim();
+                if (nome === '') {
+                    aviso.style.display = 'none';
+                    return;
+                }
+
+                var params = new URLSearchParams({ acao: 'buscar_cliente', nome: nome, data: dataInput.value });
+                fetch('painel-reservas.php?' + params.toString())
+                    .then(function (resposta) { return resposta.json(); })
+                    .then(function (dados) {
+                        if (dados.duplicado) {
+                            aviso.textContent = 'Esse cliente já está reservado para esse dia.';
+                            aviso.style.display = 'block';
+                            return;
+                        }
+
+                        aviso.style.display = 'none';
+
+                        if (dados.telefone && telefoneInput && telefoneInput.value.trim() === '') {
+                            telefoneInput.value = dados.telefone;
+                        }
+
+                        if (dados.churrascaria && churrascariaSelect) {
+                            churrascariaSelect.value = dados.churrascaria;
+                        }
+                    })
+                    .catch(function () {});
+            }
+
+            function agendarVerificacao() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(verificarCliente, 400);
+            }
+
+            nomeInput.addEventListener('input', agendarVerificacao);
+            dataInput.addEventListener('change', agendarVerificacao);
+        }
 
         function inicializarBuscaReservasPainel() {
             document.querySelectorAll('.reservas-busca-input').forEach(function (input) {

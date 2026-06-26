@@ -2199,6 +2199,14 @@ h1, h2, h3, h4 {
     gap: 0.4rem;
 }
 
+.reserva-form-aviso {
+    color: var(--primary-color);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
 .reserva-form-label i {
     color: var(--primary-color);
     width: 14px;
