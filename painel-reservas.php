@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cl
     $nomeBusca = trim($_GET['nome'] ?? '');
     $telefoneBusca = trim($_GET['telefone'] ?? '');
     $dataBusca = $_GET['data'] ?? '';
-    $resposta = ['duplicado' => false, 'telefone' => null, 'churrascaria' => null];
+    $resposta = ['duplicado' => false, 'telefone' => null, 'churrascaria' => null, 'data_nascimento' => null];
 
     if ($nomeBusca !== '' || $telefoneBusca !== '') {
         if ($dataBusca !== '') {
@@ -47,6 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cl
             if ($anterior) {
                 $resposta['telefone'] = $anterior['telefone'];
                 $resposta['churrascaria'] = $anterior['churrascaria'];
+            }
+        }
+
+        if (!$resposta['duplicado']) {
+            $telefoneCliente = $telefoneBusca !== '' ? $telefoneBusca : ($resposta['telefone'] ?? '');
+            if ($telefoneCliente !== '') {
+                $stmtCliente = $pdo->prepare('SELECT data_nascimento FROM clientes WHERE telefone = ? LIMIT 1');
+                $stmtCliente->execute([$telefoneCliente]);
+                $cliente = $stmtCliente->fetch();
+                if ($cliente && $cliente['data_nascimento']) {
+                    $resposta['data_nascimento'] = $cliente['data_nascimento'];
+                }
             }
         }
     }
@@ -108,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $nomeCliente = trim($_POST['nome'] ?? '');
             $telefoneCliente = trim($_POST['telefone'] ?? '');
+            $aniversarioCliente = trim($_POST['cliente_data_nascimento'] ?? '');
 
             $stmt = $pdo->prepare(
                 'INSERT INTO reservas (nome_cliente, telefone, churrascaria, tipo_reserva, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
@@ -128,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $_SESSION['funcionario_id'],
             ]);
-            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente);
+            salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, $aniversarioCliente !== '' ? $aniversarioCliente : null);
             header('Location: painel-reservas.php');
             exit;
         }
@@ -352,6 +365,10 @@ $reservas = $stmtReservas->fetchAll();
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-phone"></i>Telefone</span>
                             <input type="tel" name="telefone" id="novo_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-cake-candles"></i>Aniversário do cliente</span>
+                            <input type="date" name="cliente_data_nascimento" id="novo_cliente_aniversario">
                         </label>
                         <label class="reserva-form-label">
                             <span><i class="fa-solid fa-store"></i>Churrascaria</span>
@@ -671,6 +688,7 @@ $reservas = $stmtReservas->fetchAll();
             var nomeInput = document.getElementById('novo_nome');
             var telefoneInput = document.getElementById('novo_telefone');
             var churrascariaSelect = document.getElementById('novo_churrascaria');
+            var aniversarioInput = document.getElementById('novo_cliente_aniversario');
             var dataInput = document.getElementById('novo_data');
             var aviso = document.getElementById('novo_cliente_aviso');
 
@@ -707,6 +725,10 @@ $reservas = $stmtReservas->fetchAll();
 
                         if (dados.churrascaria && churrascariaSelect) {
                             churrascariaSelect.value = dados.churrascaria;
+                        }
+
+                        if (dados.data_nascimento && aniversarioInput && aniversarioInput.value === '') {
+                            aniversarioInput.value = dados.data_nascimento;
                         }
                     })
                     .catch(function () {});

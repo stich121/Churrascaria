@@ -304,9 +304,18 @@ function garantirTabelaClientes(PDO $pdo): void
     $verificado = true;
 }
 
-function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone): void
+function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?string $dataNascimento = null): void
 {
     if ($nome === '' || $telefone === '') {
+        return;
+    }
+
+    if ($dataNascimento !== null) {
+        $pdo->prepare(
+            'INSERT INTO clientes (nome, telefone, data_nascimento) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE nome = VALUES(nome), data_nascimento = VALUES(data_nascimento)'
+        )->execute([$nome, $telefone, $dataNascimento]);
+
         return;
     }
 
