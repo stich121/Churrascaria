@@ -9,21 +9,35 @@ garantirColunaTipoReserva($pdo);
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
     header('Content-Type: application/json; charset=utf-8');
     $nomeBusca = trim($_GET['nome'] ?? '');
+    $telefoneBusca = trim($_GET['telefone'] ?? '');
     $dataBusca = $_GET['data'] ?? '';
     $resposta = ['duplicado' => false, 'telefone' => null, 'churrascaria' => null];
 
-    if ($nomeBusca !== '') {
+    if ($nomeBusca !== '' || $telefoneBusca !== '') {
         if ($dataBusca !== '') {
+            $condicoes = [];
+            $parametrosDup = [];
+
+            if ($nomeBusca !== '') {
+                $condicoes[] = 'nome_cliente = ?';
+                $parametrosDup[] = $nomeBusca;
+            }
+
+            if ($telefoneBusca !== '') {
+                $condicoes[] = 'telefone = ?';
+                $parametrosDup[] = $telefoneBusca;
+            }
+
             $stmtDup = $pdo->prepare(
-                "SELECT id FROM reservas WHERE nome_cliente = ? AND data_reserva = ? AND status_reserva = 'Reservado' LIMIT 1"
+                "SELECT id FROM reservas WHERE (" . implode(' OR ', $condicoes) . ") AND data_reserva = ? AND status_reserva = 'Reservado' LIMIT 1"
             );
-            $stmtDup->execute([$nomeBusca, $dataBusca]);
+            $stmtDup->execute(array_merge($parametrosDup, [$dataBusca]));
             if ($stmtDup->fetch()) {
                 $resposta['duplicado'] = true;
             }
         }
 
-        if (!$resposta['duplicado']) {
+        if (!$resposta['duplicado'] && $nomeBusca !== '') {
             $stmtAnterior = $pdo->prepare(
                 'SELECT telefone, churrascaria FROM reservas WHERE nome_cliente = ? ORDER BY criado_em DESC LIMIT 1'
             );
@@ -650,20 +664,22 @@ $reservas = $stmtReservas->fetchAll();
             var dataInput = document.getElementById('novo_data');
             var aviso = document.getElementById('novo_cliente_aviso');
 
-            if (!nomeInput || !dataInput || !aviso) {
+            if (!dataInput || !aviso) {
                 return;
             }
 
             var timeoutId = null;
 
             function verificarCliente() {
-                var nome = nomeInput.value.trim();
-                if (nome === '') {
+                var nome = nomeInput ? nomeInput.value.trim() : '';
+                var telefone = telefoneInput ? telefoneInput.value.replace(/\D/g, '') : '';
+
+                if (nome === '' && telefone === '') {
                     aviso.style.display = 'none';
                     return;
                 }
 
-                var params = new URLSearchParams({ acao: 'buscar_cliente', nome: nome, data: dataInput.value });
+                var params = new URLSearchParams({ acao: 'buscar_cliente', nome: nome, telefone: telefone, data: dataInput.value });
                 fetch('painel-reservas.php?' + params.toString())
                     .then(function (resposta) { return resposta.json(); })
                     .then(function (dados) {
@@ -691,7 +707,14 @@ $reservas = $stmtReservas->fetchAll();
                 timeoutId = setTimeout(verificarCliente, 400);
             }
 
-            nomeInput.addEventListener('input', agendarVerificacao);
+            if (nomeInput) {
+                nomeInput.addEventListener('input', agendarVerificacao);
+            }
+
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', agendarVerificacao);
+            }
+
             dataInput.addEventListener('change', agendarVerificacao);
         }
 
