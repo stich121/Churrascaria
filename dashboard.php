@@ -58,6 +58,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'atualiz
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'confirmar_reserva') {
+    verificarCsrf();
+
+    $idReserva = (int) ($_POST['id'] ?? 0);
+    if ($idReserva > 0) {
+        $pdo->prepare("UPDATE reservas SET confirmacao = 'Confirmado' WHERE id = ?")
+            ->execute([$idReserva]);
+    }
+
+    $abaRetorno = in_array($_POST['aba'] ?? '', ['dia', 'semana', 'mes'], true) ? $_POST['aba'] : 'dia';
+    header('Location: ' . dashboardUrl([
+        'data' => validarDataYmd($_POST['data'] ?? null),
+        'aba' => $abaRetorno,
+        'churrascaria' => $_POST['churrascaria'] ?? 'pampulha',
+        'ordenacao_dia' => $_POST['ordenacao_dia'] ?? 'hora_asc',
+    ]));
+    exit;
+}
+
 $dataSelecionada = validarDataYmd($_GET['data'] ?? null);
 $dataSelecionadaDt = new DateTime($dataSelecionada);
 $diaSemanaNum = (int) $dataSelecionadaDt->format('w');
@@ -356,7 +375,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                             <?php if ($reserva['confirmacao'] === 'Confirmado'): ?>
                                                 <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i>Confirmado</span>
                                             <?php else: ?>
-                                                <span class="badge badge-warning"><i class="fa-solid fa-hourglass-half"></i>Pendente</span>
+                                                <button type="button" class="badge badge-warning badge-clicavel" onclick="abrirConfirmarReserva(<?= e((string) $reserva['id']) ?>)"><i class="fa-solid fa-hourglass-half"></i>Pendente</button>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -479,6 +498,29 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
         </div>
     </section>
 
+    <div id="modalConfirmarReserva" class="modal-overlay" onclick="if (event.target === this) fecharConfirmarReserva();">
+        <div class="modal-card">
+            <div class="card-header-bar">
+                <i class="fa-solid fa-circle-question"></i>
+                <h3>Pode confirmar?</h3>
+                <button type="button" class="modal-close" onclick="fecharConfirmarReserva()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form method="post" action="dashboard.php" id="formConfirmarReserva">
+                <input type="hidden" name="acao" value="confirmar_reserva">
+                <input type="hidden" name="id" id="confirmar_id" value="">
+                <input type="hidden" name="data" value="<?= e($dataSelecionada) ?>">
+                <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
+                <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
+                <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
+                <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="fecharConfirmarReserva()"><i class="fa-solid fa-xmark"></i>Não</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i>Sim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <?php renderizarControleSessao(); ?>
 
     <script>
@@ -488,6 +530,15 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             inicializarComparecimentoDashboard();
             inicializarBuscaReservasDia();
         });
+
+        function abrirConfirmarReserva(id) {
+            document.getElementById('confirmar_id').value = id;
+            document.getElementById('modalConfirmarReserva').classList.add('aberto');
+        }
+
+        function fecharConfirmarReserva() {
+            document.getElementById('modalConfirmarReserva').classList.remove('aberto');
+        }
 
         function inicializarBuscaReservasDia() {
             document.querySelectorAll('.dashboard-reservas-busca-input').forEach(function (input) {

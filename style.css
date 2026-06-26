@@ -389,6 +389,28 @@ h1, h2, h3, h4 {
     transform: translateY(-3px);
 }
 
+.btn-danger {
+    background-color: #c0392b;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #a93226;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.btn-success {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #256428;
+    color: white;
+    transform: translateY(-3px);
+}
+
 /* ===== Diferenciais ===== */
 .diferenciais {
     padding: 80px 20px;
@@ -2213,6 +2235,17 @@ h1, h2, h3, h4 {
 .badge-warning {
     background-color: #fff2dc;
     color: #a15c00;
+}
+
+.badge-clicavel {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.15s ease;
+}
+
+.badge-clicavel:hover {
+    filter: brightness(0.95);
 }
 
 .badge-danger {
