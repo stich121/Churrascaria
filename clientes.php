@@ -114,7 +114,7 @@ if ($buscaCliente !== '') {
                 <div class="panel-header-icon"><i class="fa-solid fa-address-book"></i></div>
                 <div>
                     <h2>Clientes</h2>
-                    <p>Cadastro de clientes com nome, telefone e data de aniversário</p>
+                    <p>Cadastro de clientes com nome, telefone e data de nascimento</p>
                 </div>
             </div>
 
@@ -136,7 +136,7 @@ if ($buscaCliente !== '') {
                             <input type="tel" name="telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
                         </label>
                         <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-cake-candles"></i>Data de aniversário</span>
+                            <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento</span>
                             <input type="date" name="data_nascimento">
                         </label>
                     </div>
@@ -170,7 +170,7 @@ if ($buscaCliente !== '') {
                         <tr>
                             <th>Nome</th>
                             <th>Telefone</th>
-                            <th>Aniversário</th>
+                            <th>Nascimento</th>
                             <th>Ações</th>
                         </tr>
                     </thead>

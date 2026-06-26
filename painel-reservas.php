@@ -367,7 +367,7 @@ $reservas = $stmtReservas->fetchAll();
                             <input type="tel" name="telefone" id="novo_telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" required>
                         </label>
                         <label class="reserva-form-label">
-                            <span><i class="fa-solid fa-cake-candles"></i>Aniversário do cliente</span>
+                            <span><i class="fa-solid fa-cake-candles"></i>Data de nascimento do cliente</span>
                             <input type="date" name="cliente_data_nascimento" id="novo_cliente_aniversario">
                         </label>
                         <label class="reserva-form-label">
