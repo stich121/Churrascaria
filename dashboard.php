@@ -325,20 +325,31 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                                                     <input type="hidden" name="aba" value="<?= e($abaSelecionada) ?>">
                                                     <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
                                                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                                                    <select name="status_comparecimento" class="dashboard-comparecimento-select">
-                                                        <option value="" <?= $statusComparecimentoAtual === '' ? 'selected' : '' ?>>Pendente</option>
-                                                        <option value="sim" <?= $statusComparecimentoAtual === 'sim' ? 'selected' : '' ?>>Veio</option>
-                                                        <option value="nao" <?= $statusComparecimentoAtual === 'nao' ? 'selected' : '' ?>>Não veio</option>
-                                                    </select>
-                                                    <input
-                                                        type="number"
-                                                        name="pessoas_compareceram"
-                                                        min="1"
-                                                        placeholder="Qtd"
-                                                        class="dashboard-comparecimento-qtd"
-                                                        value="<?= $statusComparecimentoAtual === 'sim' ? e((string) $reserva['pessoas_compareceram']) : '' ?>"
-                                                        style="<?= $statusComparecimentoAtual === 'sim' ? '' : 'display:none;' ?>">
-                                                    <button type="submit" title="Salvar"><i class="fa-solid fa-check"></i></button>
+                                                    <div class="dashboard-comparecimento-opcoes" role="radiogroup" aria-label="Comparecimento">
+                                                        <label class="dashboard-comparecimento-opcao">
+                                                            <input type="radio" name="status_comparecimento" value="" <?= $statusComparecimentoAtual === '' ? 'checked' : '' ?>>
+                                                            <span><i class="fa-solid fa-hourglass-half"></i>Pendente</span>
+                                                        </label>
+                                                        <label class="dashboard-comparecimento-opcao">
+                                                            <input type="radio" name="status_comparecimento" value="sim" <?= $statusComparecimentoAtual === 'sim' ? 'checked' : '' ?>>
+                                                            <span><i class="fa-solid fa-user-check"></i>Veio</span>
+                                                        </label>
+                                                        <label class="dashboard-comparecimento-opcao">
+                                                            <input type="radio" name="status_comparecimento" value="nao" <?= $statusComparecimentoAtual === 'nao' ? 'checked' : '' ?>>
+                                                            <span><i class="fa-solid fa-user-xmark"></i>Não veio</span>
+                                                        </label>
+                                                    </div>
+                                                    <label class="dashboard-comparecimento-qtd-wrap" style="<?= $statusComparecimentoAtual === 'sim' ? '' : 'display:none;' ?>">
+                                                        <span>Qtd</span>
+                                                        <input
+                                                            type="number"
+                                                            name="pessoas_compareceram"
+                                                            min="1"
+                                                            placeholder="0"
+                                                            class="dashboard-comparecimento-qtd"
+                                                            value="<?= $statusComparecimentoAtual === 'sim' ? e((string) $reserva['pessoas_compareceram']) : '' ?>">
+                                                    </label>
+                                                    <button type="submit" class="dashboard-comparecimento-salvar" title="Salvar comparecimento"><i class="fa-solid fa-check"></i></button>
                                                 </form>
                                             <?php else: ?>
                                                 <?php if ($statusComparecimentoAtual === 'sim'): ?>
@@ -433,15 +444,19 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
         });
 
         function inicializarComparecimentoDashboard() {
-            document.querySelectorAll('.dashboard-comparecimento-select').forEach(function (select) {
-                select.addEventListener('change', function () {
-                    var qtdInput = select.closest('.dashboard-comparecimento-form').querySelector('.dashboard-comparecimento-qtd');
-                    if (select.value === 'sim') {
-                        qtdInput.style.display = '';
-                    } else {
-                        qtdInput.style.display = 'none';
-                        qtdInput.value = '';
-                    }
+            document.querySelectorAll('.dashboard-comparecimento-form').forEach(function (form) {
+                form.querySelectorAll('input[name="status_comparecimento"]').forEach(function (radio) {
+                    radio.addEventListener('change', function () {
+                        var qtdWrap = form.querySelector('.dashboard-comparecimento-qtd-wrap');
+                        var qtdInput = form.querySelector('.dashboard-comparecimento-qtd');
+                        if (radio.value === 'sim') {
+                            qtdWrap.style.display = '';
+                            qtdInput.focus();
+                        } else {
+                            qtdWrap.style.display = 'none';
+                            qtdInput.value = '';
+                        }
+                    });
                 });
             });
         }
