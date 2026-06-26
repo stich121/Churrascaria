@@ -1486,6 +1486,47 @@ h1, h2, h3, h4 {
     justify-content: center;
 }
 
+.boi-login {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 1.2rem;
+}
+
+.boi-login svg {
+    width: 100%;
+    height: 100%;
+}
+
+.boi-login .boi-olho-aberto {
+    opacity: 1;
+    animation: boiOlharLados 4s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.boi-login .boi-olho-fechado {
+    opacity: 0;
+}
+
+.boi-login.boi-olhos-fechados .boi-olho-aberto {
+    opacity: 0;
+}
+
+.boi-login.boi-olhos-fechados .boi-olho-fechado {
+    opacity: 1;
+}
+
+@keyframes boiOlharLados {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+
 .login-card h2 {
     color: var(--primary-color);
     font-size: 1.8rem;
