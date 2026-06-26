@@ -42,6 +42,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($acao === 'editar_funcionario' && $nivelLogado >= NIVEL_SUPERIOR) {
+        $idAlvo = (int) ($_POST['id'] ?? 0);
+        $nome = trim($_POST['nome'] ?? '');
+        $usuario = trim($_POST['usuario'] ?? '');
+        $nivelNovo = (int) ($_POST['nivel'] ?? 0);
+        $senha = $_POST['senha'] ?? '';
+
+        if ($idAlvo < 1 || $nome === '' || $usuario === '') {
+            $erro = 'Preencha nome e usuário do funcionário.';
+        } elseif (!in_array($nivelNovo, [NIVEL_ATENDENTE, NIVEL_GERENTE, NIVEL_SUPERIOR], true)) {
+            $erro = 'Escolha um nível de acesso válido.';
+        } elseif ($senha !== '' && strlen($senha) < 6) {
+            $erro = 'A nova senha precisa ter pelo menos 6 caracteres.';
+        } else {
+            $stmt = $pdo->prepare('SELECT id FROM funcionarios WHERE usuario = ? AND id <> ?');
+            $stmt->execute([$usuario, $idAlvo]);
+
+            if ($stmt->fetch()) {
+                $erro = 'Esse nome de usuário já está em uso.';
+            } else {
+                if ($senha !== '') {
+                    $hash = password_hash($senha, PASSWORD_DEFAULT);
+                    $pdo->prepare('UPDATE funcionarios SET nome = ?, usuario = ?, nivel = ?, senha_hash = ? WHERE id = ?')
+                        ->execute([$nome, $usuario, $nivelNovo, $hash, $idAlvo]);
+                } else {
+                    $pdo->prepare('UPDATE funcionarios SET nome = ?, usuario = ?, nivel = ? WHERE id = ?')
+                        ->execute([$nome, $usuario, $nivelNovo, $idAlvo]);
+                }
+                header('Location: funcionarios.php');
+                exit;
+            }
+        }
+    }
+
+    if ($acao === 'excluir_funcionario' && $nivelLogado >= NIVEL_SUPERIOR) {
+        $idAlvo = (int) ($_POST['id'] ?? 0);
+
+        if ($idAlvo === $idLogado) {
+            $erro = 'Você não pode excluir a própria conta.';
+        } else {
+            $pdo->prepare('DELETE FROM funcionarios WHERE id = ?')->execute([$idAlvo]);
+            header('Location: funcionarios.php');
+            exit;
+        }
+    }
+
     if ($acao === 'alternar_status') {
         $idAlvo = (int) ($_POST['id'] ?? 0);
 
@@ -206,7 +252,16 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                                         <span class="badge badge-danger"><i class="fa-solid fa-ban"></i>Inativo</span>
                                     <?php endif; ?>
                                 </td>
-                                <td>
+                                <td class="reserva-acoes-col">
+                                    <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
+                                        <button
+                                            type="button"
+                                            class="btn-editar-reserva"
+                                            title="Editar funcionário"
+                                            onclick="abrirEdicaoFuncionario(<?= e((string) $funcionario['id']) ?>, '<?= e(addslashes($funcionario['nome'])) ?>', '<?= e(addslashes($funcionario['usuario'])) ?>', <?= e((string) $funcionario['nivel']) ?>)">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    <?php endif; ?>
                                     <?php if ($podeAlterarEsteAqui): ?>
                                         <form method="post" action="funcionarios.php" onsubmit="return confirm('Alterar o status deste funcionário?');">
                                             <input type="hidden" name="acao" value="alternar_status">
@@ -214,6 +269,16 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                                             <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                                             <button type="submit" class="btn-remover-reserva" title="Ativar/Desativar">
                                                 <i class="fa-solid fa-power-off"></i>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                    <?php if ($nivelLogado >= NIVEL_SUPERIOR && (int) $funcionario['id'] !== $idLogado): ?>
+                                        <form method="post" action="funcionarios.php" onsubmit="return confirm('Excluir o funcionário &quot;<?= e($funcionario['nome']) ?>&quot;? Essa ação não pode ser desfeita.');">
+                                            <input type="hidden" name="acao" value="excluir_funcionario">
+                                            <input type="hidden" name="id" value="<?= e((string) $funcionario['id']) ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                                            <button type="submit" class="btn-remover-reserva" title="Excluir funcionário">
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
                                     <?php endif; ?>
@@ -225,6 +290,65 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
             </div>
         </div>
     </section>
+
+    <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
+        <div id="modalEditarFuncionario" class="modal-overlay" onclick="if (event.target === this) fecharEdicaoFuncionario();">
+            <div class="modal-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-pen"></i>
+                    <h3>Editar Funcionário</h3>
+                    <button type="button" class="modal-close" onclick="fecharEdicaoFuncionario()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form method="post" action="funcionarios.php">
+                    <input type="hidden" name="acao" value="editar_funcionario">
+                    <input type="hidden" name="id" id="editar_funcionario_id" value="">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                    <div class="reserva-form-grid">
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-id-card"></i>Nome completo</span>
+                            <input type="text" name="nome" id="editar_funcionario_nome" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-user"></i>Usuário de acesso</span>
+                            <input type="text" name="usuario" id="editar_funcionario_usuario" required>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-layer-group"></i>Nível de acesso</span>
+                            <select name="nivel" id="editar_funcionario_nivel" required>
+                                <option value="<?= NIVEL_ATENDENTE ?>">Atendente</option>
+                                <option value="<?= NIVEL_GERENTE ?>">Gerente</option>
+                                <option value="<?= NIVEL_SUPERIOR ?>">Nível Superior</option>
+                            </select>
+                        </label>
+                        <label class="reserva-form-label">
+                            <span><i class="fa-solid fa-lock"></i>Nova senha</span>
+                            <input type="password" name="senha" id="editar_funcionario_senha" placeholder="Deixe em branco para não alterar" minlength="6">
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline" onclick="fecharEdicaoFuncionario()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i>Salvar alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function abrirEdicaoFuncionario(id, nome, usuario, nivel) {
+                document.getElementById('editar_funcionario_id').value = id;
+                document.getElementById('editar_funcionario_nome').value = nome;
+                document.getElementById('editar_funcionario_usuario').value = usuario;
+                document.getElementById('editar_funcionario_nivel').value = nivel;
+                document.getElementById('editar_funcionario_senha').value = '';
+                document.getElementById('modalEditarFuncionario').classList.add('aberto');
+            }
+
+            function fecharEdicaoFuncionario() {
+                document.getElementById('modalEditarFuncionario').classList.remove('aberto');
+            }
+        </script>
+    <?php endif; ?>
+
     <?php renderizarControleSessao(); ?>
 </body>
 </html>
