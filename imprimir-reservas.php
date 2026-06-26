@@ -27,6 +27,7 @@ if (!array_key_exists($churrascariaSelecionada, $opcoesChurrascaria)) {
 }
 
 $rotuloChurrascaria = $opcoesChurrascaria[$churrascariaSelecionada];
+$logoRelatorioAtual = logoChurrascaria($churrascariaSelecionada === 'todas' ? null : $rotuloChurrascaria);
 $filtroChurrascariaSql = '';
 $parametrosConsulta = [$dataSelecionada];
 
@@ -267,7 +268,7 @@ $diaSemana = $diasSemana[(int) date('w', strtotime($dataSelecionada))];
                 <p><?= e($dataFormatada) ?> (<?= e($diaSemana) ?>)</p>
                 <p><?= e($rotuloChurrascaria) ?></p>
             </div>
-            <img src="logo-pampulha.png" alt="Churrascaria Pampulha">
+            <img src="<?= e($logoRelatorioAtual) ?>" alt="<?= e($rotuloChurrascaria) ?>">
         </div>
 
         <div class="relatorio-resumo">

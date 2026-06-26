@@ -124,6 +124,7 @@ if (!array_key_exists($ordenacaoDashboardDia, $ordenacoesDashboardDia)) {
 $ordenacaoDashboardDiaSql = $ordenacoesDashboardDia[$ordenacaoDashboardDia]['sql'];
 
 $rotuloDashboardChurrascaria = $opcoesDashboardChurrascaria[$churrascariaDashboard];
+$logoDashboardAtual = logoChurrascaria($churrascariaDashboard === 'todas' ? null : $rotuloDashboardChurrascaria);
 $filtroChurrascariaSql = '';
 $filtroChurrascariaParams = [];
 
@@ -231,7 +232,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
             <div class="navbar-content">
                 <div class="logo">
                     <a href="index.html">
-                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
+                        <img src="<?= e($logoDashboardAtual) ?>" alt="<?= e($rotuloDashboardChurrascaria) ?>" class="logo-img">
                     </a>
                 </div>
                 <ul class="funcionario-nav-links">

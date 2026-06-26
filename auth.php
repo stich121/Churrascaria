@@ -316,6 +316,11 @@ function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone): void
     )->execute([$nome, $telefone]);
 }
 
+function logoChurrascaria(?string $churrascaria): string
+{
+    return $churrascaria === 'Casarão Itau' ? 'logo-casarao-itau.png' : 'logo-pampulha.png';
+}
+
 function e(?string $valor): string
 {
     return htmlspecialchars($valor ?? '', ENT_QUOTES, 'UTF-8');
