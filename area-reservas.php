@@ -63,14 +63,16 @@ if ($bloqueioRestante > 0) {
         <div class="login-card">
             <div class="boi-login" id="boiLogin" aria-hidden="true">
                 <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M25 18 Q15 5 10 15" stroke="#c41e3a" stroke-width="4" fill="none" stroke-linecap="round"/>
-                    <path d="M75 18 Q85 5 90 15" stroke="#c41e3a" stroke-width="4" fill="none" stroke-linecap="round"/>
-                    <ellipse cx="14" cy="44" rx="9" ry="13" fill="#fff" stroke="#c41e3a" stroke-width="3"/>
-                    <ellipse cx="86" cy="44" rx="9" ry="13" fill="#fff" stroke="#c41e3a" stroke-width="3"/>
-                    <ellipse cx="50" cy="50" rx="38" ry="32" fill="#fff" stroke="#c41e3a" stroke-width="3"/>
-                    <ellipse cx="50" cy="68" rx="20" ry="13" fill="#fbe6e9"/>
-                    <ellipse cx="42" cy="68" rx="3" ry="4" fill="#c41e3a"/>
-                    <ellipse cx="58" cy="68" rx="3" ry="4" fill="#c41e3a"/>
+                    <path d="M31 24 C21 12 14 10 10 18 C17 16 22 19 27 27" fill="none" stroke="#c41e3a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M69 24 C79 12 86 10 90 18 C83 16 78 19 73 27" fill="none" stroke="#c41e3a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M24 39 C14 31 7 34 8 46 C9 55 17 59 25 53" fill="#fff" stroke="#c41e3a" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M76 39 C86 31 93 34 92 46 C91 55 83 59 75 53" fill="#fff" stroke="#c41e3a" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M50 19 C29 19 19 35 20 52 C21 72 34 82 50 82 C66 82 79 72 80 52 C81 35 71 19 50 19Z" fill="#fff" stroke="#c41e3a" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M33 62 C37 54 43 51 50 51 C57 51 63 54 67 62 C68 73 61 78 50 78 C39 78 32 73 33 62Z" fill="#fbe6e9" stroke="#c41e3a" stroke-width="2" stroke-linejoin="round"/>
+                    <ellipse cx="42" cy="66" rx="3.2" ry="4.8" fill="#7b2d1b" transform="rotate(-12 42 66)"/>
+                    <ellipse cx="58" cy="66" rx="3.2" ry="4.8" fill="#7b2d1b" transform="rotate(12 58 66)"/>
+                    <path d="M28 31 C33 25 39 24 43 29" fill="none" stroke="#c41e3a" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M72 31 C67 25 61 24 57 29" fill="none" stroke="#c41e3a" stroke-width="2.5" stroke-linecap="round"/>
                     <g class="boi-olho">
                         <circle class="boi-olho-aberto" cx="36" cy="46" r="6" fill="#2b1b12"/>
                         <path class="boi-olho-fechado" d="M30 46 Q36 52 42 46" stroke="#2b1b12" stroke-width="3" fill="none" stroke-linecap="round"/>
