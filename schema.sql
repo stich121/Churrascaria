@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS reservas (
     data_reserva DATE NOT NULL,
     hora_reserva TIME NOT NULL,
     pessoas SMALLINT UNSIGNED NOT NULL,
+    mesas_alocadas VARCHAR(120) NULL,
     pessoas_compareceram SMALLINT UNSIGNED NULL,
     valor DECIMAL(10,2) NOT NULL DEFAULT 0,
     status_reserva VARCHAR(20) NOT NULL DEFAULT 'Reservado',

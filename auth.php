@@ -349,6 +349,93 @@ function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?stri
     )->execute([$nome, $telefone, $churrascaria]);
 }
 
+function garantirColunaMesasAlocadasReservas(PDO $pdo): void
+{
+    static $verificado = false;
+
+    if ($verificado) {
+        return;
+    }
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM reservas LIKE 'mesas_alocadas'");
+    if (!$stmt->fetch()) {
+        $pdo->exec('ALTER TABLE reservas ADD COLUMN mesas_alocadas VARCHAR(120) NULL AFTER pessoas');
+    }
+
+    $verificado = true;
+}
+
+/**
+ * Calcula quais mesas usar para uma reserva: prioriza mesa de 2 lugares para 2 pessoas,
+ * mesa de 4 lugares para 3 ou 4 pessoas, e combina mesas maiores->menores para grupos maiores.
+ */
+function calcularMesasReserva(PDO $pdo, string $churrascaria, int $pessoas): string
+{
+    if ($pessoas < 1) {
+        return '';
+    }
+
+    $stmt = $pdo->prepare('SELECT capacidade, quantidade FROM mesas WHERE churrascaria = ? ORDER BY capacidade ASC');
+    $stmt->execute([$churrascaria]);
+    $disponiveis = [];
+    foreach ($stmt->fetchAll() as $mesa) {
+        $disponiveis[(int) $mesa['capacidade']] = (int) $mesa['quantidade'];
+    }
+
+    if (empty($disponiveis)) {
+        return 'Nenhuma mesa cadastrada';
+    }
+
+    $usadas = [];
+
+    if ($pessoas <= 2 && !empty($disponiveis[2])) {
+        $disponiveis[2]--;
+        $usadas[2] = ($usadas[2] ?? 0) + 1;
+    } elseif ($pessoas <= 4 && !empty($disponiveis[4])) {
+        $disponiveis[4]--;
+        $usadas[4] = ($usadas[4] ?? 0) + 1;
+    } else {
+        $restante = $pessoas;
+        $capacidadesDesc = array_keys($disponiveis);
+        rsort($capacidadesDesc);
+
+        while ($restante > 0) {
+            $alocou = false;
+
+            foreach ($capacidadesDesc as $capacidade) {
+                if ($disponiveis[$capacidade] > 0) {
+                    $disponiveis[$capacidade]--;
+                    $usadas[$capacidade] = ($usadas[$capacidade] ?? 0) + 1;
+                    $restante -= $capacidade;
+                    $alocou = true;
+                    break;
+                }
+            }
+
+            if (!$alocou) {
+                $usadas['extra'] = ($usadas['extra'] ?? 0) + 1;
+                $restante -= max($capacidadesDesc ?: [1]);
+            }
+        }
+    }
+
+    if (empty($usadas)) {
+        $maiorCapacidade = max(array_keys($disponiveis));
+        $usadas[$maiorCapacidade] = 1;
+    }
+
+    $descricoes = [];
+    foreach ($usadas as $capacidade => $quantidade) {
+        if ($capacidade === 'extra') {
+            $descricoes[] = $quantidade . ' mesa(s) extra';
+            continue;
+        }
+        $descricoes[] = $quantidade . ' mesa(s) de ' . $capacidade;
+    }
+
+    return implode(' + ', $descricoes);
+}
+
 function logoChurrascaria(?string $churrascaria): string
 {
     return $churrascaria === 'Casarão Itau' ? 'logo-casarao-itau.png' : 'logo-pampulha.png';

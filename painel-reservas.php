@@ -7,6 +7,7 @@ garantirTabelaTiposReserva($pdo);
 garantirColunaTipoReserva($pdo);
 garantirTabelaClientes($pdo);
 garantirColunaChurrascariaClientes($pdo);
+garantirColunaMesasAlocadasReservas($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
     header('Content-Type: application/json; charset=utf-8');
@@ -122,10 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nomeCliente = trim($_POST['nome'] ?? '');
             $telefoneCliente = trim($_POST['telefone'] ?? '');
             $aniversarioCliente = trim($_POST['cliente_data_nascimento'] ?? '');
+            $mesasAlocadas = calcularMesasReserva($pdo, $churrascaria, $pessoas);
 
             $stmt = $pdo->prepare(
-                'INSERT INTO reservas (nome_cliente, telefone, churrascaria, tipo_reserva, data_pedido, data_reserva, hora_reserva, pessoas, valor, status_reserva, confirmacao, observacao, funcionario_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO reservas (nome_cliente, telefone, churrascaria, tipo_reserva, data_pedido, data_reserva, hora_reserva, pessoas, mesas_alocadas, valor, status_reserva, confirmacao, observacao, funcionario_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             $stmt->execute([
                 $nomeCliente,
@@ -136,6 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
                 $pessoas,
+                $mesasAlocadas,
                 parseValorBr($_POST['valor'] ?? '0'),
                 $statusReserva,
                 $confirmacao,
@@ -167,9 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $nomeCliente = trim($_POST['nome'] ?? '');
             $telefoneCliente = trim($_POST['telefone'] ?? '');
+            $mesasAlocadas = calcularMesasReserva($pdo, $churrascaria, $pessoas);
 
             $stmt = $pdo->prepare(
-                'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, tipo_reserva = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, valor = ?, status_reserva = ?, observacao = ?
+                'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, tipo_reserva = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, mesas_alocadas = ?, valor = ?, status_reserva = ?, observacao = ?
                  WHERE id = ?'
             );
             $stmt->execute([
@@ -181,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['data'] ?? '',
                 $_POST['hora'] ?? '',
                 $pessoas,
+                $mesasAlocadas,
                 parseValorBr($_POST['valor'] ?? '0'),
                 $statusReserva,
                 $observacao !== '' ? $observacao : null,
@@ -268,7 +273,7 @@ $primeiraReservaPagina = $totalReservas > 0 ? $offsetReservas + 1 : 0;
 $ultimaReservaPagina = min($offsetReservas + $reservasPorPagina, $totalReservas);
 
 $stmtReservas = $pdo->prepare(
-    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas,
+    'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas, r.mesas_alocadas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
      JOIN funcionarios f ON f.id = r.funcionario_id
@@ -486,6 +491,7 @@ $reservas = $stmtReservas->fetchAll();
                             <th>Dia</th>
                             <th>Hora</th>
                             <th>Pessoas</th>
+                            <th>Mesas</th>
                             <th>Valor</th>
                             <th>Status</th>
                             <th>Confirmação / Compareceram</th>
@@ -506,6 +512,7 @@ $reservas = $stmtReservas->fetchAll();
                                 <td><?= e($diasSemana[(int) date('w', strtotime($reserva['data_reserva']))]) ?></td>
                                 <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
                                 <td><?= e((string) $reserva['pessoas']) ?></td>
+                                <td><?= $reserva['mesas_alocadas'] ? e($reserva['mesas_alocadas']) : '-' ?></td>
                                 <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
                                 <td>
                                     <?php if ($reserva['status_reserva'] === 'Reservado'): ?>
