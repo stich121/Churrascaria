@@ -501,7 +501,7 @@ function nomeNivel(int $nivel): string
 function ehDesenvolvedorAutorizado(): bool
 {
     return nivelFuncionario() >= NIVEL_DESENVOLVEDOR
-        && ($_SESSION['funcionario_usuario'] ?? '') === USUARIO_DESENVOLVEDOR;
+        && strcasecmp((string) ($_SESSION['funcionario_usuario'] ?? ''), USUARIO_DESENVOLVEDOR) === 0;
 }
 
 function exigirDesenvolvedor(): void
