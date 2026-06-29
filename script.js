@@ -55,10 +55,6 @@ if (contactForm) {
 
         // Simular delay de envio
         setTimeout(() => {
-            // Criar mailto link com os dados
-            const subject = encodeURIComponent(`Contato de ${name}`);
-            const body = encodeURIComponent(`Nome: ${name}\nEmail: ${email}\n\nMensagem:\n${message}`);
-
             // Mostrar sucesso
             alert('Obrigado! Sua mensagem foi enviada com sucesso! Em breve entraremos em contato.');
 
@@ -155,7 +151,6 @@ formInputs.forEach(input => {
 document.querySelectorAll('.btn').forEach(btn => {
     btn.addEventListener('mouseenter', function(e) {
         const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
 
         ripple.style.position = 'absolute';
         ripple.style.borderRadius = '50%';
@@ -228,7 +223,6 @@ window.addEventListener('scroll', function() {
 
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
         if (pageYOffset >= sectionTop - 200) {
             current = section.getAttribute('id');
         }
