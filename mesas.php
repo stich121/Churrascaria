@@ -23,14 +23,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $stmt = $pdo->prepare('INSERT INTO mesas (capacidade, quantidade, churrascaria) VALUES (?, ?, ?)');
             $stmt->execute([$capacidade, $quantidadeMesas, $churrascaria]);
+            Logger::audit('mesa_criada', [
+                'mesa_id' => (int) $pdo->lastInsertId(),
+                'capacidade' => $capacidade,
+                'quantidade' => $quantidadeMesas,
+                'churrascaria' => $churrascaria,
+            ]);
             header('Location: mesas.php');
             exit;
         }
     }
 
     if ($acao === 'excluir_mesa' && $nivel >= NIVEL_GERENTE) {
+        $idMesaExcluir = (int) ($_POST['id'] ?? 0);
         $stmt = $pdo->prepare('DELETE FROM mesas WHERE id = ?');
-        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        $stmt->execute([$idMesaExcluir]);
+        Logger::audit('mesa_excluida', ['mesa_id' => $idMesaExcluir]);
         header('Location: mesas.php');
         exit;
     }
@@ -69,6 +77,9 @@ foreach ($mesas as $mesa) {
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>

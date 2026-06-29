@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $pdo->prepare('INSERT INTO tipos_reserva (nome, criado_por) VALUES (?, ?)')
                     ->execute([$nomeTipo, $_SESSION['funcionario_id']]);
+                Logger::audit('tipo_reserva_criado', ['tipo_id' => (int) $pdo->lastInsertId(), 'nome' => $nomeTipo]);
                 header('Location: tipos-reserva.php');
                 exit;
             }
@@ -32,8 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($acao === 'excluir_tipo_reserva' && $nivel >= NIVEL_GERENTE) {
+        $idTipoExcluir = (int) ($_POST['id'] ?? 0);
         $stmt = $pdo->prepare('DELETE FROM tipos_reserva WHERE id = ?');
-        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        $stmt->execute([$idTipoExcluir]);
+        Logger::audit('tipo_reserva_excluido', ['tipo_id' => $idTipoExcluir]);
         header('Location: tipos-reserva.php');
         exit;
     }
@@ -72,6 +75,9 @@ $tiposReserva = $pdo->query(
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>

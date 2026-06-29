@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'atualiz
     if ($idReserva > 0) {
         $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ? WHERE id = ?')
             ->execute([$pessoasCompareceram, $idReserva]);
+        Logger::audit('reserva_comparecimento_atualizado', ['reserva_id' => $idReserva, 'pessoas_compareceram' => $pessoasCompareceram]);
     }
 
     $abaRetorno = in_array($_POST['aba'] ?? '', ['dia', 'semana', 'mes'], true) ? $_POST['aba'] : 'dia';
@@ -65,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'confirm
     if ($idReserva > 0) {
         $pdo->prepare("UPDATE reservas SET confirmacao = 'Confirmado' WHERE id = ?")
             ->execute([$idReserva]);
+        Logger::audit('reserva_confirmada', ['reserva_id' => $idReserva]);
     }
 
     $abaRetorno = in_array($_POST['aba'] ?? '', ['dia', 'semana', 'mes'], true) ? $_POST['aba'] : 'dia';
@@ -242,6 +244,9 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
@@ -730,7 +735,11 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         inicializarDashboardTabs();
                         inicializarBuscaReservasDia();
                     }
-                }).catch(function () {}).finally(function () {
+                }).catch(function (erro) {
+                    if (window.AppLogger) {
+                        window.AppLogger.warn('Falha ao atualizar dashboard automaticamente', { erro: String(erro) });
+                    }
+                }).finally(function () {
                     atualizando = false;
                 });
             }

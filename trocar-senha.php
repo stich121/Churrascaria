@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $funcionario = $stmt->fetch();
 
     if (!$funcionario || !password_verify($senhaAtual, $funcionario['senha_hash'])) {
+        Logger::warn('Tentativa de troca de senha com senha atual incorreta', ['action' => 'password_change_failed']);
         $erro = 'Senha atual incorreta.';
     } elseif (strlen($senhaNova) < 6) {
         $erro = 'A nova senha precisa ter pelo menos 6 caracteres.';
@@ -27,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $hash = password_hash($senhaNova, PASSWORD_DEFAULT);
         $pdo->prepare('UPDATE funcionarios SET senha_hash = ? WHERE id = ?')->execute([$hash, $_SESSION['funcionario_id']]);
+        Logger::audit('password_changed', ['funcionario_id' => $_SESSION['funcionario_id']]);
         $sucesso = 'Senha alterada com sucesso.';
     }
 }
@@ -57,6 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>

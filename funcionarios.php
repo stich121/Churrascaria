@@ -37,6 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hash = password_hash($senha, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare('INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES (?, ?, ?, ?)');
                 $stmt->execute([$nome, $usuario, $hash, $nivelNovo]);
+                Logger::audit('funcionario_criado', [
+                    'funcionario_id' => (int) $pdo->lastInsertId(),
+                    'usuario' => $usuario,
+                    'nivel' => $nivelNovo,
+                ]);
                 $sucesso = 'Funcionário cadastrado com sucesso.';
             }
         }
@@ -70,6 +75,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare('UPDATE funcionarios SET nome = ?, usuario = ?, nivel = ? WHERE id = ?')
                         ->execute([$nome, $usuario, $nivelNovo, $idAlvo]);
                 }
+                Logger::audit('funcionario_editado', [
+                    'funcionario_id' => $idAlvo,
+                    'usuario' => $usuario,
+                    'nivel' => $nivelNovo,
+                    'senha_alterada' => $senha !== '',
+                ]);
                 header('Location: funcionarios.php');
                 exit;
             }
@@ -83,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $erro = 'Você não pode excluir a própria conta.';
         } else {
             $pdo->prepare('DELETE FROM funcionarios WHERE id = ?')->execute([$idAlvo]);
+            Logger::audit('funcionario_excluido', ['funcionario_id' => $idAlvo]);
             header('Location: funcionarios.php');
             exit;
         }
@@ -102,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($podeAlterar) {
                 $pdo->prepare('UPDATE funcionarios SET ativo = NOT ativo WHERE id = ?')->execute([$idAlvo]);
+                Logger::audit('funcionario_status_alternado', ['funcionario_id' => $idAlvo]);
             } else {
                 $erro = 'Você não tem permissão para alterar este funcionário.';
             }
@@ -144,6 +157,9 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                     <li><a href="mesas.php">Mesas</a></li>
                     <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
                     <li><a href="clientes.php">Clientes</a></li>
+                    <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
+                    <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>

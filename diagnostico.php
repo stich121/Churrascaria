@@ -12,6 +12,9 @@ try {
 } catch (\Throwable $e) {
     $authOk = false;
     $authErro = $e->getMessage() . ' em ' . $e->getFile() . ':' . $e->getLine();
+    if (class_exists('Logger')) {
+        Logger::error('Falha ao carregar auth.php no diagnostico', ['exception' => $e]);
+    }
 }
 
 header('Content-Type: text/plain; charset=UTF-8');
@@ -56,4 +59,11 @@ try {
 } catch (\Throwable $e) {
     echo "ERRO na conexao/consulta: " . $e->getMessage() . "\n";
     echo "Em: " . $e->getFile() . ":" . $e->getLine() . "\n";
+    if (class_exists('Logger')) {
+        Logger::error('Falha na conexao/consulta de diagnostico', [
+            'db_host' => $mHost[1] ?? null,
+            'db_name' => $mName[1] ?? null,
+            'exception' => $e,
+        ]);
+    }
 }

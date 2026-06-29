@@ -22,6 +22,14 @@ try {
         ]
     );
 } catch (PDOException $e) {
+    if (class_exists('Logger')) {
+        Logger::fatal('Falha ao conectar ao banco de dados', [
+            'action' => 'db_connection_failed',
+            'db_host' => $DB_HOST,
+            'db_name' => $DB_NAME,
+            'exception' => $e,
+        ]);
+    }
     http_response_code(500);
     die('Erro ao conectar ao banco de dados.');
 }

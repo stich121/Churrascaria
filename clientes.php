@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $pdo->prepare('INSERT INTO clientes (nome, telefone, churrascaria, data_nascimento) VALUES (?, ?, ?, ?)')
                     ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null]);
+                Logger::audit('cliente_criado', ['cliente_id' => (int) $pdo->lastInsertId()]);
                 header('Location: clientes.php');
                 exit;
             }
@@ -57,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $pdo->prepare('UPDATE clientes SET nome = ?, telefone = ?, churrascaria = ?, data_nascimento = ? WHERE id = ?')
                     ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null, $idCliente]);
+                Logger::audit('cliente_editado', ['cliente_id' => $idCliente]);
                 header('Location: clientes.php');
                 exit;
             }
@@ -64,8 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($acao === 'excluir_cliente' && $nivel >= NIVEL_GERENTE) {
+        $idClienteExcluir = (int) ($_POST['id'] ?? 0);
         $stmt = $pdo->prepare('DELETE FROM clientes WHERE id = ?');
-        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        $stmt->execute([$idClienteExcluir]);
+        Logger::audit('cliente_excluido', ['cliente_id' => $idClienteExcluir]);
         header('Location: clientes.php');
         exit;
     }
@@ -133,6 +137,9 @@ $clientes = $stmt->fetchAll();
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
