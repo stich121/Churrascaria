@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     nivel TINYINT UNSIGNED NOT NULL,
     ativo TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_funcionarios_nivel CHECK (nivel IN (1, 2, 3))
+    CONSTRAINT chk_funcionarios_nivel CHECK (nivel IN (1, 2, 3, 4))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS tipos_reserva (
