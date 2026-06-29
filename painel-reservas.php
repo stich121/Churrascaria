@@ -146,6 +146,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['funcionario_id'],
             ]);
             salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, $aniversarioCliente !== '' ? $aniversarioCliente : null, $churrascaria);
+            Logger::audit('reserva_criada', [
+                'reserva_id' => (int) $pdo->lastInsertId(),
+                'churrascaria' => $churrascaria,
+                'pessoas' => $pessoas,
+            ]);
             header('Location: painel-reservas.php');
             exit;
         }
@@ -192,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $idReserva,
             ]);
             salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, null, $churrascaria);
+            Logger::audit('reserva_editada', ['reserva_id' => $idReserva, 'churrascaria' => $churrascaria]);
             header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
             exit;
         }
@@ -212,8 +218,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($acao === 'excluir' && $nivel >= NIVEL_GERENTE) {
+        $idExcluir = (int) ($_POST['id'] ?? 0);
         $stmt = $pdo->prepare('DELETE FROM reservas WHERE id = ?');
-        $stmt->execute([(int) ($_POST['id'] ?? 0)]);
+        $stmt->execute([$idExcluir]);
+        Logger::audit('reserva_excluida', ['reserva_id' => $idExcluir]);
         header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
         exit;
     }
@@ -310,6 +318,9 @@ $reservas = $stmtReservas->fetchAll();
                     <li><a href="clientes.php">Clientes</a></li>
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
+                    <?php endif; ?>
+                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                        <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
@@ -756,7 +767,11 @@ $reservas = $stmtReservas->fetchAll();
                             aniversarioInput.value = dados.data_nascimento;
                         }
                     })
-                    .catch(function () {});
+                    .catch(function (erro) {
+                        if (window.AppLogger) {
+                            window.AppLogger.error('Falha ao buscar cliente para preencher reserva', { erro: String(erro) });
+                        }
+                    });
             }
 
             function agendarVerificacao() {

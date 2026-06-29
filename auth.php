@@ -2,6 +2,9 @@
 // Controle de sessão e permissões da área do funcionário.
 // Inclua este arquivo antes de qualquer saída HTML nas páginas protegidas.
 
+require_once __DIR__ . '/lib/Logger.php';
+Logger::init();
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start([
         'cookie_httponly' => true,
@@ -69,6 +72,15 @@ function registrarTentativaFalhaLogin(PDO $pdo, string $ip): void
         ? date('Y-m-d H:i:s', time() + LOGIN_BLOQUEIO_SEGUNDOS)
         : null;
 
+    if ($bloqueadoUntil !== null) {
+        Logger::warn('IP bloqueado por excesso de tentativas de login', [
+            'action' => 'login_ip_blocked',
+            'ip' => $ip,
+            'tentativas' => $novasTentativas,
+            'bloqueado_until' => $bloqueadoUntil,
+        ]);
+    }
+
     $pdo->prepare('UPDATE login_attempts SET tentativas = ?, ultima_tentativa = NOW(), bloqueado_until = ? WHERE ip = ?')
         ->execute([$novasTentativas, $bloqueadoUntil, $ip]);
 }
@@ -123,6 +135,7 @@ function funcionarioLogado(): bool
     }
 
     if (sessaoExpiradaPorInatividade()) {
+        Logger::audit('session_expired_by_inactivity', ['user_id' => $_SESSION['funcionario_id']]);
         encerrarSessao();
 
         return false;
@@ -153,6 +166,12 @@ function exigirNivel(int $nivelMinimo): void
     exigirLogin();
 
     if (nivelFuncionario() < $nivelMinimo) {
+        Logger::warn('Acesso negado por nivel insuficiente', [
+            'action' => 'access_denied',
+            'nivel_atual' => nivelFuncionario(),
+            'nivel_exigido' => $nivelMinimo,
+            'uri' => $_SERVER['REQUEST_URI'] ?? null,
+        ]);
         http_response_code(403);
         die('Acesso negado: seu nível de permissão não tem acesso a esta página.');
     }
@@ -172,6 +191,10 @@ function verificarCsrf(): void
     $tokenEnviado = $_POST['csrf_token'] ?? '';
 
     if (!hash_equals($_SESSION['csrf_token'] ?? '', $tokenEnviado)) {
+        Logger::warn('Token CSRF invalido ou ausente', [
+            'action' => 'csrf_invalid',
+            'uri' => $_SERVER['REQUEST_URI'] ?? null,
+        ]);
         http_response_code(403);
         die('Token de segurança inválido. Volte e atualize a página.');
     }
@@ -189,7 +212,8 @@ function renderizarControleSessao(): void
     ];
 
     echo '<script>window.AppSessaoConfig = ' . json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';</script>' . PHP_EOL;
-    echo '<script src="sessao.js?v=20260622-1"></script>' . PHP_EOL;
+    echo '<script src="logger.js?v=20260629-1"></script>' . PHP_EOL;
+    echo '<script src="sessao.js?v=20260629-1"></script>' . PHP_EOL;
 }
 
 function churrascariaReservaValida(?string $churrascaria): bool

@@ -16,6 +16,9 @@
         storedLastActivity = Number(sessionStorage.getItem(storageKey)) || 0;
     } catch (e) {
         storedLastActivity = 0;
+        if (window.AppLogger) {
+            window.AppLogger.warn('Falha ao ler sessionStorage de atividade', { erro: String(e) });
+        }
     }
 
     if (storedLastActivity > serverLastActivity && storedLastActivity <= now) {
@@ -25,7 +28,11 @@
     function salvarUltimaAtividade() {
         try {
             sessionStorage.setItem(storageKey, String(lastActivity));
-        } catch (e) {}
+        } catch (e) {
+            if (window.AppLogger) {
+                window.AppLogger.warn('Falha ao salvar ultima atividade no sessionStorage', { erro: String(e) });
+            }
+        }
     }
 
     function desconectarPorInatividade() {
@@ -64,7 +71,11 @@
             if (response.status === 401) {
                 desconectarPorInatividade();
             }
-        }).catch(function () {});
+        }).catch(function (erro) {
+            if (window.AppLogger) {
+                window.AppLogger.warn('Falha no ping de atividade da sessao', { erro: String(erro) });
+            }
+        });
     }
 
     function registrarAtividade() {

@@ -28,11 +28,13 @@ if ($bloqueioRestante > 0) {
         $_SESSION['funcionario_nome'] = $funcionario['nome'];
         $_SESSION['funcionario_nivel'] = (int) $funcionario['nivel'];
         registrarAtividadeUsuario();
+        Logger::audit('login_success', ['usuario' => $usuario]);
         header('Location: dashboard.php');
         exit;
     }
 
     registrarTentativaFalhaLogin($pdo, $ip);
+    Logger::warn('Tentativa de login falhou', ['action' => 'login_failed', 'usuario' => $usuario]);
     $erro = 'Usuário ou senha incorretos.';
 }
 ?>
