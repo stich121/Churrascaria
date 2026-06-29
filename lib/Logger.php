@@ -118,6 +118,7 @@ final class Logger
                 'message' => $data->getMessage(),
                 'file' => $data->getFile(),
                 'line' => $data->getLine(),
+                'trace' => self::safeTrace($data),
             ];
         }
 
@@ -135,6 +136,29 @@ final class Logger
         }
 
         return $data;
+    }
+
+    /**
+     * Pilha de chamadas só com classe/função/arquivo/linha — nunca os valores
+     * dos argumentos (que poderiam conter senha em texto plano vinda de uma
+     * chamada como password_verify($senha, $hash)).
+     */
+    private static function safeTrace(\Throwable $e): array
+    {
+        $quadros = [];
+
+        foreach ($e->getTrace() as $quadro) {
+            $local = ($quadro['class'] ?? '') . ($quadro['type'] ?? ($quadro['class'] ?? '' ? '::' : ''));
+            $local .= $quadro['function'] ?? '';
+
+            if (isset($quadro['file'])) {
+                $local .= ' em ' . $quadro['file'] . ':' . ($quadro['line'] ?? '?');
+            }
+
+            $quadros[] = $local;
+        }
+
+        return array_slice($quadros, 0, 20);
     }
 
     private static function isSensitiveKey(string $chave): bool

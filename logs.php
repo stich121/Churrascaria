@@ -2,7 +2,7 @@
 require __DIR__ . '/auth.php';
 // Não inclui config.php de propósito: esta página precisa funcionar mesmo
 // quando o banco de dados está fora do ar, pois é aqui que se descobre por quê.
-exigirNivel(NIVEL_SUPERIOR);
+exigirDesenvolvedor();
 
 $nivel = nivelFuncionario();
 
@@ -72,6 +72,14 @@ function badgeNivel(string $nivelLog): string
 $arquivoLog = __DIR__ . '/logs/' . $canalAtual . '.log';
 $entradas = tailJsonLines($arquivoLog, 500);
 
+$statsPorNivel = ['DEBUG' => 0, 'INFO' => 0, 'WARN' => 0, 'ERROR' => 0, 'FATAL' => 0];
+foreach ($entradas as $entradaStat) {
+    $nivelStat = $entradaStat['level'] ?? '';
+    if (isset($statsPorNivel[$nivelStat])) {
+        $statsPorNivel[$nivelStat]++;
+    }
+}
+
 if ($nivelFiltro !== '') {
     $entradas = array_filter($entradas, fn ($entrada) => ($entrada['level'] ?? '') === $nivelFiltro);
 }
@@ -86,6 +94,42 @@ if ($busca !== '') {
 }
 
 $totalEntradas = count($entradas);
+
+function tamanhoLegivel(int $bytes): string
+{
+    if ($bytes < 1024) {
+        return $bytes . ' B';
+    }
+    if ($bytes < 1024 * 1024) {
+        return round($bytes / 1024, 1) . ' KB';
+    }
+
+    return round($bytes / (1024 * 1024), 2) . ' MB';
+}
+
+$diretorioLogs = __DIR__ . '/logs';
+$infoCanais = [];
+foreach ($canaisValidos as $canalInfo) {
+    $caminhoInfo = $diretorioLogs . '/' . $canalInfo . '.log';
+    $infoCanais[$canalInfo] = [
+        'existe' => file_exists($caminhoInfo),
+        'tamanho' => file_exists($caminhoInfo) ? tamanhoLegivel((int) filesize($caminhoInfo)) : '-',
+        'modificado' => file_exists($caminhoInfo) ? date('d/m/Y H:i:s', (int) filemtime($caminhoInfo)) : '-',
+    ];
+}
+
+$infoSistema = [
+    'PHP' => PHP_VERSION,
+    'SO' => PHP_OS_FAMILY,
+    'Memória em uso' => tamanhoLegivel((int) memory_get_usage(true)),
+    'Pico de memória' => tamanhoLegivel((int) memory_get_peak_usage(true)),
+    'Espaço livre em disco' => function_exists('disk_free_space') && disk_free_space($diretorioLogs) !== false
+        ? tamanhoLegivel((int) disk_free_space($diretorioLogs))
+        : '-',
+    'Hora do servidor' => date('d/m/Y H:i:s'),
+    'display_errors' => ini_get('display_errors') ? 'ativo' : 'inativo',
+    'error_reporting' => (string) error_reporting(),
+];
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -120,10 +164,56 @@ $totalEntradas = count($entradas);
     <section class="painel-reservas">
         <div class="container">
             <div class="panel-header">
-                <div class="panel-header-icon"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="panel-header-icon"><i class="fa-solid fa-code"></i></div>
                 <div>
-                    <h2>Logs do Sistema</h2>
-                    <p>Últimas <?= e((string) $totalEntradas) ?> entradas do canal "<?= e($canalAtual) ?>" — dados sensíveis (senhas, tokens, telefones) já vêm mascarados</p>
+                    <h2>Logs do Sistema <span class="badge badge-info">Área de Desenvolvedor</span></h2>
+                    <p>Últimas <?= e((string) $totalEntradas) ?> entradas do canal "<?= e($canalAtual) ?>" — dados sensíveis (senhas, tokens, telefones) já vêm mascarados na origem</p>
+                </div>
+            </div>
+
+            <div class="stat-cards-row">
+                <div class="stat">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <h4><?= e($statsPorNivel['INFO']) ?></h4>
+                    <p>INFO</p>
+                </div>
+                <div class="stat">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h4><?= e($statsPorNivel['WARN']) ?></h4>
+                    <p>WARN</p>
+                </div>
+                <div class="stat">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <h4><?= e($statsPorNivel['ERROR']) ?></h4>
+                    <p>ERROR</p>
+                </div>
+                <div class="stat">
+                    <i class="fa-solid fa-skull-crossbones"></i>
+                    <h4><?= e($statsPorNivel['FATAL']) ?></h4>
+                    <p>FATAL</p>
+                </div>
+            </div>
+
+            <div class="reserva-form-card">
+                <div class="card-header-bar">
+                    <i class="fa-solid fa-server"></i>
+                    <h3>Informações do sistema</h3>
+                </div>
+                <div class="reserva-form-grid">
+                    <?php foreach ($infoSistema as $rotuloInfo => $valorInfo): ?>
+                        <label class="reserva-form-label">
+                            <span><?= e($rotuloInfo) ?></span>
+                            <strong><?= e((string) $valorInfo) ?></strong>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <div class="reserva-form-grid" style="margin-top: 1rem;">
+                    <?php foreach ($infoCanais as $canalInfoNome => $dadosCanal): ?>
+                        <label class="reserva-form-label">
+                            <span><?= e($canalInfoNome) ?>.log</span>
+                            <strong><?= $dadosCanal['existe'] ? e($dadosCanal['tamanho']) . ' · atualizado em ' . e($dadosCanal['modificado']) : 'não existe ainda' ?></strong>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -175,8 +265,10 @@ $totalEntradas = count($entradas);
                             <th>Ação</th>
                             <th>Usuário</th>
                             <th>IP</th>
+                            <th>Request ID</th>
+                            <th>URI</th>
                             <th>Mensagem</th>
-                            <th>Contexto</th>
+                            <th>Contexto / Trace</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -187,6 +279,8 @@ $totalEntradas = count($entradas);
                                 <td><?= $entrada['action'] ? '<span class="badge badge-info"><i class="fa-solid fa-tag"></i>' . e((string) $entrada['action']) . '</span>' : '-' ?></td>
                                 <td><?= e((string) ($entrada['user_id'] ?? '-')) ?></td>
                                 <td><?= e((string) ($entrada['ip'] ?? '-')) ?></td>
+                                <td><code style="font-size: 0.8em;"><?= e((string) ($entrada['request_id'] ?? '-')) ?></code></td>
+                                <td style="max-width: 220px; word-break: break-all;"><?= e((string) ($entrada['uri'] ?? '-')) ?></td>
                                 <td><?= e((string) ($entrada['message'] ?? '-')) ?></td>
                                 <td>
                                     <?php if (!empty($entrada['context'])): ?>

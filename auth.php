@@ -15,6 +15,12 @@ if (session_status() === PHP_SESSION_NONE) {
 const NIVEL_ATENDENTE = 1;
 const NIVEL_GERENTE = 2;
 const NIVEL_SUPERIOR = 3;
+const NIVEL_DESENVOLVEDOR = 4;
+
+// Nível reservado exclusivamente para uso interno de desenvolvimento/depuração.
+// Não é atribuível pela interface de funcionarios.php — só existe via acesso
+// direto ao banco — e mesmo assim só concede acesso de fato a este usuário.
+const USUARIO_DESENVOLVEDOR = 'matheus.dias';
 
 const CHURRASCARIA_PADRAO = 'Churrascaria Pampulha';
 const CHURRASCARIAS_RESERVA = [
@@ -473,6 +479,8 @@ function e(?string $valor): string
 function nomeNivel(int $nivel): string
 {
     switch ($nivel) {
+        case NIVEL_DESENVOLVEDOR:
+            return 'Desenvolvedor';
         case NIVEL_SUPERIOR:
             return 'Nível Superior';
         case NIVEL_GERENTE:
@@ -481,5 +489,32 @@ function nomeNivel(int $nivel): string
             return 'Atendente';
         default:
             return 'Desconhecido';
+    }
+}
+
+/**
+ * Acesso de desenvolvedor exige nível 4 E ser exatamente o usuário
+ * USUARIO_DESENVOLVEDOR — dupla checagem para que elevar alguém a nível 4
+ * por engano (ou um bug na UI) nunca seja suficiente, por si só, para
+ * liberar a área de depuração.
+ */
+function ehDesenvolvedorAutorizado(): bool
+{
+    return nivelFuncionario() >= NIVEL_DESENVOLVEDOR
+        && ($_SESSION['funcionario_usuario'] ?? '') === USUARIO_DESENVOLVEDOR;
+}
+
+function exigirDesenvolvedor(): void
+{
+    exigirLogin();
+
+    if (!ehDesenvolvedorAutorizado()) {
+        Logger::warn('Acesso negado a area de desenvolvedor', [
+            'action' => 'dev_access_denied',
+            'nivel_atual' => nivelFuncionario(),
+            'usuario' => $_SESSION['funcionario_usuario'] ?? null,
+        ]);
+        http_response_code(403);
+        die('Acesso negado: esta área é restrita ao desenvolvedor responsável pelo sistema.');
     }
 }

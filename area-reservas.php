@@ -27,6 +27,7 @@ if ($bloqueioRestante > 0) {
         $_SESSION['funcionario_id'] = $funcionario['id'];
         $_SESSION['funcionario_nome'] = $funcionario['nome'];
         $_SESSION['funcionario_nivel'] = (int) $funcionario['nivel'];
+        $_SESSION['funcionario_usuario'] = $usuario;
         registrarAtividadeUsuario();
         Logger::audit('login_success', ['usuario' => $usuario]);
         header('Location: dashboard.php');

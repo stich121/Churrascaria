@@ -76,7 +76,7 @@ $tiposReserva = $pdo->query(
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
                     <?php endif; ?>
-                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                    <?php if (ehDesenvolvedorAutorizado()): ?>
                         <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>

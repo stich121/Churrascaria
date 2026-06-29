@@ -157,7 +157,7 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                     <li><a href="mesas.php">Mesas</a></li>
                     <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
                     <li><a href="clientes.php">Clientes</a></li>
-                    <?php if ($nivelLogado >= NIVEL_SUPERIOR): ?>
+                    <?php if (ehDesenvolvedorAutorizado()): ?>
                         <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="trocar-senha.php">Trocar senha</a></li>

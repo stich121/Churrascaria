@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($nivel >= NIVEL_GERENTE): ?>
                         <li><a href="funcionarios.php">Funcionários</a></li>
                     <?php endif; ?>
-                    <?php if ($nivel >= NIVEL_SUPERIOR): ?>
+                    <?php if (ehDesenvolvedorAutorizado()): ?>
                         <li><a href="logs.php">Logs</a></li>
                     <?php endif; ?>
                     <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
