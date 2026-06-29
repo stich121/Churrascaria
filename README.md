@@ -47,8 +47,7 @@ do espaço, escolhendo entre 2, 4 ou 6 lugares por mesa — a tela mostra o tota
 
 Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.php` (mesas do espaço),
 `funcionarios.php` (gestão de equipe, nível ≥ 2), `trocar-senha.php`, `logout.php`, `auth.php`/`config.php`
-(sessão e conexão com o banco), `schema.sql` (estrutura das tabelas) e `gerar-senha.php` (utilitário de uso
-único para criar o primeiro admin).
+(sessão e conexão com o banco) e `schema.sql` (estrutura das tabelas).
 
 ### Deploy no Hostinger
 
@@ -64,8 +63,9 @@ Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.
 4. Suba todos os outros arquivos `.php`, `.html`, `.css`, `.js` e as imagens para dentro da `public_html`.
 5. Faça login em `area-reservas.php` com o usuário admin e cadastre os demais funcionários pela tela
    "Funcionários".
-6. Para criar outro admin via hash manual no futuro, use `gerar-senha.php` pelo navegador e depois
-   **apague esse arquivo do servidor** — ele não deve ficar publicado.
+6. Para criar outro admin manualmente no futuro, gere o hash da senha localmente com PHP
+   (`php -r "echo password_hash('SENHA_AQUI', PASSWORD_DEFAULT);"`) e insira no banco via phpMyAdmin —
+   não suba scripts utilitários de geração de hash para o servidor de produção.
 7. Se o site já estava no ar antes da tabela `mesas` existir, não reimporte `schema.sql` inteiro (o INSERT
    do admin vai falhar por duplicidade). Em vez disso, rode só o trecho `CREATE TABLE IF NOT EXISTS mesas (...)`
    de `schema.sql` na aba "SQL" do phpMyAdmin.
@@ -112,8 +112,7 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
 - Tela de login (`area-reservas.php`), painel de reservas (`painel-reservas.php`), gestão de equipe (`funcionarios.php`),
   troca de senha (`trocar-senha.php`) e logout, além de `auth.php`/`config.php` (sessão e conexão com o banco) e
   `schema.sql` (estrutura das tabelas).
-- Cadastro de admin inicial (`Matheus.dias`, nível 3) no `schema.sql` e utilitário `gerar-senha.php` para gerar hash
-  de senha de novos admins.
+- Cadastro de admin inicial (`Matheus.dias`, nível 3) no `schema.sql`.
 - Campos completos na reserva: cliente, telefone, churrascaria, data do pedido, data/hora/quantidade de pessoas,
   pessoas que compareceram, valor, status, confirmação e observação — com máscaras de telefone e valor.
 - Seletor de churrascaria nas reservas e no filtro do dashboard.

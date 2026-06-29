@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS clientes (
     UNIQUE KEY uq_clientes_telefone (telefone)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Primeiro administrador (nível 3). Hash gerado localmente com password_hash() do PHP
--- para a senha informada — rode este INSERT uma vez, na aba SQL do phpMyAdmin.
+-- Primeiro administrador (nível 3). Gere o hash localmente com
+-- `php -r "echo password_hash('SUA_SENHA', PASSWORD_DEFAULT);"` e cole no lugar de
+-- COLE_O_HASH_AQUI antes de rodar este INSERT uma vez na aba SQL do phpMyAdmin.
 INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES
-('Matheus Dias', 'Matheus.dias', '$2y$10$MAK7weG1g1u4OEp8Ir46C.9Bzho2nX1p2YRGHN6fpl/6H7aLGHaFi', 3);
+('Matheus Dias', 'Matheus.dias', 'COLE_O_HASH_AQUI', 3);
