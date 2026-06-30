@@ -4,6 +4,7 @@
   "description": "Área de reservas da Churrascaria Pampulha — uso interno da equipe.",
   "lang": "pt-BR",
   "dir": "ltr",
+  "id": "/area-reservas.php",
   "start_url": "area-reservas.php",
   "scope": "./",
   "display": "standalone",
