@@ -3048,6 +3048,19 @@ h1, h2, h3, h4 {
     overflow-y: auto;
 }
 
+/* Em telas largas, tira a sidebar do fluxo e a fixa na margem esquerda
+   vazia, fora do container, para não roubar espaço do dashboard. */
+@media (min-width: 1700px) {
+    .painel-aniversariantes-sidebar {
+        position: fixed;
+        top: 110px;
+        left: calc((100vw - 1200px) / 2 - 264px);
+        width: 240px;
+        max-height: calc(100vh - 140px);
+        z-index: 10;
+    }
+}
+
 .aniversariantes-header {
     display: flex;
     align-items: center;
