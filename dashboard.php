@@ -234,7 +234,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260630-6">
+    <link rel="stylesheet" href="style.css?v=20260630-7">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -266,7 +266,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
         </div>
     </nav>
 
-    <section class="painel-reservas">
+    <section class="painel-reservas<?= $churrascariaDashboard === 'casarao-itau' ? ' painel-reservas--casarao' : '' ?>">
         <div class="container">
             <div class="panel-header">
                 <div class="panel-header-icon"><i class="fa-solid fa-gauge-high"></i></div>

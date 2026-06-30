@@ -3203,6 +3203,44 @@ h1, h2, h3, h4 {
     50%       { box-shadow: 0 0 0 6px rgba(27,94,32,0); }
 }
 
+/* Dashboard inteiro em verde quando o Casarão Itaú está selecionado,
+   para as atendentes não confundirem com a Churrascaria Pampulha (vermelha). */
+.painel-reservas--casarao .panel-header {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #1b5e20 100%);
+}
+
+.painel-reservas--casarao .dashboard-tab:hover {
+    border-color: #1b5e20;
+    color: #1b5e20;
+}
+
+.painel-reservas--casarao .dashboard-tab.is-active {
+    background: #1b5e20;
+    border-color: #1b5e20;
+}
+
+.painel-reservas--casarao .stat-cards-row .stat h4,
+.painel-reservas--casarao .dashboard-view-date {
+    color: #1b5e20;
+}
+
+.painel-reservas--casarao .dashboard-week-list li a:hover {
+    background-color: rgba(27, 94, 32, 0.12);
+}
+
+.painel-reservas--casarao .dashboard-week-list li.is-selected a {
+    background-color: #1b5e20;
+}
+
+.painel-reservas--casarao .dashboard-date-bar .btn-primary {
+    background-color: #1b5e20;
+}
+
+.painel-reservas--casarao .dashboard-date-bar .btn-primary:hover {
+    background-color: #2e7d32;
+    color: white;
+}
+
 .aniv-info {
     display: flex;
     flex-direction: column;
