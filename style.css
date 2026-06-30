@@ -3241,6 +3241,26 @@ h1, h2, h3, h4 {
     color: white;
 }
 
+.navbar--casarao {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #1b5e20 100%);
+}
+
+.painel-reservas--casarao .reservas-tabela th {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #1b5e20 100%);
+}
+
+.painel-reservas--casarao .card-header-bar i,
+.painel-reservas--casarao .dashboard-reservas-ordenacao-form label i,
+.painel-reservas--casarao .dashboard-reservas-busca i {
+    color: #1b5e20;
+}
+
+.painel-reservas--casarao .dashboard-reservas-ordenacao-form:focus-within,
+.painel-reservas--casarao .dashboard-reservas-busca:focus-within {
+    border-color: #1b5e20;
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.12);
+}
+
 .aniv-info {
     display: flex;
     flex-direction: column;
