@@ -95,6 +95,11 @@ if ($busca !== '') {
 
 $totalEntradas = count($entradas);
 
+$porPagina = 10;
+$totalPaginas = max(1, (int) ceil($totalEntradas / $porPagina));
+$paginaAtual = max(1, min($totalPaginas, (int) ($_GET['pagina'] ?? 1)));
+$entradasPagina = array_slice($entradas, ($paginaAtual - 1) * $porPagina, $porPagina);
+
 function tamanhoLegivel(int $bytes): string
 {
     if ($bytes < 1024) {
@@ -167,7 +172,7 @@ $infoSistema = [
                 <div class="panel-header-icon"><i class="fa-solid fa-code"></i></div>
                 <div>
                     <h2>Logs do Sistema <span class="badge badge-info">Área de Desenvolvedor</span></h2>
-                    <p>Últimas <?= e((string) $totalEntradas) ?> entradas do canal "<?= e($canalAtual) ?>" — dados sensíveis (senhas, tokens, telefones) já vêm mascarados na origem</p>
+                    <p>Mostrando <?= e((string) count($entradasPagina)) ?> de <?= e((string) $totalEntradas) ?> entradas do canal "<?= e($canalAtual) ?>" (página <?= e((string) $paginaAtual) ?> de <?= e((string) $totalPaginas) ?>) — dados sensíveis (senhas, tokens, telefones) já vêm mascarados na origem</p>
                 </div>
             </div>
 
@@ -251,7 +256,7 @@ $infoSistema = [
                         <?php if ($nivelFiltro !== '' || $busca !== ''): ?>
                             <a href="logs.php?canal=<?= e($canalAtual) ?>" class="btn btn-outline btn-sm">Limpar</a>
                         <?php endif; ?>
-                        <a href="logs.php?<?= e(http_build_query(['canal' => $canalAtual, 'nivel' => $nivelFiltro, 'busca' => $busca])) ?>" class="btn btn-outline btn-sm" title="Atualizar"><i class="fa-solid fa-rotate"></i>Atualizar</a>
+                        <a href="logs.php?<?= e(http_build_query(['canal' => $canalAtual, 'nivel' => $nivelFiltro, 'busca' => $busca, 'pagina' => $paginaAtual])) ?>" class="btn btn-outline btn-sm" title="Atualizar"><i class="fa-solid fa-rotate"></i>Atualizar</a>
                     </form>
                 </div>
             </div>
@@ -272,7 +277,7 @@ $infoSistema = [
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($entradas as $entrada): ?>
+                        <?php foreach ($entradasPagina as $entrada): ?>
                             <tr>
                                 <td><?= e((string) ($entrada['timestamp'] ?? '-')) ?></td>
                                 <td><?= badgeNivel((string) ($entrada['level'] ?? '')) ?></td>
@@ -296,10 +301,24 @@ $infoSistema = [
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <?php if (empty($entradas)): ?>
+                <?php if (empty($entradasPagina)): ?>
                     <p class="reservas-vazio" style="display: block;">Nenhuma entrada encontrada neste canal.</p>
                 <?php endif; ?>
             </div>
+
+            <?php if ($totalPaginas > 1): ?>
+                <div class="reservas-lista-toolbar">
+                    <div class="reservas-lista-controles">
+                        <?php if ($paginaAtual > 1): ?>
+                            <a class="btn btn-outline btn-sm" href="logs.php?<?= e(http_build_query(['canal' => $canalAtual, 'nivel' => $nivelFiltro, 'busca' => $busca, 'pagina' => $paginaAtual - 1])) ?>"><i class="fa-solid fa-chevron-left"></i> Anterior</a>
+                        <?php endif; ?>
+                        <span>Página <?= e((string) $paginaAtual) ?> de <?= e((string) $totalPaginas) ?></span>
+                        <?php if ($paginaAtual < $totalPaginas): ?>
+                            <a class="btn btn-outline btn-sm" href="logs.php?<?= e(http_build_query(['canal' => $canalAtual, 'nivel' => $nivelFiltro, 'busca' => $busca, 'pagina' => $paginaAtual + 1])) ?>">Próxima <i class="fa-solid fa-chevron-right"></i></a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
