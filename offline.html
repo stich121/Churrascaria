@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sem conexão - Reservas Pampulha</title>
+    <style>
+        :root { --primary-color: #c41e3a; --dark-bg: #1a1a1a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 32px;
+            text-align: center;
+            font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: #fff;
+        }
+        img { width: 140px; height: 140px; }
+        h1 { font-size: 1.4rem; }
+        p { color: #cfcfcf; max-width: 340px; line-height: 1.5; }
+        button {
+            margin-top: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <img src="icons/icon-192.png" alt="Churrascaria Pampulha">
+    <h1>Você está sem conexão</h1>
+    <p>O sistema de reservas precisa de internet para mostrar os dados atualizados. Verifique sua conexão e tente novamente.</p>
+    <button onclick="location.reload()">Tentar de novo</button>
+</body>
+</html>
