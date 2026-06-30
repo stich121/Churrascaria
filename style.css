@@ -3158,6 +3158,51 @@ h1, h2, h3, h4 {
     50%       { box-shadow: 0 0 0 6px rgba(160,21,45,0); }
 }
 
+/* Variante verde: exibida quando a unidade selecionada é o Casarão Itaú,
+   para as atendentes não confundirem com a Churrascaria Pampulha. */
+.painel-aniversariantes-sidebar--casarao {
+    border-color: #c5e0c6;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversariantes-header {
+    border-bottom-color: #2e7d32;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversariantes-header > i,
+.painel-aniversariantes-sidebar--casarao .aniversariantes-mes {
+    color: #2e7d32;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversariantes-item {
+    background: #f4faf4;
+    border-color: #e1f0e1;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversariantes-item:hover {
+    background: #eaf6ea;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniv-dia {
+    background: #e1f0e1;
+    color: #2e7d32;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversariantes-item.aniversario-hoje {
+    background: linear-gradient(135deg, #eef9ee 0%, #dcf0dc 100%);
+    border-color: #2e7d32;
+}
+
+.painel-aniversariantes-sidebar--casarao .aniversario-hoje .aniv-dia {
+    background: #2e7d32;
+    color: #fff;
+    animation: pulse-aniv-casarao 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-aniv-casarao {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(46,125,50,0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(46,125,50,0); }
+}
+
 .aniv-info {
     display: flex;
     flex-direction: column;
