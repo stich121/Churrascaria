@@ -238,6 +238,7 @@ $nomeMesAno = $mesesNome[(int) $dataSelecionadaDt->format('n')] . ' de ' . $data
                         <img src="<?= e($logoDashboardAtual) ?>" alt="<?= e($rotuloDashboardChurrascaria) ?>" class="logo-img">
                     </a>
                 </div>
+                <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
                 <ul class="funcionario-nav-links">
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
                     <li><a href="mesas.php">Mesas</a></li>

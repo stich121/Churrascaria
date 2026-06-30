@@ -15,4 +15,32 @@
             });
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.querySelector('.nav-hamburger');
+        var nav = document.querySelector('.funcionario-nav-links');
+        if (!btn || !nav) return;
+
+        btn.addEventListener('click', function () {
+            var aberto = nav.classList.toggle('aberto');
+            btn.classList.toggle('aberto');
+            btn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        });
+
+        nav.addEventListener('click', function (e) {
+            if (e.target.closest('a')) {
+                nav.classList.remove('aberto');
+                btn.classList.remove('aberto');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!btn.contains(e.target) && !nav.contains(e.target)) {
+                nav.classList.remove('aberto');
+                btn.classList.remove('aberto');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
 </script>

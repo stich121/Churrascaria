@@ -2893,6 +2893,84 @@ h1, h2, h3, h4 {
     transform: translateY(-1px);
 }
 
+/* ===== Menu hambúrguer — área de funcionários (mobile) ===== */
+.nav-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.nav-hamburger span {
+    display: block;
+    width: 26px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.nav-hamburger.aberto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger.aberto span:nth-child(2) { opacity: 0; }
+.nav-hamburger.aberto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+    .nav-hamburger {
+        display: flex;
+    }
+
+    .navbar {
+        position: relative;
+    }
+
+    .navbar-content {
+        flex-wrap: nowrap;
+        row-gap: 0;
+        align-items: center;
+    }
+
+    .funcionario-nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
+        flex-direction: column;
+        width: 100%;
+        padding: 0.5rem 0 1rem;
+        gap: 0;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        z-index: 998;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+    }
+
+    .funcionario-nav-links.aberto {
+        display: flex;
+    }
+
+    .funcionario-nav-links li {
+        width: 100%;
+    }
+
+    .funcionario-nav-links a:not(.btn-voltar-site) {
+        display: block;
+        padding: 0.85rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 1rem;
+    }
+
+    .funcionario-nav-links .btn-voltar-site {
+        margin: 0.75rem 1.5rem 0;
+        justify-content: center;
+    }
+}
+
 /* ===== Scrollbar Styling ===== */
 ::-webkit-scrollbar {
     width: 10px;

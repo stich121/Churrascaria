@@ -152,6 +152,7 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
                         <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
                     </a>
                 </div>
+                <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
                 <ul class="funcionario-nav-links">
                     <li><a href="dashboard.php">Dashboard</a></li>
                     <li><a href="painel-reservas.php">Painel de Reservas</a></li>
