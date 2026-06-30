@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Política de Privacidade e Proteção de Dados da Churrascaria Pampulha, em conformidade com a LGPD (Lei nº 13.709/2018).">
+    <title>Política de Privacidade - Churrascaria Pampulha</title>
+    <link rel="stylesheet" href="style.css?v=20260630-pp">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .pp-hero {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #5a1a1a 100%);
+            padding: 120px 0 60px;
+            text-align: center;
+            color: #fff;
+        }
+        .pp-hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 0.5rem;
+        }
+        .pp-hero p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        .pp-body {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 60px 20px 80px;
+        }
+        .pp-toc {
+            background: var(--light-bg);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            padding: 28px 32px;
+            margin-bottom: 48px;
+        }
+        .pp-toc h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary-color);
+            margin-bottom: 14px;
+            font-family: var(--font-body);
+        }
+        .pp-toc ol {
+            padding-left: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .pp-toc li a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .pp-toc li a:hover {
+            color: var(--primary-color);
+        }
+        .pp-section {
+            margin-bottom: 48px;
+        }
+        .pp-section h2 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0e0e0;
+        }
+        .pp-section h3 {
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 20px 0 8px;
+        }
+        .pp-section p {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 0.97rem;
+        }
+        .pp-section ul, .pp-section ol {
+            color: var(--text-light);
+            font-size: 0.97rem;
+            line-height: 1.8;
+            padding-left: 1.4rem;
+            margin-bottom: 12px;
+        }
+        .pp-section li {
+            margin-bottom: 6px;
+        }
+        .pp-section strong {
+            color: var(--text-dark);
+        }
+        .pp-tag {
+            display: inline-block;
+            background: #fbe6e9;
+            color: var(--primary-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        .pp-alert {
+            background: #fff8e1;
+            border-left: 4px solid #f4a460;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 0.93rem;
+            color: #5a4100;
+            line-height: 1.7;
+        }
+        .pp-alert i {
+            color: #f4a460;
+            margin-right: 6px;
+        }
+        .pp-contact-box {
+            background: linear-gradient(135deg, #fbe6e9 0%, #fff0f0 100%);
+            border-radius: var(--border-radius);
+            padding: 28px 32px;
+            margin-top: 48px;
+        }
+        .pp-contact-box h2 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+            margin-bottom: 12px;
+            border: none;
+            padding: 0;
+        }
+        .pp-contact-box p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+        .pp-contact-box a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .pp-contact-box a:hover {
+            text-decoration: underline;
+        }
+        .pp-updated {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 600px) {
+            .pp-toc { padding: 20px; }
+            .pp-contact-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
+                    </a>
+                </div>
+                <a href="index.html" class="btn-voltar-site"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="pp-hero">
+        <div class="container">
+            <span class="section-kicker" style="color:#f4a460;">LGPD · Lei nº 13.709/2018</span>
+            <h1>Política de Privacidade e Proteção de Dados</h1>
+            <p>Churrascaria Pampulha · CNPJ 26.240.071/0001-55</p>
+        </div>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="pp-body">
+
+        <!-- Índice -->
+        <nav class="pp-toc" aria-label="Sumário">
+            <h2><i class="fa-solid fa-list"></i> Sumário</h2>
+            <ol>
+                <li><a href="#sec1">Quem somos</a></li>
+                <li><a href="#sec2">Como funciona o sistema de reservas</a></li>
+                <li><a href="#sec3">Dados pessoais coletados</a></li>
+                <li><a href="#sec4">Finalidade do tratamento de dados</a></li>
+                <li><a href="#sec5">Base legal (LGPD)</a></li>
+                <li><a href="#sec6">Compartilhamento de dados</a></li>
+                <li><a href="#sec7">Armazenamento, segurança e retenção</a></li>
+                <li><a href="#sec8">Direitos do titular</a></li>
+                <li><a href="#sec9">Cookies e dados de navegação</a></li>
+                <li><a href="#sec10">Menores de idade</a></li>
+                <li><a href="#sec11">Alterações desta política</a></li>
+                <li><a href="#sec12">Encarregado (DPO) e contato</a></li>
+            </ol>
+        </nav>
+
+        <!-- 1. Quem somos -->
+        <section class="pp-section" id="sec1">
+            <span class="pp-tag">Seção 1</span>
+            <h2>1. Quem somos</h2>
+            <p>
+                A <strong>Churrascaria Pampulha</strong>, inscrita no CNPJ sob o nº <strong>26.240.071/0001-55</strong>, com sede em Belo Horizonte – MG, é a <strong>controladora</strong> dos dados pessoais tratados nos termos desta Política, na acepção do art. 5º, VI da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD).
+            </p>
+            <p>
+                Esta Política de Privacidade descreve como coletamos, utilizamos, armazenamos e protegemos os dados pessoais de nossos clientes e visitantes, em especial no contexto do nosso sistema interno de gestão de reservas.
+            </p>
+        </section>
+
+        <!-- 2. Como funciona o sistema de reservas -->
+        <section class="pp-section" id="sec2">
+            <span class="pp-tag">Seção 2</span>
+            <h2>2. Como funciona o sistema de reservas</h2>
+            <p>
+                A Churrascaria Pampulha opera um <strong>sistema interno de gestão de reservas</strong>, acessível exclusivamente por funcionários autorizados por meio de login com usuário e senha. Não existe formulário de auto-cadastro disponível ao público: toda reserva é <strong>registrada por um atendente</strong> durante o contato com o cliente (presencialmente ou por telefone/WhatsApp).
+            </p>
+            <h3>Fluxo de uma reserva</h3>
+            <ol>
+                <li>O cliente entra em contato com o restaurante para solicitar uma reserva.</li>
+                <li>O atendente acessa o painel interno e registra os dados fornecidos pelo cliente.</li>
+                <li>A reserva é vinculada a uma data, horário, tipo de serviço (rodízio, à la carte, evento etc.), número de pessoas e mesa(s) disponível(eis).</li>
+                <li>O sistema verifica automaticamente reservas duplicadas para o mesmo cliente na mesma data.</li>
+                <li>Em visitas futuras, o atendente pode buscar o histórico do cliente pelo nome ou telefone, agilizando o atendimento.</li>
+            </ol>
+            <div class="pp-alert">
+                <i class="fa-solid fa-circle-info"></i>
+                <strong>Importante:</strong> o sistema de reservas é uma ferramenta exclusivamente interna. Nenhum dado de cliente é exibido publicamente no site ou transmitido a terceiros para fins comerciais.
+            </div>
+        </section>
+
+        <!-- 3. Dados coletados -->
+        <section class="pp-section" id="sec3">
+            <span class="pp-tag">Seção 3</span>
+            <h2>3. Dados pessoais coletados</h2>
+            <p>No contexto do sistema de reservas, tratamos as seguintes categorias de dados pessoais:</p>
+            <h3>3.1 Dados do cliente (titular)</h3>
+            <ul>
+                <li><strong>Nome completo</strong> – identificação do titular da reserva.</li>
+                <li><strong>Número de telefone</strong> – canal de contato para confirmação ou alteração da reserva.</li>
+                <li><strong>Data de nascimento</strong> (opcional) – registrada quando informada, para fins de atendimento personalizado (ex.: identificação de aniversários).</li>
+            </ul>
+            <h3>3.2 Dados da reserva</h3>
+            <ul>
+                <li>Data e horário da reserva.</li>
+                <li>Número de pessoas.</li>
+                <li>Tipo de reserva (rodízio, evento, à la carte, etc.).</li>
+                <li>Mesa(s) alocada(s).</li>
+                <li>Churrascaria de destino (quando aplicável).</li>
+                <li>Status da reserva (Reservado, Cancelado, Realizado).</li>
+                <li>Observações adicionais inseridas pelo atendente.</li>
+            </ul>
+            <h3>3.3 Dados de acesso do funcionário</h3>
+            <ul>
+                <li>Nome e nome de usuário do funcionário.</li>
+                <li>Senha armazenada exclusivamente em forma de <em>hash</em> criptográfico (bcrypt), nunca em texto simples.</li>
+                <li>Nível de acesso (atendente, gerente, administrador).</li>
+            </ul>
+            <h3>3.4 Dados de logs e segurança</h3>
+            <ul>
+                <li>Endereço IP de acesso ao sistema.</li>
+                <li>Registros de auditoria: data/hora de login, ações realizadas no sistema (criação, edição, cancelamento de reservas).</li>
+                <li>Tentativas de login malsucedidas (para proteção contra acesso não autorizado).</li>
+            </ul>
+            <p>Não coletamos dados pessoais sensíveis (art. 5º, II da LGPD) como origem racial, saúde, dados biométricos ou informações financeiras.</p>
+        </section>
+
+        <!-- 4. Finalidade -->
+        <section class="pp-section" id="sec4">
+            <span class="pp-tag">Seção 4</span>
+            <h2>4. Finalidade do tratamento de dados</h2>
+            <p>Os dados pessoais coletados são utilizados exclusivamente para as seguintes finalidades:</p>
+            <ul>
+                <li><strong>Gestão de reservas:</strong> registrar, confirmar, alterar e cancelar reservas de mesa.</li>
+                <li><strong>Atendimento ao cliente:</strong> localizar reservas existentes e agilizar o atendimento em novas visitas.</li>
+                <li><strong>Prevenção de conflitos:</strong> evitar reservas duplicadas para o mesmo cliente na mesma data.</li>
+                <li><strong>Atendimento personalizado:</strong> identificar aniversariantes e ocasiões especiais quando a data de nascimento for fornecida.</li>
+                <li><strong>Segurança do sistema:</strong> registrar logs de auditoria para rastrear acessos, detectar usos indevidos e proteger a integridade das informações.</li>
+                <li><strong>Cumprimento de obrigações legais:</strong> atender eventuais requisições de autoridades competentes, nos termos da legislação vigente.</li>
+            </ul>
+            <div class="pp-alert">
+                <i class="fa-solid fa-ban"></i>
+                Os dados dos clientes <strong>não são utilizados</strong> para fins de marketing, publicidade, perfilamento comportamental, venda a terceiros ou qualquer finalidade diversa das descritas acima.
+            </div>
+        </section>
+
+        <!-- 5. Base legal -->
+        <section class="pp-section" id="sec5">
+            <span class="pp-tag">Seção 5</span>
+            <h2>5. Base legal (LGPD)</h2>
+            <p>O tratamento dos dados pessoais descritos nesta Política fundamenta-se nas seguintes hipóteses legais previstas no art. 7º da LGPD:</p>
+            <ul>
+                <li>
+                    <strong>Execução de contrato ou de procedimentos preliminares (art. 7º, V):</strong> o registro da reserva constitui a etapa preparatória necessária para a prestação do serviço gastronômico solicitado pelo cliente.
+                </li>
+                <li>
+                    <strong>Legítimo interesse do controlador (art. 7º, IX):</strong> os logs de auditoria e registros de acesso são mantidos para fins de segurança da informação e proteção do sistema, respeitando os direitos e expectativas dos titulares.
+                </li>
+                <li>
+                    <strong>Cumprimento de obrigação legal ou regulatória (art. 7º, II):</strong> aplicável quando houver requisição de autoridade pública competente.
+                </li>
+                <li>
+                    <strong>Consentimento do titular (art. 7º, I):</strong> aplicável ao registro da data de nascimento, fornecida voluntariamente pelo cliente e passível de revogação a qualquer momento mediante solicitação.
+                </li>
+            </ul>
+        </section>
+
+        <!-- 6. Compartilhamento -->
+        <section class="pp-section" id="sec6">
+            <span class="pp-tag">Seção 6</span>
+            <h2>6. Compartilhamento de dados</h2>
+            <p>
+                A Churrascaria Pampulha <strong>não vende, não aluga e não cede</strong> dados pessoais de clientes a terceiros para fins comerciais.
+            </p>
+            <p>O compartilhamento de dados pode ocorrer somente nas seguintes situações:</p>
+            <ul>
+                <li><strong>Fornecedores de infraestrutura tecnológica</strong> (ex.: serviço de hospedagem do sistema), que atuam como <em>operadores</em> (art. 5º, VII da LGPD) e estão contratualmente obrigados a tratar os dados apenas conforme nossas instruções.</li>
+                <li><strong>Autoridades públicas</strong> (Poder Judiciário, Ministério Público, órgãos reguladores), quando exigido por lei ou ordem judicial.</li>
+            </ul>
+            <p>Qualquer eventual operador contratado é avaliado quanto às suas práticas de segurança e privacidade antes da contratação.</p>
+        </section>
+
+        <!-- 7. Armazenamento e segurança -->
+        <section class="pp-section" id="sec7">
+            <span class="pp-tag">Seção 7</span>
+            <h2>7. Armazenamento, segurança e retenção</h2>
+            <h3>Armazenamento</h3>
+            <p>Os dados são armazenados em banco de dados relacional (MySQL/MariaDB) em servidor protegido por senha, com acesso restrito a pessoal autorizado da Churrascaria Pampulha.</p>
+            <h3>Medidas de segurança</h3>
+            <ul>
+                <li>Senhas de funcionários armazenadas em <em>hash</em> bcrypt (irreversível).</li>
+                <li>Controle de tentativas de login com bloqueio temporário por IP após falhas repetidas.</li>
+                <li>Sessões com expiração automática por inatividade.</li>
+                <li>Regeneração de ID de sessão após autenticação bem-sucedida (prevenção de fixação de sessão).</li>
+                <li>Proteção CSRF em todos os formulários internos.</li>
+                <li>Registro de auditoria de todas as operações críticas do sistema.</li>
+                <li>Acesso ao painel restrito a funcionários com credenciais válidas e status ativo.</li>
+            </ul>
+            <h3>Prazo de retenção</h3>
+            <p>
+                Os dados de reservas são mantidos pelo prazo necessário para a prestação do serviço e para cumprimento de obrigações legais, não excedendo <strong>5 (cinco) anos</strong> contados do encerramento do relacionamento, salvo obrigação legal diversa.
+            </p>
+            <p>
+                Logs de acesso e auditoria são retidos por até <strong>6 (seis) meses</strong>, em conformidade com o Marco Civil da Internet (Lei nº 12.965/2014), podendo ser estendidos em caso de investigação de incidentes.
+            </p>
+            <p>
+                Após o prazo de retenção, os dados são eliminados ou anonimizados de forma segura.
+            </p>
+        </section>
+
+        <!-- 8. Direitos do titular -->
+        <section class="pp-section" id="sec8">
+            <span class="pp-tag">Seção 8</span>
+            <h2>8. Direitos do titular</h2>
+            <p>Nos termos do art. 18 da LGPD, o titular dos dados pessoais tem os seguintes direitos, exercíveis a qualquer momento mediante solicitação:</p>
+            <ul>
+                <li><strong>Confirmação:</strong> saber se tratamos seus dados pessoais.</li>
+                <li><strong>Acesso:</strong> obter cópia dos dados pessoais que mantemos sobre você.</li>
+                <li><strong>Correção:</strong> solicitar a correção de dados incompletos, inexatos ou desatualizados.</li>
+                <li><strong>Anonimização, bloqueio ou eliminação:</strong> de dados desnecessários, excessivos ou tratados em desconformidade com a LGPD.</li>
+                <li><strong>Portabilidade:</strong> receber seus dados em formato estruturado, para transferência a outro controlador.</li>
+                <li><strong>Eliminação:</strong> requerer a exclusão dos dados tratados com base no consentimento, quando este for revogado.</li>
+                <li><strong>Revogação do consentimento:</strong> retirar o consentimento dado a qualquer momento, sem prejuízo do tratamento realizado anteriormente.</li>
+                <li><strong>Informação sobre compartilhamento:</strong> ser informado sobre com quem seus dados foram compartilhados.</li>
+                <li><strong>Oposição:</strong> se opor ao tratamento realizado com fundamento em outras hipóteses legais, em caso de descumprimento da LGPD.</li>
+                <li><strong>Revisão de decisões automatizadas:</strong> solicitar revisão de decisões tomadas com base em tratamento automatizado de dados.</li>
+            </ul>
+            <p>
+                Para exercer qualquer um desses direitos, entre em contato conosco pelos canais indicados na <a href="#sec12">Seção 12</a>. Responderemos no prazo de até <strong>15 (quinze) dias úteis</strong>, conforme determinado pela LGPD.
+            </p>
+        </section>
+
+        <!-- 9. Cookies -->
+        <section class="pp-section" id="sec9">
+            <span class="pp-tag">Seção 9</span>
+            <h2>9. Cookies e dados de navegação</h2>
+            <p>
+                O <strong>site público</strong> da Churrascaria Pampulha (<code>index.html</code>) é uma página estática de apresentação. Não utilizamos cookies de rastreamento, pixels de anúncio ou ferramentas de analytics de terceiros que coletem dados pessoais dos visitantes.
+            </p>
+            <p>
+                O <strong>sistema interno de reservas</strong> utiliza um cookie de sessão (<code>PHPSESSID</code>) estritamente necessário para manter a autenticação do funcionário durante o uso do painel. Esse cookie é temporário, expira ao fechar o navegador ou após período de inatividade, e não é compartilhado com terceiros.
+            </p>
+        </section>
+
+        <!-- 10. Menores -->
+        <section class="pp-section" id="sec10">
+            <span class="pp-tag">Seção 10</span>
+            <h2>10. Menores de idade</h2>
+            <p>
+                Nosso sistema de reservas não é direcionado a menores de 18 anos e não coletamos dados pessoais de menores de forma intencional. Caso identifiquemos que coletamos dados de um menor sem o devido consentimento dos pais ou responsável legal, eliminaremos essas informações prontamente.
+            </p>
+        </section>
+
+        <!-- 11. Alterações -->
+        <section class="pp-section" id="sec11">
+            <span class="pp-tag">Seção 11</span>
+            <h2>11. Alterações desta política</h2>
+            <p>
+                Esta Política de Privacidade pode ser atualizada periodicamente para refletir mudanças em nossos processos, obrigações legais ou melhorias nas práticas de privacidade. A data de última atualização é sempre indicada ao final deste documento.
+            </p>
+            <p>
+                Em caso de alterações relevantes que afetem direitos dos titulares, comunicaremos as mudanças de forma adequada (ex.: aviso no site ou contato direto, quando possível).
+            </p>
+        </section>
+
+        <!-- 12. Contato -->
+        <div class="pp-contact-box" id="sec12">
+            <span class="pp-tag">Seção 12</span>
+            <h2>12. Encarregado (DPO) e contato</h2>
+            <p>
+                Em conformidade com o art. 41 da LGPD, a Churrascaria Pampulha designa como canal de contato para questões relacionadas à privacidade e proteção de dados:
+            </p>
+            <p>
+                <strong><i class="fa-solid fa-building"></i> Razão Social:</strong> Churrascaria Pampulha<br>
+                <strong><i class="fa-solid fa-id-card"></i> CNPJ:</strong> 26.240.071/0001-55<br>
+                <strong><i class="fa-solid fa-envelope"></i> E-mail:</strong> <a href="mailto:contato@churrascariapampulha.com.br">contato@churrascariapampulha.com.br</a><br>
+                <strong><i class="fa-solid fa-phone"></i> Telefone:</strong> <a href="tel:+553135825158">(31) 3582-5158</a>
+            </p>
+            <p style="margin-top:12px; font-size:0.88rem; color:#888;">
+                Você também pode registrar reclamações perante a <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong> pelo site <a href="https://www.gov.br/anpd" target="_blank" rel="noopener noreferrer">www.gov.br/anpd</a>.
+            </p>
+        </div>
+
+        <p class="pp-updated">
+            <i class="fa-regular fa-calendar"></i> Última atualização: <strong>30 de junho de 2026</strong>
+        </p>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; <span id="footerYear">2026</span> Churrascaria Pampulha - CNPJ 26.240.071/0001-55 | Todos os direitos reservados</p>
+                <p><a href="politica-de-privacidade.html">Política de Privacidade</a></p>
+                <p class="footer-funcionario-link"><a href="area-reservas.php">Área Funcionário</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
