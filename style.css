@@ -2838,22 +2838,33 @@ h1, h2, h3, h4 {
     }
 
     .dashboard-reservas-dia-header {
-        align-items: stretch;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .dashboard-reservas-dia-header > i {
+        margin-top: 0.15rem;
     }
 
     .dashboard-reservas-dia-header h3 {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
     }
 
-    .dashboard-reservas-controles,
+    .dashboard-reservas-controles {
+        width: 100%;
+        margin-left: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
     .dashboard-reservas-busca,
     .dashboard-reservas-ordenacao-form {
         width: 100%;
         margin-left: 0;
-    }
-
-    .dashboard-reservas-controles {
-        align-items: stretch;
+        box-sizing: border-box;
     }
 
     .dashboard-reservas-ordenacao-form {
