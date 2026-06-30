@@ -292,16 +292,6 @@ $stmtReservas->bindValue(':limite', $reservasPorPagina, PDO::PARAM_INT);
 $stmtReservas->bindValue(':offset', $offsetReservas, PDO::PARAM_INT);
 $stmtReservas->execute();
 $reservas = $stmtReservas->fetchAll();
-
-$mesAtual = (int) date('n');
-$diaAtual  = (int) date('j');
-$nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-$nomeMesAtual = $nomesMeses[$mesAtual - 1];
-$stmtAniversariantes = $pdo->prepare(
-    'SELECT nome, telefone, data_nascimento FROM clientes WHERE data_nascimento IS NOT NULL AND MONTH(data_nascimento) = ? ORDER BY DAY(data_nascimento) ASC'
-);
-$stmtAniversariantes->execute([$mesAtual]);
-$aniversariantes = $stmtAniversariantes->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -309,7 +299,7 @@ $aniversariantes = $stmtAniversariantes->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Reservas - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260630-3">
+    <link rel="stylesheet" href="style.css?v=20260630-2">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -343,45 +333,6 @@ $aniversariantes = $stmtAniversariantes->fetchAll();
 
     <section class="painel-reservas">
         <div class="container">
-            <div class="painel-reservas-layout">
-
-            <!-- Sidebar: Aniversariantes do mês -->
-            <aside class="painel-aniversariantes-sidebar">
-                <div class="aniversariantes-header">
-                    <i class="fa-solid fa-cake-candles"></i>
-                    <div>
-                        <h3>Aniversariantes</h3>
-                        <span class="aniversariantes-mes"><?= e($nomeMesAtual) ?></span>
-                    </div>
-                </div>
-                <?php if (empty($aniversariantes)): ?>
-                    <p class="aniversariantes-vazio">Nenhum cliente com aniversário em <?= e($nomeMesAtual) ?>.</p>
-                <?php else: ?>
-                    <ul class="aniversariantes-lista">
-                        <?php foreach ($aniversariantes as $aniv):
-                            $diaAniv = (int) date('j', strtotime($aniv['data_nascimento']));
-                            $ehHoje  = ($diaAniv === $diaAtual);
-                        ?>
-                        <li class="aniversariantes-item<?= $ehHoje ? ' aniversario-hoje' : '' ?>">
-                            <div class="aniv-dia">
-                                <?php if ($ehHoje): ?>
-                                    <i class="fa-solid fa-cake-candles"></i>
-                                <?php else: ?>
-                                    <span><?= e(str_pad((string)$diaAniv, 2, '0', STR_PAD_LEFT)) ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="aniv-info">
-                                <strong class="aniv-nome"><?= e($aniv['nome']) ?></strong>
-                                <span class="aniv-tel"><?= e($aniv['telefone']) ?></span>
-                            </div>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-            </aside>
-
-            <!-- Conteúdo principal -->
-            <div class="painel-conteudo-principal">
             <div class="panel-header">
                 <div class="panel-header-icon"><i class="fa-solid fa-calendar-check"></i></div>
                 <div>
@@ -654,8 +605,7 @@ $aniversariantes = $stmtAniversariantes->fetchAll();
                         </div>
                     </nav>
                 <?php endif; ?>
-            </div><!-- /painel-conteudo-principal -->
-            </div><!-- /painel-reservas-layout -->
+            </div>
         </div>
     </section>
 
