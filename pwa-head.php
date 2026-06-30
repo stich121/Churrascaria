@@ -1,8 +1,4 @@
-<?php
-// Tags do PWA (Progressive Web App) compartilhadas pela Área de Reservas.
-// Incluir dentro do <head> de cada página da área:  <?php include __DIR__ . '/pwa-head.php'; ?>
-// Como todas as páginas ficam na mesma pasta, os caminhos abaixo são relativos.
-?>
+<?php /* pwa-head.php — inclua dentro do <head> de cada pagina da area de reservas */ ?>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c41e3a">
 <meta name="mobile-web-app-capable" content="yes">
