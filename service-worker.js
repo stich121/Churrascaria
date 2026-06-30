@@ -12,7 +12,7 @@
  * Ao mudar arquivos estáticos importantes, suba a versão abaixo para forçar
  * a renovação do cache nos celulares já instalados.
  */
-const VERSION = 'reservas-pampulha-v1';
+const VERSION = 'reservas-pampulha-v2';
 const STATIC_CACHE = `${VERSION}-estatico`;
 const OFFLINE_URL = 'offline.html';
 
