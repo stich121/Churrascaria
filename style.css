@@ -1321,15 +1321,9 @@ h1, h2, h3, h4 {
     }
 
     .navbar-content {
-        flex-wrap: wrap;
-        row-gap: 0.75rem;
-    }
-
-    .funcionario-nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.6rem 1rem;
-        width: 100%;
+        flex-wrap: nowrap;
+        row-gap: 0;
+        align-items: center;
     }
 }
 
@@ -2899,24 +2893,25 @@ h1, h2, h3, h4 {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px;
+    padding: 10px 8px;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 .nav-hamburger span {
     display: block;
-    width: 26px;
+    width: 28px;
     height: 2px;
     background: #fff;
     border-radius: 2px;
-    transition: transform 0.3s, opacity 0.3s;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.nav-hamburger.aberto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.nav-hamburger.aberto span:nth-child(2) { opacity: 0; }
-.nav-hamburger.aberto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.nav-hamburger.aberto span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.nav-hamburger.aberto span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.aberto span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 @media (max-width: 768px) {
     .nav-hamburger {
@@ -2928,9 +2923,10 @@ h1, h2, h3, h4 {
     }
 
     .navbar-content {
-        flex-wrap: nowrap;
-        row-gap: 0;
+        flex-wrap: nowrap !important;
+        row-gap: 0 !important;
         align-items: center;
+        justify-content: space-between;
     }
 
     .funcionario-nav-links {
@@ -2939,15 +2935,16 @@ h1, h2, h3, h4 {
         top: 100%;
         left: 0;
         right: 0;
-        background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-color) 100%);
+        background: linear-gradient(180deg, #1a0a08 0%, #2d0f0a 100%);
         flex-direction: column;
         width: 100%;
-        padding: 0.5rem 0 1rem;
+        padding: 0.25rem 0 1rem;
         gap: 0;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
         z-index: 998;
-        flex-wrap: nowrap;
+        flex-wrap: nowrap !important;
         justify-content: flex-start;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .funcionario-nav-links.aberto {
@@ -2956,18 +2953,42 @@ h1, h2, h3, h4 {
 
     .funcionario-nav-links li {
         width: 100%;
+        list-style: none;
     }
 
     .funcionario-nav-links a:not(.btn-voltar-site) {
-        display: block;
-        padding: 0.85rem 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        padding: 0.95rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.95rem;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .funcionario-nav-links a:not(.btn-voltar-site):active,
+    .funcionario-nav-links a:not(.btn-voltar-site):hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--accent-color);
+    }
+
+    .funcionario-nav-links li:last-child {
+        padding: 0.85rem 1.25rem 0;
     }
 
     .funcionario-nav-links .btn-voltar-site {
-        margin: 0.75rem 1.5rem 0;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 8px;
+        margin: 0;
     }
 }
 
