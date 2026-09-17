@@ -9,6 +9,154 @@ garantirTabelaClientes($pdo);
 garantirColunaChurrascariaClientes($pdo);
 garantirColunaMesasAlocadasReservas($pdo);
 
+$diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+$ordenacoesReservas = [
+    'data_asc' => [
+        'label' => 'Data mais próxima',
+        'sql' => 'r.data_reserva ASC, r.hora_reserva ASC, r.nome_cliente ASC',
+    ],
+    'data_desc' => [
+        'label' => 'Data mais recente',
+        'sql' => 'r.data_reserva DESC, r.hora_reserva DESC, r.nome_cliente ASC',
+    ],
+    'cliente_asc' => [
+        'label' => 'Cliente A-Z',
+        'sql' => 'r.nome_cliente ASC, r.data_reserva ASC, r.hora_reserva ASC',
+    ],
+    'cliente_desc' => [
+        'label' => 'Cliente Z-A',
+        'sql' => 'r.nome_cliente DESC, r.data_reserva ASC, r.hora_reserva ASC',
+    ],
+];
+
+function renderizarLinhaReservaPainel(array $reserva, int $paginaAtual, string $ordenacaoAtual, int $nivel, array $diasSemana): string
+{
+    ob_start();
+    ?>
+    <tr>
+        <td><?= e($reserva['nome_cliente']) ?></td>
+        <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
+        <td><?= $reserva['tipo_reserva'] ? '<span class="badge badge-info"><i class="fa-solid fa-tag"></i>' . e($reserva['tipo_reserva']) . '</span>' : '-' ?></td>
+        <td><?= e($reserva['telefone']) ?></td>
+        <td><?= $reserva['data_pedido'] ? e(date('d/m/Y', strtotime($reserva['data_pedido']))) : '-' ?></td>
+        <td><?= e(date('d/m/Y', strtotime($reserva['data_reserva']))) ?></td>
+        <td><?= e($diasSemana[(int) date('w', strtotime($reserva['data_reserva']))]) ?></td>
+        <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
+        <td><?= e((string) $reserva['pessoas']) ?></td>
+        <td><?= $reserva['mesas_alocadas'] ? e($reserva['mesas_alocadas']) : '-' ?></td>
+        <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
+        <td>
+            <?php if ($reserva['status_reserva'] === 'Reservado'): ?>
+                <span class="badge badge-info"><i class="fa-solid fa-calendar-check"></i>Reservado</span>
+            <?php else: ?>
+                <span class="badge badge-danger"><i class="fa-solid fa-ban"></i>Cancelado</span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <form method="post" action="painel-reservas.php" class="reserva-comparecimento-form">
+                <input type="hidden" name="acao" value="atualizar_comparecimento">
+                <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
+                <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
+                <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                <select name="confirmacao">
+                    <option value="Pendente" <?= $reserva['confirmacao'] === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
+                    <option value="Confirmado" <?= $reserva['confirmacao'] === 'Confirmado' ? 'selected' : '' ?>>Confirmado</option>
+                </select>
+                <input type="number" name="pessoas_compareceram" min="0" placeholder="Vieram" value="<?= e($reserva['pessoas_compareceram'] !== null ? (string) $reserva['pessoas_compareceram'] : '') ?>">
+                <button type="submit" title="Salvar"><i class="fa-solid fa-check"></i></button>
+            </form>
+        </td>
+        <td><?= e($reserva['criado_por']) ?></td>
+        <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
+        <td class="reserva-acoes-col">
+            <button type="button" class="btn-editar-reserva" title="Editar reserva"
+                data-id="<?= e((string) $reserva['id']) ?>"
+                data-nome="<?= e($reserva['nome_cliente']) ?>"
+                data-telefone="<?= e($reserva['telefone']) ?>"
+                data-churrascaria="<?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?>"
+                data-tipo-reserva="<?= e($reserva['tipo_reserva'] ?? '') ?>"
+                data-data-pedido="<?= e($reserva['data_pedido'] ?? '') ?>"
+                data-data="<?= e($reserva['data_reserva']) ?>"
+                data-hora="<?= e(substr((string) $reserva['hora_reserva'], 0, 5)) ?>"
+                data-pessoas="<?= e((string) $reserva['pessoas']) ?>"
+                data-valor="<?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?>"
+                data-status="<?= e($reserva['status_reserva']) ?>"
+                data-observacao="<?= e($reserva['observacao'] ?? '') ?>"
+                onclick="abrirEdicaoReserva(this)">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            <?php if ($nivel >= NIVEL_GERENTE): ?>
+                <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover esta reserva?');">
+                    <input type="hidden" name="acao" value="excluir">
+                    <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
+                    <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
+                    <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
+                    <button type="submit" class="btn-remover-reserva" title="Remover reserva">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            <?php endif; ?>
+        </td>
+    </tr>
+    <?php
+    return ob_get_clean();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_reservas_painel') {
+    header('Content-Type: application/json; charset=utf-8');
+    $nivelBusca = nivelFuncionario();
+    $termoBusca = trim($_GET['termo'] ?? '');
+    $ordenacaoBusca = $_GET['ordenacao'] ?? 'data_asc';
+    if (!array_key_exists($ordenacaoBusca, $ordenacoesReservas)) {
+        $ordenacaoBusca = 'data_asc';
+    }
+    $digitosBusca = preg_replace('/\D/', '', $termoBusca);
+
+    $respostaBusca = ['html' => '', 'total' => 0, 'mostrando' => 0];
+
+    if ($termoBusca !== '') {
+        $limiteResultadosBusca = 300;
+        $condicoesBusca = ['(r.nome_cliente LIKE ? OR r.telefone LIKE ?'];
+        $parametrosBusca = ['%' . $termoBusca . '%', '%' . $termoBusca . '%'];
+
+        if ($digitosBusca !== '') {
+            $condicoesBusca[0] .= " OR REPLACE(REPLACE(REPLACE(REPLACE(r.telefone, '(', ''), ')', ''), ' ', ''), '-', '') LIKE ?";
+            $parametrosBusca[] = '%' . $digitosBusca . '%';
+        }
+        $condicoesBusca[0] .= ')';
+
+        $stmtContagemBusca = $pdo->prepare(
+            'SELECT COUNT(*) FROM reservas r WHERE ' . implode(' AND ', $condicoesBusca)
+        );
+        $stmtContagemBusca->execute($parametrosBusca);
+        $respostaBusca['total'] = (int) $stmtContagemBusca->fetchColumn();
+
+        $stmtBusca = $pdo->prepare(
+            'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas, r.mesas_alocadas,
+                    r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
+             FROM reservas r
+             JOIN funcionarios f ON f.id = r.funcionario_id
+             WHERE ' . implode(' AND ', $condicoesBusca) . '
+             ORDER BY ' . $ordenacoesReservas[$ordenacaoBusca]['sql'] . '
+             LIMIT ' . $limiteResultadosBusca
+        );
+        $stmtBusca->execute($parametrosBusca);
+        $reservasEncontradas = $stmtBusca->fetchAll();
+
+        $htmlLinhas = '';
+        foreach ($reservasEncontradas as $reservaEncontrada) {
+            $htmlLinhas .= renderizarLinhaReservaPainel($reservaEncontrada, 1, $ordenacaoBusca, $nivelBusca, $diasSemana);
+        }
+        $respostaBusca['html'] = $htmlLinhas;
+        $respostaBusca['mostrando'] = count($reservasEncontradas);
+    }
+
+    echo json_encode($respostaBusca);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['acao'] ?? '') === 'buscar_cliente') {
     header('Content-Type: application/json; charset=utf-8');
     $nomeBusca = trim($_GET['nome'] ?? '');
@@ -227,30 +375,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-
 $tiposReserva = $pdo->query('SELECT id, nome FROM tipos_reserva ORDER BY nome')->fetchAll();
 
 $reservasPorPagina = 50;
 $paginaAtual = max(1, (int) ($_GET['pagina'] ?? 1));
-$ordenacoesReservas = [
-    'data_asc' => [
-        'label' => 'Data mais próxima',
-        'sql' => 'r.data_reserva ASC, r.hora_reserva ASC, r.nome_cliente ASC',
-    ],
-    'data_desc' => [
-        'label' => 'Data mais recente',
-        'sql' => 'r.data_reserva DESC, r.hora_reserva DESC, r.nome_cliente ASC',
-    ],
-    'cliente_asc' => [
-        'label' => 'Cliente A-Z',
-        'sql' => 'r.nome_cliente ASC, r.data_reserva ASC, r.hora_reserva ASC',
-    ],
-    'cliente_desc' => [
-        'label' => 'Cliente Z-A',
-        'sql' => 'r.nome_cliente DESC, r.data_reserva ASC, r.hora_reserva ASC',
-    ],
-];
 $ordenacaoAtual = $_GET['ordenacao'] ?? 'data_asc';
 if (!array_key_exists($ordenacaoAtual, $ordenacoesReservas)) {
     $ordenacaoAtual = 'data_asc';
@@ -515,96 +643,29 @@ $reservas = $stmtReservas->fetchAll();
                     </thead>
                     <tbody>
                         <?php foreach ($reservas as $reserva): ?>
-                            <tr>
-                                <td><?= e($reserva['nome_cliente']) ?></td>
-                                <td><span class="badge badge-info"><i class="fa-solid fa-location-dot"></i><?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?></span></td>
-                                <td><?= $reserva['tipo_reserva'] ? '<span class="badge badge-info"><i class="fa-solid fa-tag"></i>' . e($reserva['tipo_reserva']) . '</span>' : '-' ?></td>
-                                <td><?= e($reserva['telefone']) ?></td>
-                                <td><?= $reserva['data_pedido'] ? e(date('d/m/Y', strtotime($reserva['data_pedido']))) : '-' ?></td>
-                                <td><?= e(date('d/m/Y', strtotime($reserva['data_reserva']))) ?></td>
-                                <td><?= e($diasSemana[(int) date('w', strtotime($reserva['data_reserva']))]) ?></td>
-                                <td><?= e(date('H:i', strtotime($reserva['hora_reserva']))) ?></td>
-                                <td><?= e((string) $reserva['pessoas']) ?></td>
-                                <td><?= $reserva['mesas_alocadas'] ? e($reserva['mesas_alocadas']) : '-' ?></td>
-                                <td>R$ <?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?></td>
-                                <td>
-                                    <?php if ($reserva['status_reserva'] === 'Reservado'): ?>
-                                        <span class="badge badge-info"><i class="fa-solid fa-calendar-check"></i>Reservado</span>
-                                    <?php else: ?>
-                                        <span class="badge badge-danger"><i class="fa-solid fa-ban"></i>Cancelado</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <form method="post" action="painel-reservas.php" class="reserva-comparecimento-form">
-                                        <input type="hidden" name="acao" value="atualizar_comparecimento">
-                                        <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
-                                        <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
-                                        <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
-                                        <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                                        <select name="confirmacao">
-                                            <option value="Pendente" <?= $reserva['confirmacao'] === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
-                                            <option value="Confirmado" <?= $reserva['confirmacao'] === 'Confirmado' ? 'selected' : '' ?>>Confirmado</option>
-                                        </select>
-                                        <input type="number" name="pessoas_compareceram" min="0" placeholder="Vieram" value="<?= e($reserva['pessoas_compareceram'] !== null ? (string) $reserva['pessoas_compareceram'] : '') ?>">
-                                        <button type="submit" title="Salvar"><i class="fa-solid fa-check"></i></button>
-                                    </form>
-                                </td>
-                                <td><?= e($reserva['criado_por']) ?></td>
-                                <td><?= $reserva['observacao'] ? e($reserva['observacao']) : '-' ?></td>
-                                <td class="reserva-acoes-col">
-                                    <button type="button" class="btn-editar-reserva" title="Editar reserva"
-                                        data-id="<?= e((string) $reserva['id']) ?>"
-                                        data-nome="<?= e($reserva['nome_cliente']) ?>"
-                                        data-telefone="<?= e($reserva['telefone']) ?>"
-                                        data-churrascaria="<?= e($reserva['churrascaria'] ?? CHURRASCARIA_PADRAO) ?>"
-                                        data-tipo-reserva="<?= e($reserva['tipo_reserva'] ?? '') ?>"
-                                        data-data-pedido="<?= e($reserva['data_pedido'] ?? '') ?>"
-                                        data-data="<?= e($reserva['data_reserva']) ?>"
-                                        data-hora="<?= e(substr((string) $reserva['hora_reserva'], 0, 5)) ?>"
-                                        data-pessoas="<?= e((string) $reserva['pessoas']) ?>"
-                                        data-valor="<?= e(number_format((float) $reserva['valor'], 2, ',', '.')) ?>"
-                                        data-status="<?= e($reserva['status_reserva']) ?>"
-                                        data-observacao="<?= e($reserva['observacao'] ?? '') ?>"
-                                        onclick="abrirEdicaoReserva(this)">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                    <?php if ($nivel >= NIVEL_GERENTE): ?>
-                                        <form method="post" action="painel-reservas.php" onsubmit="return confirm('Remover esta reserva?');">
-                                            <input type="hidden" name="acao" value="excluir">
-                                            <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
-                                            <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
-                                            <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
-                                            <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
-                                            <button type="submit" class="btn-remover-reserva" title="Remover reserva">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
+                            <?= renderizarLinhaReservaPainel($reserva, $paginaAtual, $ordenacaoAtual, $nivel, $diasSemana) ?>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
                 <?php if (empty($reservas)): ?>
-                    <p class="reservas-vazio" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
+                    <p class="reservas-vazio reservas-vazio-inicial" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
                 <?php endif; ?>
                 <p class="reservas-vazio reservas-busca-vazio">Nenhuma reserva encontrada para essa pesquisa.</p>
-                <?php if ($totalPaginas > 1): ?>
-                    <nav class="reservas-paginacao" aria-label="Paginação de reservas">
-                        <span class="reservas-paginacao-info">Mostrando <?= e((string) $primeiraReservaPagina) ?>-<?= e((string) $ultimaReservaPagina) ?> de <?= e((string) $totalReservas) ?></span>
-                        <div class="reservas-paginacao-links">
-                            <?php if ($paginaAtual > 1): ?>
-                                <a href="<?= e(urlPainelReservas($paginaAtual - 1, $ordenacaoAtual)) ?>" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></a>
-                            <?php endif; ?>
-                            <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
-                                <a href="<?= e(urlPainelReservas($pagina, $ordenacaoAtual)) ?>" class="<?= $pagina === $paginaAtual ? 'ativa' : '' ?>" <?= $pagina === $paginaAtual ? 'aria-current="page"' : '' ?>><?= e((string) $pagina) ?></a>
-                            <?php endfor; ?>
-                            <?php if ($paginaAtual < $totalPaginas): ?>
-                                <a href="<?= e(urlPainelReservas($paginaAtual + 1, $ordenacaoAtual)) ?>" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></a>
-                            <?php endif; ?>
-                        </div>
-                    </nav>
-                <?php endif; ?>
+                <nav class="reservas-paginacao" aria-label="Paginação de reservas" <?= $totalPaginas > 1 ? '' : 'style="display: none;"' ?>>
+                    <span class="reservas-paginacao-info"><?= $totalPaginas > 1 ? 'Mostrando ' . e((string) $primeiraReservaPagina) . '-' . e((string) $ultimaReservaPagina) . ' de ' . e((string) $totalReservas) : '' ?></span>
+                    <div class="reservas-paginacao-links">
+                        <?php if ($paginaAtual > 1): ?>
+                            <a href="<?= e(urlPainelReservas($paginaAtual - 1, $ordenacaoAtual)) ?>" aria-label="Página anterior"><i class="fa-solid fa-chevron-left"></i></a>
+                        <?php endif; ?>
+                        <?php for ($pagina = 1; $pagina <= $totalPaginas; $pagina++): ?>
+                            <a href="<?= e(urlPainelReservas($pagina, $ordenacaoAtual)) ?>" class="<?= $pagina === $paginaAtual ? 'ativa' : '' ?>" <?= $pagina === $paginaAtual ? 'aria-current="page"' : '' ?>><?= e((string) $pagina) ?></a>
+                        <?php endfor; ?>
+                        <?php if ($paginaAtual < $totalPaginas): ?>
+                            <a href="<?= e(urlPainelReservas($paginaAtual + 1, $ordenacaoAtual)) ?>" aria-label="Próxima página"><i class="fa-solid fa-chevron-right"></i></a>
+                        <?php endif; ?>
+                    </div>
+                </nav>
+                <p class="reservas-busca-resultado-info" style="display: none;"></p>
             </div>
         </div>
     </section>
@@ -799,38 +860,100 @@ $reservas = $stmtReservas->fetchAll();
                     return;
                 }
 
-                var linhas = Array.prototype.slice.call(bloco.querySelectorAll('.reservas-tabela tbody tr'));
-                var mensagemVazia = bloco.querySelector('.reservas-busca-vazio');
-
-                function normalizar(valor) {
-                    return (valor || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                var tabela = bloco.querySelector('.reservas-tabela');
+                var tbody = tabela ? tabela.querySelector('tbody') : null;
+                if (!tbody) {
+                    return;
                 }
 
-                function filtrarReservas() {
-                    var busca = normalizar(input.value);
-                    var buscaDigitos = busca.replace(/\D/g, '');
-                    var visiveis = 0;
+                var mensagemVazia = bloco.querySelector('.reservas-busca-vazio');
+                var mensagemVaziaInicial = bloco.querySelector('.reservas-vazio-inicial');
+                var nav = bloco.querySelector('.reservas-paginacao');
+                var infoBusca = bloco.querySelector('.reservas-busca-resultado-info');
+                var htmlOriginal = tbody.innerHTML;
+                var navDisplayOriginal = nav ? nav.style.display : '';
 
-                    linhas.forEach(function (linha) {
-                        var celulas = linha.querySelectorAll('td');
-                        var cliente = normalizar(celulas[0] ? celulas[0].textContent : '');
-                        var telefone = normalizar(celulas[3] ? celulas[3].textContent : '');
-                        var telefoneDigitos = telefone.replace(/\D/g, '');
-                        var corresponde = busca === '' || cliente.indexOf(busca) !== -1 || telefone.indexOf(busca) !== -1 || (buscaDigitos !== '' && telefoneDigitos.indexOf(buscaDigitos) !== -1);
+                var timeoutId = null;
+                var requisicaoAtual = 0;
 
-                        linha.style.display = corresponde ? '' : 'none';
-                        if (corresponde) {
-                            visiveis++;
-                        }
-                    });
-
+                function restaurarListaOriginal() {
+                    tbody.innerHTML = htmlOriginal;
                     if (mensagemVazia) {
-                        mensagemVazia.style.display = busca !== '' && linhas.length > 0 && visiveis === 0 ? 'block' : 'none';
+                        mensagemVazia.style.display = 'none';
+                    }
+                    if (mensagemVaziaInicial) {
+                        mensagemVaziaInicial.style.display = htmlOriginal.trim() === '' ? 'block' : 'none';
+                    }
+                    if (nav) {
+                        nav.style.display = navDisplayOriginal;
+                    }
+                    if (infoBusca) {
+                        infoBusca.style.display = 'none';
                     }
                 }
 
-                input.addEventListener('input', filtrarReservas);
-                filtrarReservas();
+                function buscarNoServidor(termo) {
+                    var ordenacaoSelect = bloco.querySelector('#ordenacao_reservas');
+                    var params = new URLSearchParams({
+                        acao: 'buscar_reservas_painel',
+                        termo: termo,
+                        ordenacao: ordenacaoSelect ? ordenacaoSelect.value : 'data_asc',
+                    });
+
+                    var idRequisicao = ++requisicaoAtual;
+
+                    fetch('painel-reservas.php?' + params.toString())
+                        .then(function (resposta) { return resposta.json(); })
+                        .then(function (dados) {
+                            if (idRequisicao !== requisicaoAtual) {
+                                return;
+                            }
+
+                            tbody.innerHTML = dados.html;
+                            if (mensagemVaziaInicial) {
+                                mensagemVaziaInicial.style.display = 'none';
+                            }
+                            if (nav) {
+                                nav.style.display = 'none';
+                            }
+                            if (mensagemVazia) {
+                                mensagemVazia.style.display = dados.total === 0 ? 'block' : 'none';
+                            }
+                            if (infoBusca) {
+                                if (dados.total > 0) {
+                                    infoBusca.style.display = 'block';
+                                    infoBusca.textContent = dados.total > dados.mostrando
+                                        ? 'Mostrando ' + dados.mostrando + ' de ' + dados.total + ' resultados (refine a busca para ver todos)'
+                                        : 'Mostrando ' + dados.total + ' resultado' + (dados.total === 1 ? '' : 's') + ' em todas as p\u00e1ginas';
+                                } else {
+                                    infoBusca.style.display = 'none';
+                                }
+                            }
+                        })
+                        .catch(function (erro) {
+                            if (window.AppLogger) {
+                                window.AppLogger.error('Falha ao buscar reservas em todas as p\u00e1ginas', { erro: String(erro) });
+                            }
+                        });
+                }
+
+                function tratarEntrada() {
+                    var termo = input.value.trim();
+
+                    clearTimeout(timeoutId);
+
+                    if (termo === '') {
+                        requisicaoAtual++;
+                        restaurarListaOriginal();
+                        return;
+                    }
+
+                    timeoutId = setTimeout(function () {
+                        buscarNoServidor(termo);
+                    }, 300);
+                }
+
+                input.addEventListener('input', tratarEntrada);
             });
         }
 

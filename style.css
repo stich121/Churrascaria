@@ -2769,6 +2769,13 @@ h1, h2, h3, h4 {
     display: none;
 }
 
+.reservas-busca-resultado-info {
+    color: var(--text-light);
+    font-size: 0.92rem;
+    padding: 1rem 0.25rem 0;
+    margin: 0;
+}
+
 .footer-funcionario-link a {
     color: #999;
     font-size: 0.85rem;
