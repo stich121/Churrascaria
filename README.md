@@ -88,9 +88,9 @@ Arquivos: `area-reservas.php` (login), `painel-reservas.php` (reservas), `mesas.
        ADD COLUMN churrascaria VARCHAR(60) NOT NULL DEFAULT 'Churrascaria Pampulha' AFTER telefone;
    ```
 
-## 📅 Desde 1982
+## 🥩 Sobre
 
-A Churrascaria Pampulha oferece uma opção de churrasco nobre com ambiente familiar e atendimento especial há mais de 40 anos.
+A Churrascaria Pampulha oferece uma opção de churrasco nobre com ambiente familiar e atendimento especial.
 
 ---
 
@@ -128,3 +128,10 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
 - Ajustes visuais do site público: remoção de gradiente escuro dos cards do cardápio, atualização do mapa de
   contato (Leaflet/Google Maps), simplificação da seção de contato e remoção de seções (Promoções, Happy Hour,
   Vouchers).
+- Remoção de todas as referências à data de fundação/tempo de casa na landing page (`index.html`), a pedido do
+  cliente: meta description ("desde 1982"), selo do topo ("Tradição desde 1982" → "Churrascaria · Belo Horizonte"),
+  subtítulo do topo ("há mais de 40 anos"), seção Quem Somos (selo "Nossa História" → "Quem Somos", título
+  "Desde 1982 em Belo Horizonte" → "Churrasco nobre em Belo Horizonte", parágrafo "Por mais de 40 anos"), card
+  "+40 Anos de tradição" (removido; ficou só "+20 Cortes no rodízio") e rodapé ("A melhor churrascaria desde 1982"
+  → "A melhor churrascaria de BH"). A seção "Desde 1982" deste README virou "Sobre". O ano automático do
+  copyright no rodapé foi mantido, pois não se refere à fundação.
