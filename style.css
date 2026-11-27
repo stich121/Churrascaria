@@ -3839,3 +3839,253 @@ h1, h2, h3, h4 {
         margin-left: 0;
     }
 }
+
+/* Histórico de alterações (historico.php). */
+.historico-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.8rem 1rem;
+    background: white;
+    border-radius: 16px;
+    padding: 1rem 1.4rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.historico-filtros label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.historico-filtros input,
+.historico-filtros select {
+    height: 40px;
+    padding: 0 0.7rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fafafa;
+    font-family: inherit;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.historico-filtros-busca {
+    flex: 1 1 220px;
+}
+
+.historico-filtros-acoes {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.historico-filtros-acoes .btn {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.historico-resumo {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+}
+
+.historico-resumo a,
+.historico-link-registro {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.painel-reservas--casarao .historico-resumo a,
+.painel-reservas--casarao .historico-link-registro {
+    color: #2e7d32;
+}
+
+.historico-vazio {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+}
+
+.historico-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.historico-item {
+    background: white;
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    border-left: 5px solid #1976d2;
+}
+
+.historico-item--criou {
+    border-left-color: #2e7d32;
+}
+
+.historico-item--excluiu {
+    border-left-color: #c62828;
+}
+
+.historico-item-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+}
+
+.historico-acao {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+
+.historico-acao--criou {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+.historico-acao--excluiu {
+    background: #ffebee;
+    color: #b71c1c;
+}
+
+.historico-entidade {
+    font-size: 0.85rem;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.historico-descricao {
+    font-size: 1rem;
+}
+
+.historico-casa {
+    font-size: 0.75rem;
+    color: #666;
+    background: #f1f1f1;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+}
+
+.historico-item-quem {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    margin-top: 0.45rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.historico-item-quem i {
+    margin-right: 0.2rem;
+}
+
+.historico-mudancas {
+    width: 100%;
+    margin-top: 0.7rem;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.historico-mudancas th,
+.historico-mudancas td {
+    text-align: left;
+    padding: 0.35rem 0.6rem;
+    border-top: 1px solid #eee;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.historico-mudancas thead th {
+    border-top: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #888;
+}
+
+.historico-mudancas tbody th {
+    width: 30%;
+    font-weight: 600;
+    color: #444;
+}
+
+.historico-antes {
+    color: #b71c1c;
+    text-decoration: line-through;
+    text-decoration-color: rgba(183, 28, 28, 0.4);
+}
+
+.historico-item--excluiu .historico-antes {
+    text-decoration: none;
+}
+
+.historico-depois {
+    color: #1b5e20;
+    font-weight: 600;
+}
+
+.historico-mudancas em {
+    color: #aaa;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.historico-paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .historico-filtros {
+        padding: 0.9rem;
+    }
+
+    .historico-filtros label {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 0;
+    }
+
+    .historico-filtros input,
+    .historico-filtros select {
+        width: 100%;
+    }
+
+    .historico-filtros-busca {
+        flex-basis: 100% !important;
+    }
+
+    .historico-item {
+        padding: 0.85rem 0.9rem;
+    }
+
+    .historico-mudancas tbody th {
+        width: 35%;
+    }
+}

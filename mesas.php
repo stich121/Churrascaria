@@ -23,8 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $stmt = $pdo->prepare('INSERT INTO mesas (capacidade, quantidade, churrascaria) VALUES (?, ?, ?)');
             $stmt->execute([$capacidade, $quantidadeMesas, $churrascaria]);
+            $idMesaCriada = (int) $pdo->lastInsertId();
+            $mesaCriada = historicoBuscarRegistro($pdo, 'mesa', $idMesaCriada);
+            registrarHistorico($pdo, 'mesa', $idMesaCriada, 'criou', historicoDescrever('mesa', $mesaCriada), null, $mesaCriada);
             Logger::audit('mesa_criada', [
-                'mesa_id' => (int) $pdo->lastInsertId(),
+                'mesa_id' => $idMesaCriada,
                 'capacidade' => $capacidade,
                 'quantidade' => $quantidadeMesas,
                 'churrascaria' => $churrascaria,
@@ -36,8 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'excluir_mesa' && $nivel >= NIVEL_GERENTE) {
         $idMesaExcluir = (int) ($_POST['id'] ?? 0);
+        $mesaAntes = historicoBuscarRegistro($pdo, 'mesa', $idMesaExcluir);
         $stmt = $pdo->prepare('DELETE FROM mesas WHERE id = ?');
         $stmt->execute([$idMesaExcluir]);
+        if ($mesaAntes !== null) {
+            registrarHistorico($pdo, 'mesa', $idMesaExcluir, 'excluiu', historicoDescrever('mesa', $mesaAntes), $mesaAntes, null);
+        }
         Logger::audit('mesa_excluida', ['mesa_id' => $idMesaExcluir]);
         header('Location: mesas.php');
         exit;

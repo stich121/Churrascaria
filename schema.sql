@@ -75,6 +75,25 @@ CREATE TABLE IF NOT EXISTS clientes (
     UNIQUE KEY uq_clientes_telefone (telefone)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Histórico de alterações (historico.php): quem mudou o quê, quando, com antes/depois
+-- de cada campo em JSON. O sistema também cria esta tabela sozinho na primeira gravação.
+CREATE TABLE IF NOT EXISTS historico_alteracoes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    criado_em DATETIME NOT NULL,
+    funcionario_id INT UNSIGNED NULL,
+    funcionario_nome VARCHAR(100) NOT NULL DEFAULT '',
+    entidade VARCHAR(30) NOT NULL,
+    entidade_id INT UNSIGNED NULL,
+    acao VARCHAR(20) NOT NULL,
+    descricao VARCHAR(255) NOT NULL DEFAULT '',
+    churrascaria VARCHAR(60) NULL,
+    alteracoes TEXT NULL,
+    ip VARCHAR(45) NULL,
+    KEY idx_historico_data (criado_em),
+    KEY idx_historico_entidade (entidade, entidade_id),
+    KEY idx_historico_funcionario (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Primeiro administrador (nível 3). Gere o hash localmente com
 -- `php -r "echo password_hash('SUA_SENHA', PASSWORD_DEFAULT);"` e cole no lugar de
 -- COLE_O_HASH_AQUI antes de rodar este INSERT uma vez na aba SQL do phpMyAdmin.

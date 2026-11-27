@@ -31,7 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $pdo->prepare('INSERT INTO clientes (nome, telefone, churrascaria, data_nascimento) VALUES (?, ?, ?, ?)')
                     ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null]);
-                Logger::audit('cliente_criado', ['cliente_id' => (int) $pdo->lastInsertId()]);
+                $idClienteCriado = (int) $pdo->lastInsertId();
+                $clienteCriado = historicoBuscarRegistro($pdo, 'cliente', $idClienteCriado);
+                registrarHistorico($pdo, 'cliente', $idClienteCriado, 'criou', historicoDescrever('cliente', $clienteCriado), null, $clienteCriado);
+                Logger::audit('cliente_criado', ['cliente_id' => $idClienteCriado]);
                 header('Location: clientes.php');
                 exit;
             }
@@ -56,8 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetch()) {
                 $mensagemErro = 'Já existe um cliente cadastrado com esse telefone.';
             } else {
+                $clienteAntes = historicoBuscarRegistro($pdo, 'cliente', $idCliente);
                 $pdo->prepare('UPDATE clientes SET nome = ?, telefone = ?, churrascaria = ?, data_nascimento = ? WHERE id = ?')
                     ->execute([$nome, $telefone, $churrascariaCliente, $dataNascimento !== '' ? $dataNascimento : null, $idCliente]);
+                $clienteDepois = historicoBuscarRegistro($pdo, 'cliente', $idCliente);
+                registrarHistorico($pdo, 'cliente', $idCliente, 'editou', historicoDescrever('cliente', $clienteDepois), $clienteAntes, $clienteDepois);
                 Logger::audit('cliente_editado', ['cliente_id' => $idCliente]);
                 header('Location: clientes.php');
                 exit;
@@ -67,8 +73,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'excluir_cliente' && $nivel >= NIVEL_GERENTE) {
         $idClienteExcluir = (int) ($_POST['id'] ?? 0);
+        $clienteAntes = historicoBuscarRegistro($pdo, 'cliente', $idClienteExcluir);
         $stmt = $pdo->prepare('DELETE FROM clientes WHERE id = ?');
         $stmt->execute([$idClienteExcluir]);
+        if ($clienteAntes !== null) {
+            registrarHistorico($pdo, 'cliente', $idClienteExcluir, 'excluiu', historicoDescrever('cliente', $clienteAntes), $clienteAntes, null);
+        }
         Logger::audit('cliente_excluido', ['cliente_id' => $idClienteExcluir]);
         header('Location: clientes.php');
         exit;

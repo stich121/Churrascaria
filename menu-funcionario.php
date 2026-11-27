@@ -26,6 +26,7 @@ $itensConfiguracoesMenu = array_values(array_filter([
     ['mesas.php', 'Mesas', 'fa-chair', true],
     ['tipos-reserva.php', 'Tipos de Reserva', 'fa-tags', true],
     ['funcionarios.php', 'Funcionários', 'fa-users', nivelFuncionario() >= NIVEL_GERENTE],
+    ['historico.php', 'Histórico de alterações', 'fa-clock-rotate-left', nivelFuncionario() >= NIVEL_GERENTE],
     ['logs.php', 'Logs', 'fa-file-lines', ehDesenvolvedorAutorizado()],
 ], function ($item) {
     return $item[3];

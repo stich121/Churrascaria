@@ -3,6 +3,7 @@
 // Inclua este arquivo antes de qualquer saída HTML nas páginas protegidas.
 
 require_once __DIR__ . '/lib/Logger.php';
+require_once __DIR__ . '/lib/Historico.php';
 Logger::init();
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -365,19 +366,37 @@ function salvarClienteAutomatico(PDO $pdo, string $nome, string $telefone, ?stri
 
     $churrascaria = $churrascaria !== null && $churrascaria !== '' ? $churrascaria : CHURRASCARIA_PADRAO;
 
+    $buscaCliente = $pdo->prepare('SELECT * FROM clientes WHERE telefone = ?');
+    $buscaCliente->execute([$telefone]);
+    $clienteAntes = $buscaCliente->fetch(PDO::FETCH_ASSOC) ?: null;
+
     if ($dataNascimento !== null) {
         $pdo->prepare(
             'INSERT INTO clientes (nome, telefone, churrascaria, data_nascimento) VALUES (?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE nome = VALUES(nome), churrascaria = VALUES(churrascaria), data_nascimento = VALUES(data_nascimento)'
         )->execute([$nome, $telefone, $churrascaria, $dataNascimento]);
-
-        return;
+    } else {
+        $pdo->prepare(
+            'INSERT INTO clientes (nome, telefone, churrascaria) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE nome = VALUES(nome), churrascaria = VALUES(churrascaria)'
+        )->execute([$nome, $telefone, $churrascaria]);
     }
 
-    $pdo->prepare(
-        'INSERT INTO clientes (nome, telefone, churrascaria) VALUES (?, ?, ?)
-         ON DUPLICATE KEY UPDATE nome = VALUES(nome), churrascaria = VALUES(churrascaria)'
-    )->execute([$nome, $telefone, $churrascaria]);
+    // Cliente criado ou atualizado sozinho a partir de uma reserva também entra no histórico.
+    $buscaCliente->execute([$telefone]);
+    $clienteDepois = $buscaCliente->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    if ($clienteDepois !== null) {
+        registrarHistorico(
+            $pdo,
+            'cliente',
+            (int) $clienteDepois['id'],
+            $clienteAntes === null ? 'criou' : 'editou',
+            historicoDescrever('cliente', $clienteDepois) . ' (pela reserva)',
+            $clienteAntes,
+            $clienteDepois
+        );
+    }
 }
 
 function garantirColunaMesasAlocadasReservas(PDO $pdo): void

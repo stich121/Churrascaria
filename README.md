@@ -207,3 +207,31 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
 - Teste feito localmente com MariaDB temporário (XAMPP) e reservas de exemplo, como nível superior e como atendente,
   em 1280px e 390px: menu e grupos, botão flutuante, setas, filtros do painel, filtros mantidos depois de salvar e
   pesquisa. Não houve erros de JavaScript.
+- **Histórico de alterações** (`historico.php`, menu **Configurações → Histórico de alterações**, gerente ou acima):
+  mostra quem alterou, quando, o quê e o valor de **antes** e de **depois** de cada campo.
+  - O que entra: criar, editar e excluir **reservas** (inclusive confirmar e marcar comparecimento, no painel e no
+    dashboard), **clientes** (inclusive os criados ou atualizados sozinhos a partir de uma reserva, marcados
+    "(pela reserva)"), **mesas**, **tipos de reserva** e **funcionários** (nome, usuário, nível, ativo/inativo).
+    Troca de senha aparece só como "Senha: alterada", nunca com o valor.
+  - Cada item mostra a ação (Criou em verde, Editou em azul, Excluiu em vermelho), o tipo, a descrição (ex.: cliente
+    + data e hora da reserva), a churrascaria, quem fez e a data/hora. Na edição, só os campos que mudaram, com o
+    antes riscado e o depois em verde. Na criação, os valores preenchidos. Na exclusão, como o registro estava,
+    para dar para refazer se foi engano. Salvar um formulário sem mudar nada não gera registro.
+  - Filtros: período (de/até), quem, o quê (reserva, cliente...), ação e busca livre (nome, telefone, valor...).
+    O link **"Histórico deste registro"** mostra tudo o que aconteceu com aquela reserva/cliente/etc.
+    30 itens por página, do mais novo para o mais antigo.
+  - Banco: tabela nova `historico_alteracoes` (também no `schema.sql`). O sistema cria a tabela sozinho na primeira
+    vez, então não precisa rodar SQL no phpMyAdmin. Guarda o nome de quem alterou no momento, para o histórico
+    continuar legível mesmo se o funcionário for excluído. Os campos mudados ficam em JSON na coluna `alteracoes`.
+  - Código: `lib/Historico.php` (incluído pelo `auth.php`) com `registrarHistorico()`, `historicoBuscarRegistro()`
+    (lê o "antes"), `historicoDiferencas()`, `historicoDescrever()` e `garantirTabelaHistorico()`. Se gravar o
+    histórico falhar, a ação do usuário continua normalmente e o erro vai para `logs/error.log`.
+  - Horário gravado em horário de Brasília (`America/Sao_Paulo`), independente do fuso do servidor.
+  - A tela "Logs" (só desenvolvedor) continua existindo: é o log técnico (`logs/*.log`); o histórico é a versão para
+    a equipe.
+  - Correções junto: ao criar reserva, o `reserva_id` do log de auditoria podia sair com o id do cliente (o
+    `lastInsertId()` era lido depois de salvar o cliente); e o painel de reservas dava erro se o POST viesse sem
+    `ordenacao`.
+  - Testado com MariaDB temporário: criar/editar/confirmar/comparecimento/excluir reserva, cliente automático e
+    manual, mesa, tipo de reserva, funcionário (com troca de senha e ativar/desativar); filtros, histórico de um
+    registro, 1280px e 390px sem vazar a tela; atendente recebe 403 e não vê o item no menu.

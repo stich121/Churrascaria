@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
     $paginaRetorno = max(1, (int) ($_POST['pagina'] ?? 1));
     $ordenacoesValidasPost = ['data_asc', 'data_desc', 'cliente_asc', 'cliente_desc'];
-    $ordenacaoRetorno = in_array($_POST['ordenacao'] ?? 'data_asc', $ordenacoesValidasPost, true) ? $_POST['ordenacao'] : 'data_asc';
+    $ordenacaoRetorno = in_array($_POST['ordenacao'] ?? '', $ordenacoesValidasPost, true) ? $_POST['ordenacao'] : 'data_asc';
 
     if ($acao === 'criar') {
         $churrascaria = trim($_POST['churrascaria'] ?? CHURRASCARIA_PADRAO);
@@ -360,9 +360,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $_SESSION['funcionario_id'],
             ]);
+            $idReservaCriada = (int) $pdo->lastInsertId();
+            $reservaCriada = historicoBuscarRegistro($pdo, 'reserva', $idReservaCriada);
+            registrarHistorico($pdo, 'reserva', $idReservaCriada, 'criou', historicoDescrever('reserva', $reservaCriada), null, $reservaCriada);
             salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, $aniversarioCliente !== '' ? $aniversarioCliente : null, $churrascaria);
             Logger::audit('reserva_criada', [
-                'reserva_id' => (int) $pdo->lastInsertId(),
+                'reserva_id' => $idReservaCriada,
                 'churrascaria' => $churrascaria,
                 'pessoas' => $pessoas,
             ]);
@@ -391,6 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nomeCliente = trim($_POST['nome'] ?? '');
             $telefoneCliente = trim($_POST['telefone'] ?? '');
             $mesasAlocadas = calcularMesasReserva($pdo, $churrascaria, $pessoas);
+            $reservaAntes = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
 
             $stmt = $pdo->prepare(
                 'UPDATE reservas SET nome_cliente = ?, telefone = ?, churrascaria = ?, tipo_reserva = ?, data_pedido = ?, data_reserva = ?, hora_reserva = ?, pessoas = ?, mesas_alocadas = ?, valor = ?, status_reserva = ?, observacao = ?
@@ -411,6 +415,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $observacao !== '' ? $observacao : null,
                 $idReserva,
             ]);
+            $reservaDepois = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
+            registrarHistorico($pdo, 'reserva', $idReserva, 'editou', historicoDescrever('reserva', $reservaDepois), $reservaAntes, $reservaDepois);
             salvarClienteAutomatico($pdo, $nomeCliente, $telefoneCliente, null, $churrascaria);
             Logger::audit('reserva_editada', ['reserva_id' => $idReserva, 'churrascaria' => $churrascaria]);
             header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
@@ -425,8 +431,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $confirmacaoAtualizada = $_POST['confirmacao'] ?? 'Pendente';
 
         if (in_array($confirmacaoAtualizada, ['Pendente', 'Confirmado'], true)) {
+            $reservaAntes = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
             $stmt = $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ?, confirmacao = ? WHERE id = ?');
             $stmt->execute([$compareceram, $confirmacaoAtualizada, $idReserva]);
+            $reservaDepois = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
+            registrarHistorico($pdo, 'reserva', $idReserva, 'editou', historicoDescrever('reserva', $reservaDepois), $reservaAntes, $reservaDepois);
         }
         header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
         exit;
@@ -434,8 +443,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'excluir' && $nivel >= NIVEL_GERENTE) {
         $idExcluir = (int) ($_POST['id'] ?? 0);
+        $reservaAntes = historicoBuscarRegistro($pdo, 'reserva', $idExcluir);
         $stmt = $pdo->prepare('DELETE FROM reservas WHERE id = ?');
         $stmt->execute([$idExcluir]);
+        if ($reservaAntes !== null) {
+            registrarHistorico($pdo, 'reserva', $idExcluir, 'excluiu', historicoDescrever('reserva', $reservaAntes), $reservaAntes, null);
+        }
         Logger::audit('reserva_excluida', ['reserva_id' => $idExcluir]);
         header('Location: ' . urlPainelReservas($paginaRetorno, $ordenacaoRetorno));
         exit;

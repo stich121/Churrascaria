@@ -28,6 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $hash = password_hash($senhaNova, PASSWORD_DEFAULT);
         $pdo->prepare('UPDATE funcionarios SET senha_hash = ? WHERE id = ?')->execute([$hash, $_SESSION['funcionario_id']]);
+        registrarHistorico(
+            $pdo,
+            'funcionario',
+            (int) $_SESSION['funcionario_id'],
+            'editou',
+            'Trocou a própria senha',
+            null,
+            null,
+            [['campo' => 'Senha', 'antes' => '', 'depois' => 'alterada']]
+        );
         Logger::audit('password_changed', ['funcionario_id' => $_SESSION['funcionario_id']]);
         $sucesso = 'Senha alterada com sucesso.';
     }

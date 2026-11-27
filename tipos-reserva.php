@@ -25,7 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $pdo->prepare('INSERT INTO tipos_reserva (nome, criado_por) VALUES (?, ?)')
                     ->execute([$nomeTipo, $_SESSION['funcionario_id']]);
-                Logger::audit('tipo_reserva_criado', ['tipo_id' => (int) $pdo->lastInsertId(), 'nome' => $nomeTipo]);
+                $idTipoCriado = (int) $pdo->lastInsertId();
+                registrarHistorico($pdo, 'tipo_reserva', $idTipoCriado, 'criou', $nomeTipo, null, ['nome' => $nomeTipo]);
+                Logger::audit('tipo_reserva_criado', ['tipo_id' => $idTipoCriado, 'nome' => $nomeTipo]);
                 header('Location: tipos-reserva.php');
                 exit;
             }
@@ -34,8 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'excluir_tipo_reserva' && $nivel >= NIVEL_GERENTE) {
         $idTipoExcluir = (int) ($_POST['id'] ?? 0);
+        $tipoAntes = historicoBuscarRegistro($pdo, 'tipo_reserva', $idTipoExcluir);
         $stmt = $pdo->prepare('DELETE FROM tipos_reserva WHERE id = ?');
         $stmt->execute([$idTipoExcluir]);
+        if ($tipoAntes !== null) {
+            registrarHistorico($pdo, 'tipo_reserva', $idTipoExcluir, 'excluiu', historicoDescrever('tipo_reserva', $tipoAntes), $tipoAntes, null);
+        }
         Logger::audit('tipo_reserva_excluido', ['tipo_id' => $idTipoExcluir]);
         header('Location: tipos-reserva.php');
         exit;

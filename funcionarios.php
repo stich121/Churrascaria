@@ -37,8 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hash = password_hash($senha, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare('INSERT INTO funcionarios (nome, usuario, senha_hash, nivel) VALUES (?, ?, ?, ?)');
                 $stmt->execute([$nome, $usuario, $hash, $nivelNovo]);
+                $idFuncionarioCriado = (int) $pdo->lastInsertId();
+                $funcionarioCriado = historicoBuscarRegistro($pdo, 'funcionario', $idFuncionarioCriado);
+                registrarHistorico($pdo, 'funcionario', $idFuncionarioCriado, 'criou', historicoDescrever('funcionario', $funcionarioCriado), null, $funcionarioCriado);
                 Logger::audit('funcionario_criado', [
-                    'funcionario_id' => (int) $pdo->lastInsertId(),
+                    'funcionario_id' => $idFuncionarioCriado,
                     'usuario' => $usuario,
                     'nivel' => $nivelNovo,
                 ]);
@@ -67,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetch()) {
                 $erro = 'Esse nome de usuário já está em uso.';
             } else {
+                $funcionarioAntes = historicoBuscarRegistro($pdo, 'funcionario', $idAlvo);
                 if ($senha !== '') {
                     $hash = password_hash($senha, PASSWORD_DEFAULT);
                     $pdo->prepare('UPDATE funcionarios SET nome = ?, usuario = ?, nivel = ?, senha_hash = ? WHERE id = ?')
@@ -75,6 +79,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare('UPDATE funcionarios SET nome = ?, usuario = ?, nivel = ? WHERE id = ?')
                         ->execute([$nome, $usuario, $nivelNovo, $idAlvo]);
                 }
+                $funcionarioDepois = historicoBuscarRegistro($pdo, 'funcionario', $idAlvo);
+                registrarHistorico(
+                    $pdo,
+                    'funcionario',
+                    $idAlvo,
+                    'editou',
+                    historicoDescrever('funcionario', $funcionarioDepois),
+                    $funcionarioAntes,
+                    $funcionarioDepois,
+                    $senha !== '' ? [['campo' => 'Senha', 'antes' => '', 'depois' => 'alterada']] : []
+                );
                 Logger::audit('funcionario_editado', [
                     'funcionario_id' => $idAlvo,
                     'usuario' => $usuario,
@@ -93,7 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($idAlvo === $idLogado) {
             $erro = 'Você não pode excluir a própria conta.';
         } else {
+            $funcionarioAntes = historicoBuscarRegistro($pdo, 'funcionario', $idAlvo);
             $pdo->prepare('DELETE FROM funcionarios WHERE id = ?')->execute([$idAlvo]);
+            if ($funcionarioAntes !== null) {
+                registrarHistorico($pdo, 'funcionario', $idAlvo, 'excluiu', historicoDescrever('funcionario', $funcionarioAntes), $funcionarioAntes, null);
+            }
             Logger::audit('funcionario_excluido', ['funcionario_id' => $idAlvo]);
             header('Location: funcionarios.php');
             exit;
@@ -113,7 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $podeAlterar = $alvo && ($nivelLogado >= NIVEL_SUPERIOR || (int) $alvo['nivel'] < NIVEL_GERENTE);
 
             if ($podeAlterar) {
+                $funcionarioAntes = historicoBuscarRegistro($pdo, 'funcionario', $idAlvo);
                 $pdo->prepare('UPDATE funcionarios SET ativo = NOT ativo WHERE id = ?')->execute([$idAlvo]);
+                $funcionarioDepois = historicoBuscarRegistro($pdo, 'funcionario', $idAlvo);
+                registrarHistorico($pdo, 'funcionario', $idAlvo, 'editou', historicoDescrever('funcionario', $funcionarioDepois), $funcionarioAntes, $funcionarioDepois);
                 Logger::audit('funcionario_status_alternado', ['funcionario_id' => $idAlvo]);
             } else {
                 $erro = 'Você não tem permissão para alterar este funcionário.';

@@ -44,8 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'atualiz
     }
 
     if ($idReserva > 0) {
+        $reservaAntes = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
         $pdo->prepare('UPDATE reservas SET pessoas_compareceram = ? WHERE id = ?')
             ->execute([$pessoasCompareceram, $idReserva]);
+        $reservaDepois = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
+        registrarHistorico($pdo, 'reserva', $idReserva, 'editou', historicoDescrever('reserva', $reservaDepois), $reservaAntes, $reservaDepois);
         Logger::audit('reserva_comparecimento_atualizado', ['reserva_id' => $idReserva, 'pessoas_compareceram' => $pessoasCompareceram]);
     }
 
@@ -64,8 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'confirm
 
     $idReserva = (int) ($_POST['id'] ?? 0);
     if ($idReserva > 0) {
+        $reservaAntes = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
         $pdo->prepare("UPDATE reservas SET confirmacao = 'Confirmado' WHERE id = ?")
             ->execute([$idReserva]);
+        $reservaDepois = historicoBuscarRegistro($pdo, 'reserva', $idReserva);
+        registrarHistorico($pdo, 'reserva', $idReserva, 'editou', historicoDescrever('reserva', $reservaDepois), $reservaAntes, $reservaDepois);
         Logger::audit('reserva_confirmada', ['reserva_id' => $idReserva]);
     }
 
