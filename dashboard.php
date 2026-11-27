@@ -234,7 +234,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260630-8">
+    <link rel="stylesheet" href="style.css?v=20261127-1">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -278,14 +278,23 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
 
             <div class="painel-reservas-layout">
 
+            <!-- Botão do celular: abre os aniversariantes como pop-up (só aparece em telas de até 900px) -->
+            <button type="button" class="btn-aniversariantes-mobile<?= $churrascariaDashboard === 'casarao-itau' ? ' btn-aniversariantes-mobile--casarao' : '' ?>" aria-controls="painel-aniversariantes" aria-expanded="false">
+                <i class="fa-solid fa-cake-candles"></i> Aniversariantes (<?= count($aniversariantes) ?>)
+            </button>
+            <div class="aniversariantes-overlay"></div>
+
             <!-- Sidebar: Aniversariantes do mês -->
-            <aside class="painel-aniversariantes-sidebar<?= $churrascariaDashboard === 'casarao-itau' ? ' painel-aniversariantes-sidebar--casarao' : '' ?>">
+            <aside id="painel-aniversariantes" class="painel-aniversariantes-sidebar<?= $churrascariaDashboard === 'casarao-itau' ? ' painel-aniversariantes-sidebar--casarao' : '' ?>">
                 <div class="aniversariantes-header">
                     <i class="fa-solid fa-cake-candles"></i>
                     <div>
                         <h3>Aniversariantes</h3>
                         <span class="aniversariantes-mes"><?= e($nomeMesAtualAniv) ?></span>
                     </div>
+                    <button type="button" class="aniversariantes-fechar" aria-label="Fechar aniversariantes">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
                 <?php if (empty($aniversariantes)): ?>
                     <p class="aniversariantes-vazio">Nenhum cliente com aniversário em <?= e($nomeMesAtualAniv) ?>.</p>
@@ -594,7 +603,41 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
             inicializarDashboardTabs();
             inicializarAtualizacaoDashboard();
             inicializarBuscaReservasDia();
+            inicializarPopupAniversariantes();
         });
+
+        // Pop-up de aniversariantes no celular. Usa delegação no document porque
+        // a atualização automática troca a seção .painel-reservas a cada 30s.
+        function inicializarPopupAniversariantes() {
+            function definirAberto(aberto) {
+                document.body.classList.toggle('aniversariantes-aberto', aberto);
+                var botao = document.querySelector('.btn-aniversariantes-mobile');
+                if (botao) {
+                    botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+                }
+            }
+
+            document.addEventListener('click', function (evento) {
+                if (evento.target.closest('.btn-aniversariantes-mobile')) {
+                    definirAberto(!document.body.classList.contains('aniversariantes-aberto'));
+                } else if (evento.target.closest('.aniversariantes-fechar') || evento.target.closest('.aniversariantes-overlay')) {
+                    definirAberto(false);
+                }
+            });
+
+            document.addEventListener('keydown', function (evento) {
+                if (evento.key === 'Escape' && document.body.classList.contains('aniversariantes-aberto')) {
+                    definirAberto(false);
+                }
+            });
+
+            // Se a tela for alargada (ex.: celular girado), o pop-up não fica preso aberto.
+            window.matchMedia('(min-width: 901px)').addEventListener('change', function (mq) {
+                if (mq.matches) {
+                    definirAberto(false);
+                }
+            });
+        }
 
         function abrirConfirmarReserva(id) {
             document.getElementById('confirmar_id').value = id;

@@ -135,3 +135,12 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
   "+40 Anos de tradição" (removido; ficou só "+20 Cortes no rodízio") e rodapé ("A melhor churrascaria desde 1982"
   → "A melhor churrascaria de BH"). A seção "Desde 1982" deste README virou "Sobre". O ano automático do
   copyright no rodapé foi mantido, pois não se refere à fundação.
+- Aniversariantes do mês como pop-up no celular (`dashboard.php` + `style.css`): em telas de até 900px a lista de
+  aniversariantes não aparece mais empilhada acima do dashboard. No lugar, há um botão **"Aniversariantes (N)"**
+  (N = quantidade do mês; vermelho, ou verde `#1b5e20` com o Casarão Itaú selecionado) logo abaixo do cabeçalho
+  "Dashboard". Ao tocar, a lista abre centralizada sobre um fundo escurecido, com rolagem própria e a página de trás
+  travada. Fecha pelo botão ✕ no cabeçalho do pop-up, tocando no fundo ou com Esc, e também se a tela passar de
+  900px (ex.: celular girado). No computador nada mudou (barra lateral como antes; botão, ✕ e fundo ficam ocultos).
+  O controle é a classe `aniversariantes-aberto` no `<body>`, ligada pela função `inicializarPopupAniversariantes()`
+  com delegação de eventos no `document`, porque a atualização automática de 30s substitui a seção `.painel-reservas`
+  inteira. Versão do CSS no dashboard atualizada para `style.css?v=20261127-1`.

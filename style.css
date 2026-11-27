@@ -3292,19 +3292,89 @@ h1, h2, h3, h4 {
     text-overflow: ellipsis;
 }
 
+/* Botão e pop-up de aniversariantes (visíveis só no celular, ver media query abaixo) */
+.btn-aniversariantes-mobile {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-aniversariantes-mobile--casarao {
+    background: #1b5e20;
+}
+
+.aniversariantes-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.aniversariantes-fechar {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f2f2f2;
+    color: #555;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
 @media (max-width: 900px) {
     .painel-reservas-layout {
         flex-direction: column;
     }
 
+    /* No celular a lista some e só abre como pop-up pelo botão "Aniversariantes" */
     .painel-aniversariantes-sidebar {
-        width: 100%;
-        position: static;
-        max-height: none;
+        display: none;
     }
 
-    .aniversariantes-lista {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    body.aniversariantes-aberto .painel-aniversariantes-sidebar {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(92vw, 420px);
+        max-height: 80vh;
+        overflow-y: auto;
+        z-index: 1001;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+
+    body.aniversariantes-aberto .aniversariantes-overlay {
+        display: block;
+    }
+
+    body.aniversariantes-aberto {
+        overflow: hidden;
+    }
+
+    .btn-aniversariantes-mobile {
+        display: inline-flex;
+    }
+
+    .aniversariantes-fechar {
+        display: inline-flex;
     }
 }
+
