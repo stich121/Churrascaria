@@ -139,37 +139,14 @@ $totalInativos = $totalFuncionarios - $totalAtivos;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funcionários - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20260630-2">
+    <link rel="stylesheet" href="style.css?v=20261127-2">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="navbar-content">
-                <div class="logo">
-                    <a href="index.html">
-                        <img src="logo-pampulha.png" alt="Churrascaria Pampulha" class="logo-img">
-                    </a>
-                </div>
-                <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-                <ul class="funcionario-nav-links">
-                    <li><a href="dashboard.php">Dashboard</a></li>
-                    <li><a href="painel-reservas.php">Painel de Reservas</a></li>
-                    <li><a href="mesas.php">Mesas</a></li>
-                    <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
-                    <li><a href="clientes.php">Clientes</a></li>
-                    <?php if (ehDesenvolvedorAutorizado()): ?>
-                        <li><a href="logs.php">Logs</a></li>
-                    <?php endif; ?>
-                    <li><a href="trocar-senha.php">Trocar senha</a></li>
-                    <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include __DIR__ . '/menu-funcionario.php'; ?>
 
-    <section class="painel-reservas">
+    <section class="painel-reservas<?= temaCasaraoAtivo() ? ' painel-reservas--casarao' : '' ?>">
         <div class="container">
             <div class="panel-header">
                 <div class="panel-header-icon"><i class="fa-solid fa-user-tie"></i></div>

@@ -144,3 +144,30 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
   O controle é a classe `aniversariantes-aberto` no `<body>`, ligada pela função `inicializarPopupAniversariantes()`
   com delegação de eventos no `document`, porque a atualização automática de 30s substitui a seção `.painel-reservas`
   inteira. Versão do CSS no dashboard atualizada para `style.css?v=20261127-1`.
+- Menu único da área do funcionário (`menu-funcionario.php`): o `<nav>` estava copiado em 8 páginas e as cópias
+  já divergiam (em `logs.php` faltavam Mesas, Tipos de Reserva e Clientes e "Funcionários" aparecia sem checar o
+  nível; o dashboard não tinha link para si mesmo). Agora `dashboard.php`, `painel-reservas.php`, `mesas.php`,
+  `tipos-reserva.php`, `clientes.php`, `funcionarios.php`, `logs.php` e `trocar-senha.php` fazem
+  `include __DIR__ . '/menu-funcionario.php'`. A lista de itens fica num só lugar: Dashboard, Painel de Reservas,
+  Mesas, Tipos de Reserva, Clientes, Funcionários (gerente ou acima), Logs (só desenvolvedor autorizado), Trocar
+  senha e Sair. Aberto direto pelo navegador, o arquivo responde 404.
+- Página atual destacada no menu: o item da tela aberta recebe `class="is-atual"` e `aria-current="page"`
+  (sublinhado dourado no computador; faixa dourada à esquerda e fundo mais claro no menu do celular).
+- A logo da área do funcionário leva ao **Dashboard** (antes abria o site público `index.html`) e mostra a logo da
+  churrascaria escolhida.
+- Churrascaria escolhida guardada na sessão (`$_SESSION['churrascaria_selecionada']`), com funções novas em
+  `auth.php`: `opcoesChurrascariaNavegacao()` (Pampulha, Casarão Itaú e, para nível superior, Todos),
+  `churrascariaSelecionada()` (um `?churrascaria=` válido troca e grava; sem ele, vale a sessão; padrão Pampulha),
+  `nomeChurrascariaSelecionada()`, `temaCasaraoAtivo()` e `urlTrocarChurrascaria()`. A atualização automática de 30s
+  do dashboard não grava na sessão, para uma aba antiga não desfazer a troca feita em outra.
+  - Seletor fixo **"Pampulha | Casarão Itaú"** (+ "Todos" para nível superior) no menu de todas as páginas, também
+    visível no celular ao lado do botão de menu. Ele recarrega a mesma página mantendo os outros filtros do endereço.
+  - Cor: com Casarão Itaú escolhido, menu (inclusive o menu aberto do celular) e cabeçalho das páginas ficam verdes
+    em todas as telas, não só no dashboard.
+  - Filtro inicial: dashboard e `imprimir-reservas.php` abrem na churrascaria escolhida; `clientes.php` abre filtrado
+    por ela (a aba "Todos" de clientes continua para todos os níveis, mas só fica gravada na sessão para nível
+    superior); os formulários de nova reserva, nova mesa e novo cliente já vêm com ela selecionada. A lista do Painel
+    de Reservas e a de Mesas continuam mostrando as duas casas (não tinham filtro de churrascaria).
+- CSS novo no fim do `style.css` (classes `.navbar-funcionario`, `.menu-unidade`, `.menu-unidade-opcao`,
+  `.is-atual`), com os itens do menu sem quebrar linha no computador. Versão do CSS em todas as páginas internas:
+  `style.css?v=20261127-2`.

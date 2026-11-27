@@ -467,6 +467,76 @@ function calcularMesasReserva(PDO $pdo, string $churrascaria, int $pessoas): str
     return implode(' + ', $descricoes);
 }
 
+/**
+ * Churrascarias que o funcionário pode escolher no menu (chave usada em ?churrascaria=).
+ * "Todos" só aparece para nível superior, como já era no dashboard.
+ */
+function opcoesChurrascariaNavegacao(): array
+{
+    $opcoes = [
+        'pampulha' => CHURRASCARIA_PADRAO,
+        'casarao-itau' => 'Casarão Itau',
+    ];
+
+    if (nivelFuncionario() >= NIVEL_SUPERIOR) {
+        $opcoes['todas'] = 'Todos';
+    }
+
+    return $opcoes;
+}
+
+/**
+ * Churrascaria escolhida pelo funcionário, guardada na sessão para valer em todas as telas.
+ * Um ?churrascaria= válido no endereço troca a escolha; a atualização automática do
+ * dashboard não grava, para uma aba antiga não desfazer a troca feita em outra aba.
+ */
+function churrascariaSelecionada(): string
+{
+    static $atual = null;
+
+    if ($atual !== null) {
+        return $atual;
+    }
+
+    $opcoes = opcoesChurrascariaNavegacao();
+    $pedida = $_GET['churrascaria'] ?? null;
+
+    if (is_string($pedida) && array_key_exists($pedida, $opcoes)) {
+        if (!requisicaoAtualizacaoAutomaticaDashboard()) {
+            $_SESSION['churrascaria_selecionada'] = $pedida;
+        }
+
+        return $atual = $pedida;
+    }
+
+    $salva = $_SESSION['churrascaria_selecionada'] ?? 'pampulha';
+
+    return $atual = array_key_exists($salva, $opcoes) ? $salva : 'pampulha';
+}
+
+/** Nome gravado no banco da churrascaria escolhida, ou null quando é "Todos". */
+function nomeChurrascariaSelecionada(): ?string
+{
+    $chave = churrascariaSelecionada();
+
+    return $chave === 'todas' ? null : opcoesChurrascariaNavegacao()[$chave];
+}
+
+function temaCasaraoAtivo(): bool
+{
+    return churrascariaSelecionada() === 'casarao-itau';
+}
+
+/** Endereço da página atual com outra churrascaria, mantendo os demais filtros do endereço. */
+function urlTrocarChurrascaria(string $chave): string
+{
+    $parametros = $_GET;
+    $parametros['churrascaria'] = $chave;
+    unset($parametros['pagina']);
+
+    return basename($_SERVER['SCRIPT_NAME'] ?? 'dashboard.php') . '?' . http_build_query($parametros);
+}
+
 function logoChurrascaria(?string $churrascaria): string
 {
     return $churrascaria === 'Casarão Itau' ? 'logo-casarao-itau.png' : 'logo-pampulha.png';

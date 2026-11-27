@@ -87,19 +87,9 @@ $dataFormatada = $dataSelecionadaDt->format('d/m/Y');
 $abasValidas = ['dia', 'semana', 'mes'];
 $abaSelecionada = in_array($_GET['aba'] ?? '', $abasValidas, true) ? $_GET['aba'] : 'dia';
 
-$opcoesDashboardChurrascaria = [
-    'pampulha' => CHURRASCARIA_PADRAO,
-    'casarao-itau' => 'Casarão Itau',
-];
-
-if ($nivel >= NIVEL_SUPERIOR) {
-    $opcoesDashboardChurrascaria['todas'] = 'Todos';
-}
-
-$churrascariaDashboard = $_GET['churrascaria'] ?? 'pampulha';
-if (!array_key_exists($churrascariaDashboard, $opcoesDashboardChurrascaria)) {
-    $churrascariaDashboard = 'pampulha';
-}
+// A churrascaria vem da sessão (escolhida no menu ou nas abas abaixo) e vale em todas as telas.
+$opcoesDashboardChurrascaria = opcoesChurrascariaNavegacao();
+$churrascariaDashboard = churrascariaSelecionada();
 
 $ordenacoesDashboardDia = [
     'hora_asc' => [
@@ -234,37 +224,12 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20261127-1">
+    <link rel="stylesheet" href="style.css?v=20261127-2">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar<?= $churrascariaDashboard === 'casarao-itau' ? ' navbar--casarao' : '' ?>">
-        <div class="container">
-            <div class="navbar-content">
-                <div class="logo">
-                    <a href="index.html">
-                        <img src="<?= e($logoDashboardAtual) ?>" alt="<?= e($rotuloDashboardChurrascaria) ?>" class="logo-img">
-                    </a>
-                </div>
-                <button class="nav-hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-                <ul class="funcionario-nav-links">
-                    <li><a href="painel-reservas.php">Painel de Reservas</a></li>
-                    <li><a href="mesas.php">Mesas</a></li>
-                    <li><a href="tipos-reserva.php">Tipos de Reserva</a></li>
-                    <li><a href="clientes.php">Clientes</a></li>
-                    <?php if ($nivel >= NIVEL_GERENTE): ?>
-                        <li><a href="funcionarios.php">Funcionários</a></li>
-                    <?php endif; ?>
-                    <?php if (ehDesenvolvedorAutorizado()): ?>
-                        <li><a href="logs.php">Logs</a></li>
-                    <?php endif; ?>
-                    <li><a href="trocar-senha.php">Trocar senha</a></li>
-                    <li><a href="logout.php" class="btn-voltar-site"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include __DIR__ . '/menu-funcionario.php'; ?>
 
     <section class="painel-reservas<?= $churrascariaDashboard === 'casarao-itau' ? ' painel-reservas--casarao' : '' ?>">
         <div class="container">
@@ -746,7 +711,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
             var tabs = document.querySelectorAll('.dashboard-period-tab');
             var paineis = document.querySelectorAll('.dashboard-tab-panel');
             var abaInputs = document.querySelectorAll('.dashboard-aba-input');
-            var unitLinks = document.querySelectorAll('.dashboard-unit-tabs a');
+            var unitLinks = document.querySelectorAll('.dashboard-unit-tabs a, .menu-unidade a');
 
             tabs.forEach(function (tab) {
                 tab.addEventListener('click', function () {

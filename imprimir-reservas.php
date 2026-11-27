@@ -12,19 +12,8 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataSelecionada) || strtotime($dataSel
     $dataSelecionada = date('Y-m-d');
 }
 
-$opcoesChurrascaria = [
-    'pampulha' => CHURRASCARIA_PADRAO,
-    'casarao-itau' => 'Casarão Itau',
-];
-
-if (nivelFuncionario() >= NIVEL_SUPERIOR) {
-    $opcoesChurrascaria['todas'] = 'Todos';
-}
-
-$churrascariaSelecionada = $_GET['churrascaria'] ?? 'pampulha';
-if (!array_key_exists($churrascariaSelecionada, $opcoesChurrascaria)) {
-    $churrascariaSelecionada = 'pampulha';
-}
+$opcoesChurrascaria = opcoesChurrascariaNavegacao();
+$churrascariaSelecionada = churrascariaSelecionada();
 
 $rotuloChurrascaria = $opcoesChurrascaria[$churrascariaSelecionada];
 $logoRelatorioAtual = logoChurrascaria($churrascariaSelecionada === 'todas' ? null : $rotuloChurrascaria);
