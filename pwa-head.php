@@ -17,6 +17,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        inicializarGruposMenu();
+
         var btn = document.querySelector('.nav-hamburger');
         var nav = document.querySelector('.funcionario-nav-links');
         if (!btn || !nav) return;
@@ -36,11 +38,43 @@
         });
 
         document.addEventListener('click', function (e) {
-            if (!btn.contains(e.target) && !nav.contains(e.target)) {
+            if (!btn.contains(e.target) && !nav.contains(e.target) && !e.target.closest('.fab-nova-reserva')) {
                 nav.classList.remove('aberto');
                 btn.classList.remove('aberto');
                 btn.setAttribute('aria-expanded', 'false');
             }
         });
     });
+
+    // Grupos do menu ("Configurações" e o do usuário): abre/fecha no clique,
+    // fecha ao clicar fora, com Esc e quando outro grupo abre.
+    function inicializarGruposMenu() {
+        function fecharGrupos(exceto) {
+            document.querySelectorAll('.menu-grupo.aberto').forEach(function (grupo) {
+                if (grupo !== exceto) {
+                    grupo.classList.remove('aberto');
+                    var botao = grupo.querySelector('.menu-grupo-botao');
+                    if (botao) botao.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+            var botao = e.target.closest('.menu-grupo-botao');
+            if (botao) {
+                var grupo = botao.closest('.menu-grupo');
+                var aberto = grupo.classList.toggle('aberto');
+                botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+                fecharGrupos(grupo);
+                return;
+            }
+            if (!e.target.closest('.menu-submenu')) {
+                fecharGrupos(null);
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') fecharGrupos(null);
+        });
+    }
 </script>

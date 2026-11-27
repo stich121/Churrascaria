@@ -224,12 +224,12 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20261127-2">
+    <link rel="stylesheet" href="style.css?v=20261127-3">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <?php include __DIR__ . '/menu-funcionario.php'; ?>
+    <?php $dataNovaReserva = $dataSelecionada; include __DIR__ . '/menu-funcionario.php'; ?>
 
     <section class="painel-reservas<?= $churrascariaDashboard === 'casarao-itau' ? ' painel-reservas--casarao' : '' ?>">
         <div class="container">
@@ -296,11 +296,18 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
                     <input type="hidden" name="churrascaria" value="<?= e($churrascariaDashboard) ?>">
                     <input type="hidden" name="ordenacao_dia" value="<?= e($ordenacaoDashboardDia) ?>">
                     <label for="data-input"><i class="fa-solid fa-calendar-days"></i> Visualizar reservas do dia</label>
-                    <input type="date" id="data-input" name="data" value="<?= e($dataSelecionada) ?>" onchange="this.form.submit()">
+                    <?php
+                    $parametrosDataDashboard = ['aba' => $abaSelecionada, 'churrascaria' => $churrascariaDashboard, 'ordenacao_dia' => $ordenacaoDashboardDia];
+                    $diaAnteriorDashboard = (clone $dataSelecionadaDt)->modify('-1 day')->format('Y-m-d');
+                    $diaSeguinteDashboard = (clone $dataSelecionadaDt)->modify('+1 day')->format('Y-m-d');
+                    ?>
+                    <div class="data-navegacao">
+                        <a href="<?= e(dashboardUrl(['data' => $diaAnteriorDashboard] + $parametrosDataDashboard)) ?>" class="data-navegacao-seta data-navegacao-link" title="Dia anterior" aria-label="Dia anterior"><i class="fa-solid fa-chevron-left"></i></a>
+                        <input type="date" id="data-input" name="data" value="<?= e($dataSelecionada) ?>" onchange="this.form.submit()">
+                        <a href="<?= e(dashboardUrl(['data' => $diaSeguinteDashboard] + $parametrosDataDashboard)) ?>" class="data-navegacao-seta data-navegacao-link" title="Próximo dia" aria-label="Próximo dia"><i class="fa-solid fa-chevron-right"></i></a>
+                        <a href="<?= e(dashboardUrl($parametrosDataDashboard)) ?>" class="data-navegacao-hoje data-navegacao-link<?= $dataSelecionada === date('Y-m-d') ? ' is-hoje' : '' ?>" title="Voltar para hoje">Hoje</a>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i>Ver</button>
-                    <?php if ($dataSelecionada !== date('Y-m-d')): ?>
-                        <a href="<?= e(dashboardUrl(['aba' => $abaSelecionada, 'churrascaria' => $churrascariaDashboard, 'ordenacao_dia' => $ordenacaoDashboardDia])) ?>" class="dashboard-date-reset"><i class="fa-solid fa-rotate-left"></i>Voltar para hoje</a>
-                    <?php endif; ?>
                 </form>
             </div>
 
@@ -496,7 +503,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
             </div>
 
             <div class="dashboard-actions">
-                <a href="painel-reservas.php" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i>Ver Painel de Reservas</a>
+                <a href="painel-reservas.php?<?= e(http_build_query(['data' => $dataSelecionada, 'churrascaria' => $churrascariaDashboard])) ?>" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i>Ver Painel de Reservas</a>
                 <a href="mesas.php" class="btn btn-outline"><i class="fa-solid fa-chair"></i>Gerenciar Mesas</a>
                 <a href="imprimir-reservas.php?data=<?= e($dataSelecionada) ?>&churrascaria=<?= e($churrascariaDashboard) ?>" target="_blank" class="btn btn-outline"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
             </div>
@@ -711,7 +718,7 @@ $nomeMesAtualAniv = $mesesNome[$mesAtualAniv];
             var tabs = document.querySelectorAll('.dashboard-period-tab');
             var paineis = document.querySelectorAll('.dashboard-tab-panel');
             var abaInputs = document.querySelectorAll('.dashboard-aba-input');
-            var unitLinks = document.querySelectorAll('.dashboard-unit-tabs a, .menu-unidade a');
+            var unitLinks = document.querySelectorAll('.dashboard-unit-tabs a, .menu-unidade a, .data-navegacao-link');
 
             tabs.forEach(function (tab) {
                 tab.addEventListener('click', function () {

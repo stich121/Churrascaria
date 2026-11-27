@@ -171,3 +171,39 @@ Desenvolvido com ❤️ para a Churrascaria Pampulha
 - CSS novo no fim do `style.css` (classes `.navbar-funcionario`, `.menu-unidade`, `.menu-unidade-opcao`,
   `.is-atual`), com os itens do menu sem quebrar linha no computador. Versão do CSS em todas as páginas internas:
   `style.css?v=20261127-2`.
+- Menu agrupado (`menu-funcionario.php`): à vista ficam só **Dashboard**, **Reservas** (o Painel de Reservas),
+  **Clientes** e o botão **"+ Nova reserva"**. Mesas, Tipos de Reserva, Funcionários (gerente ou acima) e Logs (só
+  desenvolvedor) foram para o grupo **"Configurações"**; "Trocar senha" e "Sair" foram para o grupo com o **primeiro
+  nome do usuário**. No computador os grupos abrem como lista suspensa; no celular, dentro do menu de três tracinhos,
+  abrem como sanfona. O grupo que contém a página aberta fica destacado. O abre/fecha está em `pwa-head.php`
+  (`inicializarGruposMenu()`, delegação no `document`): fecha ao clicar fora, com Esc ou ao abrir o outro grupo.
+- Botão **"+ Nova reserva"** sempre à mão: no menu do computador (vermelho, ou verde no Casarão) e, no celular
+  (até 768px), como botão redondo flutuante no canto inferior direito (`.fab-nova-reserva`, some quando o pop-up de
+  aniversariantes está aberto e na impressão). Ele leva a `painel-reservas.php#nova-reserva`: a página rola até o
+  formulário e o cursor vai para o nome do cliente. Na própria tela de reservas, só rola até o formulário, sem
+  perder os filtros. No dashboard, o botão leva junto a data que está na tela (`$dataNovaReserva`), e o campo
+  "Data da reserva" já vem preenchido com ela.
+- Dashboard → Painel de Reservas levando a data e a churrascaria: o botão "Ver Painel de Reservas" abre
+  `painel-reservas.php?data=<dia da tela>&churrascaria=<casa da tela>`.
+- Filtros novos no Painel de Reservas (barra acima dos números):
+  - **Dia** (`?data=AAAA-MM-DD`): sem ele, a lista mostra todas as datas, como antes. O link "Todas as datas" tira o
+    filtro.
+  - **Casa**: a lista e os números (total, confirmadas, pendentes, pessoas) agora seguem a churrascaria escolhida no
+    menu. Com "Todos" (nível superior) aparecem as duas. Para qualquer nível há o link **"Ver as duas casas"**
+    (`?casas=ambas`) e, de volta, "Só <casa>".
+  - A pesquisa por nome/telefone continua procurando em **todas** as reservas, sem o filtro de dia e casa.
+  - Depois de criar, editar, salvar comparecimento ou excluir, a lista volta com os mesmos filtros, a mesma página e a
+    mesma ordenação: os formulários enviam `filtro_data` e `filtro_casas`, e `urlPainelReservas()` os coloca de
+    volta no endereço. As funções novas são `filtrosPainelReservas()`, `casaFiltroPainelReservas()`,
+    `camposFiltroPainelReservas()` e `urlFiltroPainelReservas()`.
+  - "Imprimir reservas do dia" no painel imprime o dia filtrado, quando há um.
+- Setas **"◀ Hoje ▶"** na data do dashboard e do painel: avançam e voltam um dia, mantendo aba, churrascaria e
+  ordenação. "Hoje" fica preenchido quando a data mostrada já é hoje. Substituiu o link "Voltar para hoje" do
+  dashboard. Ao trocar Dia/Semana/Mês, as setas passam a levar a aba escolhida.
+- Correção no celular (até 900px): a coluna principal do dashboard se alargava até a largura da tabela de reservas e
+  a página "vazava" para o lado (barra de data, abas e botões passavam da tela). Agora `.painel-conteudo-principal`
+  ocupa só a largura da tela, e a tabela rola dentro do próprio quadro.
+- Versão do CSS em todas as páginas internas: `style.css?v=20261127-3`.
+- Teste feito localmente com MariaDB temporário (XAMPP) e reservas de exemplo, como nível superior e como atendente,
+  em 1280px e 390px: menu e grupos, botão flutuante, setas, filtros do painel, filtros mantidos depois de salvar e
+  pesquisa. Não houve erros de JavaScript.

@@ -29,6 +29,62 @@ $ordenacoesReservas = [
     ],
 ];
 
+/**
+ * Filtros da lista do painel: dia (?data=) e casa. A casa segue a churrascaria escolhida
+ * no menu; ?casas=ambas mostra as duas. Nos POSTs, os filtros voltam em filtro_data /
+ * filtro_casas para o redirecionamento devolver a mesma lista.
+ */
+function filtrosPainelReservas(): array
+{
+    static $filtros = null;
+
+    if ($filtros !== null) {
+        return $filtros;
+    }
+
+    $origem = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? ['data' => $_POST['filtro_data'] ?? '', 'casas' => $_POST['filtro_casas'] ?? '']
+        : ['data' => $_GET['data'] ?? '', 'casas' => $_GET['casas'] ?? ''];
+
+    $data = is_string($origem['data']) ? $origem['data'] : '';
+    $dt = $data !== '' ? DateTime::createFromFormat('Y-m-d', $data) : false;
+
+    return $filtros = [
+        'data' => ($dt && $dt->format('Y-m-d') === $data) ? $data : '',
+        'casas' => $origem['casas'] === 'ambas' ? 'ambas' : '',
+    ];
+}
+
+/** Nome da churrascaria usada no filtro da lista, ou null para mostrar as duas casas. */
+function casaFiltroPainelReservas(): ?string
+{
+    return filtrosPainelReservas()['casas'] === 'ambas' ? null : nomeChurrascariaSelecionada();
+}
+
+/** Campos escondidos que levam os filtros da lista nos formulários de POST. */
+function camposFiltroPainelReservas(): string
+{
+    $filtros = filtrosPainelReservas();
+
+    return '<input type="hidden" name="filtro_data" value="' . e($filtros['data']) . '">'
+        . '<input type="hidden" name="filtro_casas" value="' . e($filtros['casas']) . '">';
+}
+
+/** Endereço do painel com os filtros atuais, trocando só o que vier em $alterar. */
+function urlFiltroPainelReservas(array $alterar = []): string
+{
+    $filtros = filtrosPainelReservas();
+    $params = array_filter(array_merge([
+        'data' => $filtros['data'],
+        'casas' => $filtros['casas'],
+        'ordenacao' => $_GET['ordenacao'] ?? '',
+    ], $alterar), function ($valor) {
+        return $valor !== '' && $valor !== null && $valor !== 'data_asc';
+    });
+
+    return 'painel-reservas.php' . ($params ? '?' . http_build_query($params) : '');
+}
+
 function renderizarLinhaReservaPainel(array $reserva, int $paginaAtual, string $ordenacaoAtual, int $nivel, array $diasSemana): string
 {
     ob_start();
@@ -58,6 +114,7 @@ function renderizarLinhaReservaPainel(array $reserva, int $paginaAtual, string $
                 <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
                 <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                 <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                <?= camposFiltroPainelReservas() ?>
                 <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                 <select name="confirmacao">
                     <option value="Pendente" <?= $reserva['confirmacao'] === 'Pendente' ? 'selected' : '' ?>>Pendente</option>
@@ -92,6 +149,7 @@ function renderizarLinhaReservaPainel(array $reserva, int $paginaAtual, string $
                     <input type="hidden" name="id" value="<?= e((string) $reserva['id']) ?>">
                     <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                     <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                    <?= camposFiltroPainelReservas() ?>
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                     <button type="submit" class="btn-remover-reserva" title="Remover reserva">
                         <i class="fa-solid fa-trash"></i>
@@ -222,7 +280,16 @@ $mensagemErro = '';
 
 function urlPainelReservas(int $pagina, string $ordenacao = 'data_asc'): string
 {
+    $filtros = filtrosPainelReservas();
     $params = [];
+
+    if ($filtros['data'] !== '') {
+        $params['data'] = $filtros['data'];
+    }
+
+    if ($filtros['casas'] !== '') {
+        $params['casas'] = $filtros['casas'];
+    }
 
     if ($pagina > 1) {
         $params['pagina'] = $pagina;
@@ -299,7 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'churrascaria' => $churrascaria,
                 'pessoas' => $pessoas,
             ]);
-            header('Location: painel-reservas.php');
+            header('Location: ' . urlPainelReservas(1, $ordenacaoRetorno));
             exit;
         }
     }
@@ -385,14 +452,33 @@ if (!array_key_exists($ordenacaoAtual, $ordenacoesReservas)) {
 }
 $ordenacaoSql = $ordenacoesReservas[$ordenacaoAtual]['sql'];
 
-$resumoReservas = $pdo->query(
+$filtrosPainel = filtrosPainelReservas();
+$casaFiltroPainel = casaFiltroPainelReservas();
+$condicoesFiltroPainel = [];
+$parametrosFiltroPainel = [];
+
+if ($filtrosPainel['data'] !== '') {
+    $condicoesFiltroPainel[] = 'r.data_reserva = ?';
+    $parametrosFiltroPainel[] = $filtrosPainel['data'];
+}
+
+if ($casaFiltroPainel !== null) {
+    $condicoesFiltroPainel[] = 'r.churrascaria = ?';
+    $parametrosFiltroPainel[] = $casaFiltroPainel;
+}
+
+$whereFiltroPainel = $condicoesFiltroPainel ? ' WHERE ' . implode(' AND ', $condicoesFiltroPainel) : '';
+
+$stmtResumoReservas = $pdo->prepare(
     "SELECT
         COUNT(*) AS total,
         COALESCE(SUM(CASE WHEN confirmacao = 'Confirmado' THEN 1 ELSE 0 END), 0) AS confirmadas,
         COALESCE(SUM(CASE WHEN confirmacao <> 'Confirmado' OR confirmacao IS NULL THEN 1 ELSE 0 END), 0) AS pendentes,
         COALESCE(SUM(CASE WHEN status_reserva = 'Reservado' THEN pessoas ELSE 0 END), 0) AS pessoas_esperadas
-     FROM reservas"
-)->fetch();
+     FROM reservas r" . $whereFiltroPainel
+);
+$stmtResumoReservas->execute($parametrosFiltroPainel);
+$resumoReservas = $stmtResumoReservas->fetch();
 
 $totalReservas = (int) ($resumoReservas['total'] ?? 0);
 $totalConfirmadas = (int) ($resumoReservas['confirmadas'] ?? 0);
@@ -412,13 +498,11 @@ $stmtReservas = $pdo->prepare(
     'SELECT r.id, r.nome_cliente, r.telefone, r.churrascaria, r.tipo_reserva, r.data_pedido, r.data_reserva, r.hora_reserva, r.pessoas, r.mesas_alocadas,
             r.pessoas_compareceram, r.valor, r.status_reserva, r.confirmacao, r.observacao, f.nome AS criado_por
      FROM reservas r
-     JOIN funcionarios f ON f.id = r.funcionario_id
+     JOIN funcionarios f ON f.id = r.funcionario_id' . $whereFiltroPainel . '
      ORDER BY ' . $ordenacaoSql . '
-     LIMIT :limite OFFSET :offset'
+     LIMIT ' . (int) $reservasPorPagina . ' OFFSET ' . (int) $offsetReservas
 );
-$stmtReservas->bindValue(':limite', $reservasPorPagina, PDO::PARAM_INT);
-$stmtReservas->bindValue(':offset', $offsetReservas, PDO::PARAM_INT);
-$stmtReservas->execute();
+$stmtReservas->execute($parametrosFiltroPainel);
 $reservas = $stmtReservas->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -427,12 +511,12 @@ $reservas = $stmtReservas->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Reservas - Churrascaria Pampulha</title>
-    <link rel="stylesheet" href="style.css?v=20261127-2">
+    <link rel="stylesheet" href="style.css?v=20261127-3">
     <?php include __DIR__ . '/pwa-head.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <?php include __DIR__ . '/menu-funcionario.php'; ?>
+    <?php $dataNovaReserva = $filtrosPainel['data']; include __DIR__ . '/menu-funcionario.php'; ?>
 
     <section class="painel-reservas<?= temaCasaraoAtivo() ? ' painel-reservas--casarao' : '' ?>">
         <div class="container">
@@ -442,7 +526,41 @@ $reservas = $stmtReservas->fetchAll();
                     <h2>Painel de Reservas</h2>
                     <p>Olá, <?= e($_SESSION['funcionario_nome']) ?> (<?= e(nomeNivel($nivel)) ?>) — cadastre e acompanhe as reservas da casa</p>
                 </div>
-                <a href="imprimir-reservas.php" target="_blank" class="btn btn-outline btn-imprimir-reservas-dia"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
+                <a href="imprimir-reservas.php<?= $filtrosPainel['data'] !== '' ? '?' . e(http_build_query(['data' => $filtrosPainel['data']])) : '' ?>" target="_blank" class="btn btn-outline btn-imprimir-reservas-dia"><i class="fa-solid fa-print"></i>Imprimir reservas do dia</a>
+            </div>
+
+            <?php
+            $hojePainel = date('Y-m-d');
+            $baseSetasPainel = $filtrosPainel['data'] !== '' ? new DateTime($filtrosPainel['data']) : new DateTime($hojePainel);
+            $diaAnteriorPainel = (clone $baseSetasPainel)->modify('-1 day')->format('Y-m-d');
+            $diaSeguintePainel = (clone $baseSetasPainel)->modify('+1 day')->format('Y-m-d');
+            $rotuloCasaPainel = $casaFiltroPainel ?? 'as duas casas';
+            ?>
+            <div class="painel-filtros-bar">
+                <form method="get" action="painel-reservas.php" class="painel-filtros-form">
+                    <?php if ($filtrosPainel['casas'] !== ''): ?><input type="hidden" name="casas" value="<?= e($filtrosPainel['casas']) ?>"><?php endif; ?>
+                    <?php if ($ordenacaoAtual !== 'data_asc'): ?><input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>"><?php endif; ?>
+                    <label for="filtro_data_painel"><i class="fa-solid fa-calendar-days"></i> Dia</label>
+                    <div class="data-navegacao">
+                        <a href="<?= e(urlFiltroPainelReservas(['data' => $diaAnteriorPainel])) ?>" class="data-navegacao-seta" title="Dia anterior" aria-label="Dia anterior"><i class="fa-solid fa-chevron-left"></i></a>
+                        <input type="date" id="filtro_data_painel" name="data" value="<?= e($filtrosPainel['data']) ?>" onchange="this.form.submit()">
+                        <a href="<?= e(urlFiltroPainelReservas(['data' => $diaSeguintePainel])) ?>" class="data-navegacao-seta" title="Próximo dia" aria-label="Próximo dia"><i class="fa-solid fa-chevron-right"></i></a>
+                        <a href="<?= e(urlFiltroPainelReservas(['data' => $hojePainel])) ?>" class="data-navegacao-hoje<?= $filtrosPainel['data'] === $hojePainel ? ' is-hoje' : '' ?>" title="Reservas de hoje">Hoje</a>
+                    </div>
+                </form>
+                <?php if ($filtrosPainel['data'] !== ''): ?>
+                    <a href="<?= e(urlFiltroPainelReservas(['data' => ''])) ?>" class="painel-filtros-link"><i class="fa-solid fa-list"></i>Todas as datas</a>
+                <?php endif; ?>
+                <?php if (nomeChurrascariaSelecionada() !== null): ?>
+                    <?php if ($filtrosPainel['casas'] === 'ambas'): ?>
+                        <a href="<?= e(urlFiltroPainelReservas(['casas' => ''])) ?>" class="painel-filtros-link"><i class="fa-solid fa-location-dot"></i>Só <?= e(nomeChurrascariaSelecionada()) ?></a>
+                    <?php else: ?>
+                        <a href="<?= e(urlFiltroPainelReservas(['casas' => 'ambas'])) ?>" class="painel-filtros-link"><i class="fa-solid fa-layer-group"></i>Ver as duas casas</a>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <span class="painel-filtros-resumo">
+                    <?= $filtrosPainel['data'] !== '' ? 'Reservas de ' . e(date('d/m/Y', strtotime($filtrosPainel['data']))) . ' (' . e($diasSemana[(int) date('w', strtotime($filtrosPainel['data']))]) . ')' : 'Todas as datas' ?> · <?= e($rotuloCasaPainel) ?>
+                </span>
             </div>
 
             <?php if ($totalReservas > 0): ?>
@@ -450,7 +568,7 @@ $reservas = $stmtReservas->fetchAll();
                     <div class="stat">
                         <i class="fa-solid fa-calendar-day"></i>
                         <h4><?= e((string) $totalReservas) ?></h4>
-                        <p>Reservas no total</p>
+                        <p><?= $filtrosPainel['data'] !== '' ? 'Reservas no dia' : 'Reservas no total' ?></p>
                     </div>
                     <div class="stat">
                         <i class="fa-solid fa-circle-check"></i>
@@ -470,13 +588,15 @@ $reservas = $stmtReservas->fetchAll();
                 </div>
             <?php endif; ?>
 
-            <div class="reserva-form-card">
+            <div class="reserva-form-card" id="nova-reserva">
                 <div class="card-header-bar">
                     <i class="fa-solid fa-circle-plus"></i>
                     <h3>Nova Reserva</h3>
                 </div>
                 <form method="post" action="painel-reservas.php" class="reserva-form-secionado">
                     <input type="hidden" name="acao" value="criar">
+                    <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                    <?= camposFiltroPainelReservas() ?>
                     <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
 
                     <div class="reserva-form-secao">
@@ -525,7 +645,7 @@ $reservas = $stmtReservas->fetchAll();
                             </label>
                             <label class="reserva-form-label">
                                 <span><i class="fa-solid fa-calendar-check"></i>Data da reserva</span>
-                                <input type="date" name="data" id="novo_data" required>
+                                <input type="date" name="data" id="novo_data" value="<?= e($filtrosPainel['data']) ?>" required>
                             </label>
                             <label class="reserva-form-label">
                                 <span><i class="fa-solid fa-clock"></i>Horário</span>
@@ -580,6 +700,8 @@ $reservas = $stmtReservas->fetchAll();
                 </div>
                 <div class="reservas-lista-controles">
                     <form method="get" action="painel-reservas.php" class="reservas-ordenacao-form">
+                        <?php if ($filtrosPainel['data'] !== ''): ?><input type="hidden" name="data" value="<?= e($filtrosPainel['data']) ?>"><?php endif; ?>
+                        <?php if ($filtrosPainel['casas'] !== ''): ?><input type="hidden" name="casas" value="<?= e($filtrosPainel['casas']) ?>"><?php endif; ?>
                         <label for="ordenacao_reservas"><i class="fa-solid fa-arrow-down-a-z"></i>Ordenar por</label>
                         <select name="ordenacao" id="ordenacao_reservas" onchange="this.form.submit()">
                             <?php foreach ($ordenacoesReservas as $valorOrdenacao => $dadosOrdenacao): ?>
@@ -623,7 +745,7 @@ $reservas = $stmtReservas->fetchAll();
                     </tbody>
                 </table>
                 <?php if (empty($reservas)): ?>
-                    <p class="reservas-vazio reservas-vazio-inicial" style="display: block;">Nenhuma reserva cadastrada ainda.</p>
+                    <p class="reservas-vazio reservas-vazio-inicial" style="display: block;"><?= ($filtrosPainel['data'] !== '' || $casaFiltroPainel !== null) ? 'Nenhuma reserva para este filtro.' : 'Nenhuma reserva cadastrada ainda.' ?></p>
                 <?php endif; ?>
                 <p class="reservas-vazio reservas-busca-vazio">Nenhuma reserva encontrada para essa pesquisa.</p>
                 <nav class="reservas-paginacao" aria-label="Paginação de reservas" <?= $totalPaginas > 1 ? '' : 'style="display: none;"' ?>>
@@ -657,6 +779,7 @@ $reservas = $stmtReservas->fetchAll();
                 <input type="hidden" name="id" id="editar_id" value="">
                 <input type="hidden" name="pagina" value="<?= e((string) $paginaAtual) ?>">
                 <input type="hidden" name="ordenacao" value="<?= e($ordenacaoAtual) ?>">
+                <?= camposFiltroPainelReservas() ?>
                 <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
                 <div class="reserva-form-grid">
                     <label class="reserva-form-label">
@@ -730,6 +853,7 @@ $reservas = $stmtReservas->fetchAll();
         document.addEventListener('DOMContentLoaded', function () {
             inicializarBuscaReservasPainel();
             inicializarVerificacaoClienteNovaReserva();
+            inicializarAtalhoNovaReserva();
             document.querySelectorAll('input[name="telefone"]').forEach(function (telefoneInput) {
                 telefoneInput.addEventListener('input', function () {
                     var digitos = telefoneInput.value.replace(/\D/g, '').slice(0, 11);
@@ -757,6 +881,31 @@ $reservas = $stmtReservas->fetchAll();
                 });
             });
         });
+
+        // "+ Nova reserva" (menu e botão flutuante) leva a #nova-reserva: rola até o formulário e foca o nome.
+        function inicializarAtalhoNovaReserva() {
+            function focarNovaReserva() {
+                if (window.location.hash !== '#nova-reserva') {
+                    return;
+                }
+                var nome = document.getElementById('novo_nome');
+                if (nome) {
+                    nome.focus({ preventScroll: true });
+                }
+            }
+
+            focarNovaReserva();
+            window.addEventListener('hashchange', focarNovaReserva);
+
+            document.addEventListener('click', function (evento) {
+                var link = evento.target.closest('a[href="#nova-reserva"]');
+                if (link && window.location.hash === '#nova-reserva') {
+                    evento.preventDefault();
+                    document.getElementById('nova-reserva').scrollIntoView({ behavior: 'smooth' });
+                    focarNovaReserva();
+                }
+            });
+        }
 
         function inicializarVerificacaoClienteNovaReserva() {
             var nomeInput = document.getElementById('novo_nome');
@@ -873,6 +1022,8 @@ $reservas = $stmtReservas->fetchAll();
                         acao: 'buscar_reservas_painel',
                         termo: termo,
                         ordenacao: ordenacaoSelect ? ordenacaoSelect.value : 'data_asc',
+                        data: <?= json_encode($filtrosPainel['data']) ?>,
+                        casas: <?= json_encode($filtrosPainel['casas']) ?>,
                     });
 
                     var idRequisicao = ++requisicaoAtual;

@@ -3343,6 +3343,12 @@ h1, h2, h3, h4 {
         flex-direction: column;
     }
 
+    /* Sem isto a coluna cresce até a largura da tabela de reservas e a tela "vaza" para o lado. */
+    .painel-conteudo-principal {
+        align-self: stretch;
+        width: 100%;
+    }
+
     /* No celular a lista some e só abre como pop-up pelo botão "Aniversariantes" */
     .painel-aniversariantes-sidebar {
         display: none;
@@ -3447,6 +3453,7 @@ h1, h2, h3, h4 {
     .menu-unidade {
         margin: 0 0.6rem;
     }
+
 }
 
 @media (min-width: 769px) and (max-width: 1100px) {
@@ -3493,5 +3500,342 @@ h1, h2, h3, h4 {
     .menu-unidade-opcao {
         padding: 0.35rem 0.45rem;
         font-size: 0.72rem;
+    }
+}
+
+/* ===== Menu agrupado: Configurações e menu do usuário (menu-funcionario.php) ===== */
+.menu-icone {
+    margin-right: 0.4rem;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+
+.menu-grupo {
+    position: relative;
+}
+
+.menu-grupo-botao {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: #fff;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    white-space: nowrap;
+    transition: color 0.15s;
+}
+
+.menu-grupo-botao:hover,
+.menu-grupo.aberto > .menu-grupo-botao {
+    color: var(--accent-color);
+}
+
+.menu-grupo-botao.is-atual {
+    color: var(--accent-color);
+}
+
+.menu-grupo-seta {
+    margin-left: 0.35rem;
+    font-size: 0.7em;
+    transition: transform 0.2s;
+}
+
+.menu-grupo.aberto .menu-grupo-seta {
+    transform: rotate(180deg);
+}
+
+.menu-submenu {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem 0;
+}
+
+.menu-grupo.aberto > .menu-submenu {
+    display: block;
+}
+
+.btn-nova-reserva-menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff !important;
+    font-weight: 600 !important;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.btn-nova-reserva-menu:hover {
+    filter: brightness(1.12);
+}
+
+.navbar--casarao .btn-nova-reserva-menu {
+    background: #2e7d32;
+}
+
+.fab-nova-reserva {
+    display: none;
+}
+
+#nova-reserva {
+    scroll-margin-top: 130px;
+}
+
+@media (min-width: 769px) and (max-width: 1360px) {
+    .menu-grupo-botao {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 769px) {
+    .menu-submenu {
+        position: absolute;
+        top: calc(100% + 0.6rem);
+        right: 0;
+        min-width: 210px;
+        background: var(--dark-bg);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+        z-index: 1001;
+    }
+
+    .navbar--casarao .menu-submenu {
+        background: #0d1f0e;
+    }
+
+    .menu-submenu li a {
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 1rem;
+    }
+
+    .menu-submenu li a:hover {
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .funcionario-nav-links .menu-submenu a.is-atual:not(.btn-voltar-site) {
+        box-shadow: inset 3px 0 0 var(--accent-color);
+        padding-bottom: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-item-nova-reserva {
+        display: none;
+    }
+
+    .funcionario-nav-links li.menu-grupo,
+    .funcionario-nav-links li.menu-grupo:last-child,
+    .funcionario-nav-links .menu-submenu li:last-child {
+        padding: 0;
+    }
+
+    .menu-grupo-botao {
+        display: flex;
+        width: 100%;
+        padding: 0.95rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.95rem;
+        text-align: left;
+    }
+
+    .menu-grupo-seta {
+        margin-left: auto;
+    }
+
+    .menu-grupo-botao.is-atual {
+        box-shadow: inset 4px 0 0 var(--accent-color);
+    }
+
+    .menu-submenu {
+        padding: 0;
+        background: rgba(0, 0, 0, 0.25);
+    }
+
+    .funcionario-nav-links .menu-submenu a:not(.btn-voltar-site) {
+        padding-left: 2.6rem;
+    }
+
+    /* Botão redondo "+" no canto da tela para abrir uma nova reserva. */
+    .fab-nova-reserva {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 18px;
+        bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: #fff;
+        font-size: 1.5rem;
+        text-decoration: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        z-index: 900;
+    }
+
+    .fab-nova-reserva--casarao {
+        background: #2e7d32;
+    }
+
+    /* Pop-ups abertos ficam por cima do botão. */
+    body.aniversariantes-aberto .fab-nova-reserva {
+        display: none;
+    }
+
+    #nova-reserva {
+        scroll-margin-top: 10px;
+    }
+}
+
+@media print {
+    .fab-nova-reserva {
+        display: none !important;
+    }
+}
+
+/* ===== Setas "◀ Hoje ▶" da data (dashboard e painel de reservas) ===== */
+.data-navegacao {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.data-navegacao-seta,
+.data-navegacao-hoje {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.7rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fafafa;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.data-navegacao-seta:hover,
+.data-navegacao-hoje:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.data-navegacao-hoje.is-hoje {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.painel-reservas--casarao .data-navegacao-hoje.is-hoje {
+    background: #2e7d32;
+    border-color: #2e7d32;
+}
+
+.painel-reservas--casarao .data-navegacao-seta:hover,
+.painel-reservas--casarao .data-navegacao-hoje:hover:not(.is-hoje) {
+    border-color: #2e7d32;
+    color: #2e7d32;
+}
+
+.data-navegacao input[type="date"] {
+    height: 40px;
+    box-sizing: border-box;
+}
+
+/* Filtros do painel de reservas (dia e casa). */
+.painel-filtros-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.2rem;
+    background: white;
+    border-radius: 16px;
+    padding: 1rem 1.4rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.painel-filtros-bar label {
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.painel-filtros-bar input[type="date"] {
+    padding: 0 0.8rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 10px;
+    font-family: inherit;
+    background: #fafafa;
+}
+
+.painel-filtros-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.painel-filtros-link:hover {
+    text-decoration: underline;
+}
+
+.painel-reservas--casarao .painel-filtros-link {
+    color: #2e7d32;
+}
+
+.painel-filtros-resumo {
+    margin-left: auto;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .data-navegacao {
+        width: 100%;
+    }
+
+    .data-navegacao {
+        gap: 0.3rem;
+    }
+
+    .data-navegacao input[type="date"] {
+        flex: 1;
+        min-width: 0;
+        width: auto !important;
+        padding: 0 0.35rem !important;
+        font-size: 0.9rem;
+    }
+
+    .data-navegacao-seta {
+        min-width: 34px;
+        padding: 0;
+    }
+
+    .data-navegacao-hoje {
+        min-width: 0;
+        padding: 0 0.55rem;
+    }
+
+    .painel-filtros-resumo {
+        margin-left: 0;
     }
 }
